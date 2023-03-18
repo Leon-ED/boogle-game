@@ -1,0 +1,48 @@
+
+.ligne {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+}
+
+
+.case {
+    display: flex;
+    border: 1px solid var(--green);
+    font-size: 30px;
+    align-items: center;
+    justify-content: center;
+    margin: 1px;
+    line-height: 50px;
+    width: 80px;
+    height: 80px;
+    text-align: center;
+}
+.case span{
+    font-size: 1.2em;
+}
+
+
+#grille {
+    width: fit-content;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+#word{
+    margin: 0 auto;
+    width: 100%;
+    font-size: 1.2em;
+    font-weight: bolder;
+    color: var(--green);
+    margin-bottom: 10px;
+}
+
+.case:hover {
+    background-color: var(--white_sub);
+    border-radius: 5px;
+}

@@ -1,0 +1,307 @@
+/* 
+Feuille CSS principale pour le proje
+
+*/
+:root {
+  --bg_color: #F1F1F1;
+  --green: #006d3a;
+  --blue: #00456d;
+  --sub_blue: #006d8c;
+  --white_sub: #e6e6e6;
+  --yellow: #ceb307;
+  --red: #bb113b;
+  --white: #fbfdf7;
+  --orange: #be7c00;
+  --gray: #a9a9a9;
+}
+
+body {
+  background-color: var(--bg_color);
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: var(--green);
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+
+.grid-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: flex-start;
+}
+
+main {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.hidden {
+  display: none;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  background-color: var(--white);
+  margin-bottom: 20px;
+}
+
+nav .left:hover {
+  cursor: pointer;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+
+}
+
+.right * {
+  margin: 5px;
+}
+
+.error {
+  color: var(--white);
+  margin: 5px;
+  padding-left: 3px;
+  padding-right: 3px;
+  background-color: var(--red);
+  border-radius: 5px;
+}
+
+.logout {
+  color: var(--red) !important;
+}
+
+nav img {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+}
+
+.renversee span{
+  width: 50px;
+  border-bottom: 2px solid black ;
+}
+
+section {
+  background-color: var(--white);
+  width: fit-content;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
+.param-section {
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-elems {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-elems input {
+  margin: 10px 0;
+}
+
+input {
+  border: 1px solid var(--gray);
+  width: 100px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+input[type="submit"] {
+  width: 100px;
+  background-color: var(--green);
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 0 auto;
+}
+
+
+
+
+.stat {
+  color: var(--green);
+  font-weight: bolder;
+}
+
+
+.section-partie{
+  width: 61%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: 0;
+
+}
+
+.partie {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: var(--white_sub);
+  border-radius: 10px;
+  margin: 10px;
+  width: 30%;
+}
+
+.left-profile{
+  margin: 30px;
+
+}
+button{
+  background-color: var(--green);
+  color: var(--white);
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+}
+
+
+.left-profile button{
+  background-color: var(--green);
+  color: var(--white);
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+}
+
+button:disabled{
+  background-color: var(--gray);
+  cursor: not-allowed;
+}
+
+.partie-liste{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  
+}
+.partie a {
+  align-self: center;
+}
+
+.container-compte{
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+
+.friend{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px;
+  width: 100%;
+}
+
+.friend-header{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 10px;
+  gap: 10px;
+  width: 100%;
+}
+
+
+
+.selected{
+  background-color: var(--red) !important;
+  border-radius: 5px;
+}
+
+
+.definitions{
+  text-align: left;
+}
+
+
+.copied{
+ animation: copied 1s;
+
+}
+
+.copied::after{
+  content: "lien copié";
+  color: var(--green);
+  font-size: small;
+  font-weight: bolder;
+  margin-left: 5px;
+}
+
+@keyframes copied {
+  0%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
+}
+
+
+
+
+
+@media screen and (max-width: 768px) {
+  .grid-columns {
+      display: block;
+  }
+
+  section {
+      width: 90%;
+  }
+  section h1{
+      text-align: center;
+
+  }
+  .container-compte{
+      flex-direction: column;
+      align-items: center;
+      gap:20px;
+      justify-content: center;
+  }
+  .section-partie{
+      width: 90%;
+      margin: 0;
+  }
+  .partie{
+      width: 100%;
+  }
+
+}
+  

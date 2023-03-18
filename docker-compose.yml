@@ -1,0 +1,51 @@
+version: "3.9"
+services:
+  client:
+    image: "client"
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    depends_on:
+      - server
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+  server:
+      image: "server"
+      build:
+        context: ./server
+        dockerfile: Dockerfile
+      ports:
+        - "3000:3000"
+      expose:
+        - "3000"
+      volumes:
+        - /app/node_modules
+        - ./server:/app
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+      - ./dump.sql:/docker-entrypoint-initdb.d/
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'boogle'
+      MYSQL_PASSWORD: 'root'
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'boogle'
+      MYSQL_PASSWORD: 'root'
+      
+      
