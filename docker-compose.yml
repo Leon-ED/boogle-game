@@ -15,24 +15,21 @@ services:
       - /app/node_modules
       - ./client:/app
   server:
-      image: "server"
-      build:
-        context: ./server
-        dockerfile: Dockerfile
-      ports:
-        - "3000:3000"
-      expose:
-        - "3000"
-      volumes:
-        - /app/node_modules
-        - ./server:/app
+    image: "server"
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    expose:
+      - "3000"
+    volumes:
+      - /app/node_modules
+      - ./server:/app
   mysql:
     image: mariadb:10.5.8
     ports:
       - "3306:3306"
-    volumes:
-      - ./mysql:/var/lib/mysql
-      - ./dump.sql:/docker-entrypoint-initdb.d/
     environment:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'boogle'
@@ -47,5 +44,3 @@ services:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'boogle'
       MYSQL_PASSWORD: 'root'
-      
-      
