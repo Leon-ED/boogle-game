@@ -7,22 +7,20 @@ function Grille(props: { largeur: number, hauteur: number }) {
     const [colonnes, setColonnes] = useState<number>(4);
     const [lignes, setLignes] = useState<number>(4);
     const [grille, setGrille] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
+    const [temps, setTemps] = useState<number>(3);
+    const [tempsSec, setTempsSec] = useState<number>(3*60);
+    const [tempsString, setTempsString] = useState<string>("3:00");
+    const [intervalG, setTInterval] = useState<any>(null);
+    const [grilleOrigine, setGrilleOrigine] = useState<Array<string>>([]);
 
 
 
-    function grilleChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const { value, name } = e.target;
-        if (name == "colonnes") {
-            // setColonne with callback
-            setColonnes(parseInt(value));
-        } else {
-            setLignes(parseInt(value));
-        }
-    }
 
+
+    // initi grid only once
     useEffect(() => {
         generateGrille();
-    }, [colonnes, lignes]);
+    }, []);
 
 
     function generateGrille() {
@@ -42,10 +40,10 @@ function Grille(props: { largeur: number, hauteur: number }) {
             const grilleJSON = data.grille.split(" ");
             // remove last 
             grilleJSON.pop();
-            while(grilleJSON.length <= lignes * colonnes){
+            while (grilleJSON.length <= lignes * colonnes) {
                 grilleJSON.push("A");
             }
-
+            setGrilleOrigine(grilleJSON);
 
 
 
@@ -54,59 +52,141 @@ function Grille(props: { largeur: number, hauteur: number }) {
                 const row = grilleJSON.slice(i * colonnes, (i + 1) * colonnes);
                 grille2D.push(row);
             }
-            setGrille(grille2D );
+            setGrille(grille2D);
 
 
 
         })
+        lancerTemps();
 
     }
 
-    return (
-        <div id="grille" className="grille" >
-            <div className="grille-header">
-                <div className="grille-header-container">
-                    <label htmlFor="largeur">Lignes</label>
-                    <input name="lignes" min="2" max="10" type="number" value={lignes} onChange={grilleChange} />
-                </div>
-                <div className="grille-header-container">
-                    <label htmlFor="largeur">Colonnes</label>
-                    <input name="colonnes" min="2" max="10" value={colonnes} type="number" onChange={grilleChange} />
-                </div>
+    function lancerTemps() {
+        if(intervalG){
+            clearInterval(intervalG);
 
-            </div>
-            {
-                grille.map((ligne, index) => {
-                    return (
-                        <div className="ligne" key={index}>
-                            {}
-                            {
-                                ligne.map((colonne, index) => {
-                                    return (
-                                        <div className="case" key={index}>
-                                            <span>{colonne}</span>
-                                        </div>
-                                    )
-                                })
+        }
+        setTempsSec(temps*60);
+        setTempsString(temps+":00");
+  
 
-                            }
-                        </div>
-                    )
-                })
+    }
 
 
+    function verifierMot() {
+        fetch('http://localhost:3000/api/jeu/verify/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Charset': 'utf-8',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ 
+                mot: inputWord,
+                grille: grilleOrigine.join(" "),
+                lignes: lignes,
+                colonnes: colonnes,
+                langue: "fr"
+            })
+
+
+
+        }).then((response) => {
+            return response.json();
+        }
+        ).then((data) => {
+            if (data.reponse === "ok") {
+                alert("Mot trouvé");
+            } else {
+                alert("Mot non trouvé");
             }
 
+        })
+    }
+
+    return (
+        <main className="main-home">
+            <section >
+                <h1>Paramètres</h1>
+                <div className="grille-header">
+                    <div className="grille-header-container">
+                        <label htmlFor="largeur">Lignes</label>
+                        <input name="lignes" value={lignes} min="2" max="10" type="number" onChange={
+                            (e) => {
+                                setLignes(parseInt(e.target.value));
+                            }
+
+                        }/>
+                    </div>
+                    <div className="grille-header-container">
+                        <label htmlFor="largeur">Colonnes</label>
+                        <input type="number" name="colonnes" value={colonnes} min="2" max="10" onChange={
+                            (e) => {
+                                setColonnes(parseInt(e.target.value));
+                            }
+
+                        }/>
+                    </div>
+                    <div className="grille-header-container">
+                        <label htmlFor="temps">Temps : {temps} min</label>
+                        <input type="range" name="temps" value={temps} min="1" max="10"  onChange={
+                            (e) => {
+                                setTemps(parseInt(e.target.value));
+                            }
+                        } />
+                    </div>
+
+                    <button value="Générer" onClick={generateGrille} >Générer</button>
+                </div>
+            </section>
+            <section>
+                <h1>Temps: {tempsString} </h1>
+                <div id="grille" className="grille" >
+
+                    {
+                        grille.map((ligne, index) => {
+                            return (
+                                <div className="ligne" key={index}>
+                                    { }
+                                    {
+                                        ligne.map((colonne, index) => {
+                                            return (
+                                                <div className="case" key={index}>
+                                                    <span>{colonne}</span>
+                                                </div>
+                                            )
+                                        })
+
+                                    }
+                                </div>
+                            )
+                        })
 
 
-            <input type="text" id="word" placeholder="Mot" onChange={
-                (e) => {
-                    setInputWord(e.target.value);
-                }
+                    }
 
-            } value={inputWord} />
 
-        </div>
+
+                    <input type="text" id="word" placeholder="Mot" onChange={
+                        (e) => {
+                            setInputWord(e.target.value);
+                        }
+
+                    } value={inputWord} 
+                    onKeyDown={
+                        e => {
+                            if (e.key === "Enter") {
+                                verifierMot();
+                            }
+
+                        }
+                    }
+                    />
+
+                </div>
+            </section>
+        </main>
+
     );
 }
 

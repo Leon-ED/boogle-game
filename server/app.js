@@ -37,7 +37,7 @@ app.use('/api/auth/check', (req, res, next) => {
 app.post('/api/auth/login', login);
 app.post("/api/auth/logout", disconnect);
 app.get("/api/jeu/grille/:lignes/:colonnes", getGrille);
-
+app.post("/api/jeu/verify", verifMot);
 
 
 
