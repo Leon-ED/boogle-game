@@ -1,1 +1,1 @@
-dictionary/* diff=-S
+*.c diff -c
