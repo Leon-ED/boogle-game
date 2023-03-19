@@ -26,6 +26,7 @@ app.use('/api/auth/check', (req, res, next) => {
 
     console.log('Auth check successfful!');
     res.status(200).json({
+        status : 'success',
         message: 'Auth check successful!EE'
     });
     next();
@@ -35,6 +36,7 @@ app.use('/api/auth/check', (req, res, next) => {
 app.use('/api/auth/login', (req, res, next) => {
     if (!req.body.hasOwnProperty('login') || !req.body.hasOwnProperty('password')) {
         res.status(400).json({
+            status: 'error',
             message: 'Bad request!'
         });
         next();
@@ -48,6 +50,7 @@ app.use('/api/auth/login', (req, res, next) => {
             console.log(err);
             console.log("Error in query!");
             res.status(500).json({
+                status: 'error',
                 message: 'Error in query!'
             });
             return;
@@ -55,6 +58,7 @@ app.use('/api/auth/login', (req, res, next) => {
         if (rows.length < 1) {
             console.log("Mot de passe ou identifiant incorrect");
             res.status(401).json({
+                status: 'error',
                 message: 'Mot de passe ou identifiant incorrect'
             });
             return;
@@ -62,6 +66,7 @@ app.use('/api/auth/login', (req, res, next) => {
         if (!bcrypt.compareSync(password, rows[0].password)) {
             console.log("Mot de passe ou identifiant incorrect");
             res.status(401).json({
+                status: 'error',
                 message: 'Mot de passe ou identifiant incorrect'
             });
             return;
@@ -71,6 +76,7 @@ app.use('/api/auth/login', (req, res, next) => {
         console.log(user.idUser);
         if (auth.insertToken(token, user.idUser) === false) {
             res.status(500).json({
+                status: 'error',
                 message: 'Une erreur est survenue lors de la connexion.'
             });
             return;
@@ -90,6 +96,7 @@ app.use('/api/auth/login', (req, res, next) => {
 app.use("/api/auth/logout", (req, res, next) => {
     console.log('Logout successful!');
     res.status(200).json({
+        status : 'success',
         message: 'Logout successful!'
     });
     next();
@@ -102,19 +109,22 @@ app.get("/api/definitions/:mot", (req, res, next) => {
     exec('cd /usr/src/app/bin && java -cp jdict.jar fr.uge.jdict.DictionarySearcher definitions ' + mot + ' ../utils/dictionary.index ../utils/definitions_fr.json', (err, stdout, stderr) => {
         if (err) {
             console.error(err);
-            res.status(500).json({
+            res.status(400).json({
+                status: 'error',
                 message: 'Une erreur est survenue lors de la recherche.'
             });
             return;
         }
         if (stderr) {
             console.error(stderr);
-            res.status(500).json({
+            res.status(400).json({
+                status: 'error',
                 message: 'Une erreur est survenue lors de la recherche.'
             });
             return;
         }
         res.status(200).json({
+            status: 'success',
             message: 'Recherche réussie.',
             definitions: stdout
         });
