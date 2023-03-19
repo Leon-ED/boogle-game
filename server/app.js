@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 const auth = require('./auth');
 const base = require('./base');
+const jeu = require('./jeu');
 
 app.use(cors());
 
@@ -33,17 +34,14 @@ app.use('/api/auth/check', (req, res, next) => {
 
 });
 
-app.use('/api/auth/login', login);
+app.post('/api/auth/login', login);
+app.post("/api/auth/logout", disconnect);
+app.get("/api/jeu/grille/:lignes/:colonnes", getGrille);
 
 
-app.use("/api/auth/logout", (req, res, next) => {
-    console.log('Logout successful!');
-    res.status(200).json({
-        status : 'success',
-        message: 'Logout successful!'
-    });
-    next();
-});
+
+
+
 
 app.get("/api/definitions/:mot", (req, res, next) => {
     console.log('Recherche de définitions pour le mot ' + req.params.mot);

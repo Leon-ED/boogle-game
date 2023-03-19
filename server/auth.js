@@ -36,6 +36,31 @@ deleteUserToken = async function (idUser) {
 
 }
 
+disconnect = async function (req, res, next) {
+    let conn;
+    try {
+        conn = await base.getBase();
+        const query = 'DELETE FROM tokens WHERE token = ?';
+        const params = [req.headers.authorization];
+        await conn.execute(query, params);
+        res.status(200).json({
+            status: 'success',
+            message: 'Déconnexion réussie.'
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            status: 'error',
+            message: 'Une erreur est survenue lors de la déconnexion' 
+        });
+    } finally {
+        if (conn) conn.end();
+    }
+}
+
+
+
+
 
 login = async function(req, res, next) {
     let conn;
@@ -85,5 +110,6 @@ login = async function(req, res, next) {
   };
   
   module.exports = {
-    login
+    login,
+    disconnect
   };
