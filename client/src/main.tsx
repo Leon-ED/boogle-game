@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Definitions from './pages/Definitions';
 import Error404 from './pages/404';
 import './index.css'
+import Logout from './actions/Logout';
 
 
 
@@ -22,6 +23,7 @@ function Main() {
         <Route path="/definitions" element={<Definitions />} />
         <Route path="/definitions/:search" element={<Definitions />} />
         <Route path="*" element={<Error404 />} />
+        <Route path="/logout" element={<Logout />}  />
       </Routes>
     </BrowserRouter>
   );

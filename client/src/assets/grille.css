@@ -27,6 +27,28 @@
     font-size: 1.2em;
 }
 
+.grille-header{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+
+.grille-header label{
+    font-size: 1.2em;
+    font-weight: bolder;
+    color: var(--green);
+}
+
+
+.grille-header-container{
+    display: grid;  
+    justify-content: center;
+    
+}
+
+/* make input in grid-header-container take all first parent space */
+
+
 
 #grille {
     width: fit-content;

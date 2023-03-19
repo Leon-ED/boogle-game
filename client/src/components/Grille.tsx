@@ -1,112 +1,104 @@
 import "../assets/grille.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-type Grille = string[][];
 function Grille(props: { largeur: number, hauteur: number }) {
     const { largeur, hauteur } = props;
     const [inputWord, setInputWord] = useState<string>("");
+    const [colonnes, setColonnes] = useState<number>(4);
+    const [lignes, setLignes] = useState<number>(4);
+    const [grille, setGrille] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
 
 
-    var selectedCells: HTMLDivElement[] = [];
-    var inSelection = false;
-    var clearBox = false;
 
-    function onCellMouseDown(event: React.MouseEvent<HTMLDivElement>) {
-        var cell = event.target as HTMLDivElement;
-
-        if (cell.tagName == "SPAN") {
-            cell = cell.parentElement as HTMLDivElement;
-        }
-
-        if (clearBox) {
-            setInputWord("");
-            clearBox = false;
-        }
-
-
-        if (cell.classList.contains('selected')) {
-            selectedCells = selectedCells.filter(function (selectedCell) {
-                return selectedCell !== cell;
-            });
-            return;
+    function grilleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const { value, name } = e.target;
+        if (name == "colonnes") {
+            // setColonne with callback
+            setColonnes(parseInt(value));
         } else {
-            selectedCells.push(cell);
-        }
-        cell.classList.toggle('selected');
-        inSelection = true;
-
-        addWordToInput(cell);
-    }
-
-    function leaveGrid() {
-        const liste = document.querySelectorAll('.case');
-        liste.forEach(function (cell) {
-            cell.classList.remove('selected');
-        });
-        selectedCells = [];
-        inSelection = false;
-    }
-
-    function addWordToInput(cell: HTMLElement) {
-        const word = cell.querySelector('span')?.innerHTML;
-        if (word == null) return;
-        setInputWord(inputWord + word);
-
-    }
-
-    function removeAllSelected() {
-        const liste = document.querySelectorAll('.case');
-        liste.forEach(function (cell) {
-            cell.classList.remove('selected');
-        });
-        selectedCells = [];
-        inSelection = false;
-    }
-    function onCellMouseUp(event: React.MouseEvent<HTMLDivElement>) {
-        console.log("up");
-        removeAllSelected();
-        clearBox = true;
-
-    }
-
-    function dragEnter(event: React.MouseEvent<HTMLDivElement>) {
-        if (!inSelection) return;
-        onCellMouseDown(event);
-        event.preventDefault();
-    }
-
-    function onLeaveGrid(event: React.MouseEvent<HTMLDivElement>) {
-        console.log("leave");
-        removeAllSelected();
-    }
-
-
-    const grille: Grille = [];
-    for (let i = 0; i < hauteur; i++) {
-        grille.push([]);
-        for (let j = 0; j < largeur; j++) {
-            grille[i].push("X");
+            setLignes(parseInt(value));
         }
     }
+
+    useEffect(() => {
+        generateGrille();
+    }, [colonnes, lignes]);
+
+
+    function generateGrille() {
+
+        fetch('http://localhost:3000/api/jeu/grille/' + lignes + '/' + colonnes, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept-Charset': 'utf-8',
+                'Accept': 'application/json',
+            },
+
+        }).then((response) => {
+            return response.json();
+        }
+        ).then((data) => {
+            const grilleJSON = data.grille.split(" ");
+            // remove last 
+            grilleJSON.pop();
+            while(grilleJSON.length <= lignes * colonnes){
+                grilleJSON.push("A");
+            }
+
+
+
+
+            const grille2D = [];
+            for (let i = 0; i < lignes; i++) {
+                const row = grilleJSON.slice(i * colonnes, (i + 1) * colonnes);
+                grille2D.push(row);
+            }
+            setGrille(grille2D );
+
+
+
+        })
+
+    }
+
     return (
-        <div id="grille" className="grille" onMouseLeave={onLeaveGrid}>
-
-            {grille.map((ligne, index) => (
-                <div key={index} className="ligne">
-                    {ligne.map((colonne, index) => (
-                        console.log("colonne"),
-                        <div
-                            className="case"
-                            key={index}
-                            onMouseEnter={dragEnter}
-                            onMouseDown={onCellMouseDown}
-                            onMouseUp={onCellMouseUp}
-                        >
-                            <span>X</span>
-                        </div>
-                    ))}
+        <div id="grille" className="grille" >
+            <div className="grille-header">
+                <div className="grille-header-container">
+                    <label htmlFor="largeur">Lignes</label>
+                    <input name="lignes" min="2" max="10" type="number" value={lignes} onChange={grilleChange} />
                 </div>
-            ))}
+                <div className="grille-header-container">
+                    <label htmlFor="largeur">Colonnes</label>
+                    <input name="colonnes" min="2" max="10" value={colonnes} type="number" onChange={grilleChange} />
+                </div>
+
+            </div>
+            {
+                grille.map((ligne, index) => {
+                    return (
+                        <div className="ligne" key={index}>
+                            {}
+                            {
+                                ligne.map((colonne, index) => {
+                                    return (
+                                        <div className="case" key={index}>
+                                            <span>{colonne}</span>
+                                        </div>
+                                    )
+                                })
+
+                            }
+                        </div>
+                    )
+                })
+
+
+            }
+
+
+
             <input type="text" id="word" placeholder="Mot" onChange={
                 (e) => {
                     setInputWord(e.target.value);
