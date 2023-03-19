@@ -248,8 +248,17 @@ button:disabled{
 
 .definitions{
   text-align: left;
+  font-size: 0.9rem;
 }
-
+.definitions ul{
+  list-style-type: decimal;
+  margin: 0;
+  padding: 0;
+}
+.definitions li{
+  margin: 0;
+  padding: 5px;
+}
 
 .copied{
  animation: copied 1s;

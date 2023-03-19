@@ -23,7 +23,7 @@ function Definitions() {
 
 
 
-    function searchDefinition(e: any,search?:string) {
+    function searchDefinition(e: any, search?: string) {
         const localWord = search || word;
         const url = 'http://localhost:3000/api/definitions/' + localWord;
         fetch(url)
@@ -32,8 +32,11 @@ function Definitions() {
                 return response.json();
             })
             .then(data => {
-                if (data.status !== "success") {
+                console.log(data);
+                if (data.status === "error") {
+                    setDefinitions([]);
                     setError(true);
+                    console.log(error);
                     return;
                 }
                 setError(false);
@@ -56,7 +59,14 @@ function Definitions() {
                     <h1>Dictionnaire</h1>
                     <p>Cherchez ici les définitions des mots</p>
                 </div>
-                <input style={{ width: "50%", margin: "auto" }} id="wordField" onChange={
+                <input style={{ width: "50%", margin: "auto" }} id="wordField" onKeyDown={
+                    (e) => {
+                        if (e.key === "Enter") {
+                            searchDefinition(null);
+                        }
+                    }
+
+                } onChange={
                     (e) => {
                         setError(false);
                         setWord(e.target.value);
@@ -65,18 +75,18 @@ function Definitions() {
                 } value={word} />
                 <button onClick={searchDefinition}>Rechercher</button>
             </section>
-            { definitions.length > 0 &&
-            <section id="defSec" style={{ width: "50%", margin: "auto" }} className="text-center mt-5">
-                <h1>Définitions</h1>
-                <hr />
-                <ul>
-                    {definitionListe}
-                </ul>
-                <div>
-                    {error && <p>Aucune définition n'est disponible pour {word}</p>}
+            {(definitions.length > 0 || error) &&
+                <section id="defSec" style={{ width: "50%", margin: "auto" }} className="text-center mt-5">
+                    <h1>Définitions</h1>
+                    <hr />
+                    <ul>
+                        {definitionListe}
+                    </ul>
+                    <div>
+                        {error && <p>Aucune définition n'est disponible pour {word}</p>}
 
-                </div>
-            </section>}
+                    </div>
+                </section>}
         </>
     );
 }
