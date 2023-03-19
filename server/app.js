@@ -33,64 +33,7 @@ app.use('/api/auth/check', (req, res, next) => {
 
 });
 
-app.use('/api/auth/login', (req, res, next) => {
-    if (!req.body.hasOwnProperty('login') || !req.body.hasOwnProperty('password')) {
-        res.status(400).json({
-            status: 'error',
-            message: 'Bad request!'
-        });
-        next();
-        return;
-    }
-    const login = req.body.login;
-    const password = req.body.password;
-    const connection = base.getBase();
-    connection.query('SELECT * FROM utilisateur WHERE login = ?', [login], (err, rows, fields) => {
-        if (err) {
-            console.log(err);
-            console.log("Error in query!");
-            res.status(500).json({
-                status: 'error',
-                message: 'Error in query!'
-            });
-            return;
-        }
-        if (rows.length < 1) {
-            console.log("Mot de passe ou identifiant incorrect");
-            res.status(401).json({
-                status: 'error',
-                message: 'Mot de passe ou identifiant incorrect'
-            });
-            return;
-        }
-        if (!bcrypt.compareSync(password, rows[0].password)) {
-            console.log("Mot de passe ou identifiant incorrect");
-            res.status(401).json({
-                status: 'error',
-                message: 'Mot de passe ou identifiant incorrect'
-            });
-            return;
-        }
-        const user = rows[0];
-        const token = auth.generateToken(user);
-        console.log(user.idUser);
-        if (auth.insertToken(token, user.idUser) === false) {
-            res.status(500).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la connexion.'
-            });
-            return;
-        }
-        res.status(200).json({
-            status: 'success',
-            message: 'Connexion réussie.',
-            token: token
-        });
-        next();
-
-    });
-});
-
+app.use('/api/auth/login', login);
 
 
 app.use("/api/auth/logout", (req, res, next) => {

@@ -1,27 +1,17 @@
-const mysql = require('mysql');
+const mariadb = require('mariadb');
 
-getBase = function() {
-    const base = mysql.createConnection(
-        {
-            host: "localhost",
-            user: "root",
-            password: "root",
-            database: "boogle"
+async function getBase() {
+  const pool = mariadb.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'boogle'
+  });
 
-
-        }
-    );
-    if (base) {
-        console.log("Database connection successful!");
-    } else {
-        console.log("Database connection failed!");
-    }
-    return base;
-
-
-
+  const conn = await pool.getConnection();
+  return conn;
 }
 
 module.exports = {
-    getBase
-}
+  getBase
+};

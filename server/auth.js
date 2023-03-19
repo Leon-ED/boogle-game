@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const base = require('./base');
 require('dotenv').config();
 
 
-generateToken = function(user) {
-    return jwt.sign({ 
+generateToken = function (user) {
+    return jwt.sign({
         id: user.idUser,
         login: user.login,
         email: user.email
@@ -14,39 +15,75 @@ generateToken = function(user) {
     });
 }
 
-insertToken = function(token, idUser) {
+insertToken = async function (token, idUser) {
     deleteUserToken(idUser);
-    const connection = base.getBase();
+    let conn;
+    conn = await base.getBase();
+    const query = `INSERT INTO tokens (idUser, token,expiration) VALUES (?, ?,?)`;
     var expiration = new Date(jwt.decode(token).exp * 1000);
     expiration = expiration.getFullYear() + '-' + (expiration.getMonth() + 1) + '-' + expiration.getDate() + ' ' + expiration.getHours() + ':' + expiration.getMinutes() + ':' + expiration.getSeconds();
-    connection.query(`INSERT INTO tokens (token, idUser,expiration) VALUES ('${token}', '${idUser}', '${expiration}')`, (err, result) => {
-        if (err) {
-            console.log(err);
-
-            return false;
-        }
-        return true;
-    });
-    connection.end();
+    await conn.execute(query, [idUser, token, expiration]);
+    conn.end();
 }
 
- deleteUserToken = function(idUser) {
-    const connection = base.getBase();
-    connection.query(`DELETE FROM tokens WHERE idUser = '${idUser}'`, (err, result) => {
-        if (err) {
-            return false;
-        }
-        return true;
-    });
-    connection.end();
+deleteUserToken = async function (idUser) {
+    let conn;
+    conn = await base.getBase();
+    const query = `DELETE FROM tokens WHERE idUser = ?`;
+    await conn.execute(query, [idUser]);
+    conn.end();
+
 
 }
 
 
-
-
-module.exports = {
-    generateToken,
-    insertToken,
-    deleteUserToken
-}
+login = async function(req, res, next) {
+    let conn;
+    try {
+      conn = await base.getBase();
+      const query = 'SELECT * FROM utilisateur WHERE login = ?';
+      const params = [req.body.login];
+  
+      const result = await conn.execute(query, params);
+      if (result.length == 0) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Mot de passe ou identifiant incorrect 1'
+        });
+        return;
+      }
+  
+      const password = req.body.password;
+      const bddPassword = result[0].password;
+      console.log(bddPassword);
+      console.log(password);
+      if (!bcrypt.compareSync(password, bddPassword)) {
+        res.status(400).json({
+          status: 'error',
+          message: 'Mot de passe ou identifiant incorrect 2'
+        });
+        return;
+      }
+  
+      const user = result[0];
+      const token = generateToken(user);
+      insertToken(token, user.idUser);
+      res.status(200).json({
+        status: 'success',
+        message: 'Authentification réussie.',
+        token: token
+      });
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({
+        status: 'error',
+        message: 'Une erreur est survenue lors de la connexion'
+      });
+    } finally {
+      if (conn) conn.end();
+    }
+  };
+  
+  module.exports = {
+    login
+  };
