@@ -6,7 +6,7 @@
 /**
  * @brief Insère un mot dans l'arbre dans l'ordre alphabétique
  * @param t Arbre dans lequel insérer le mot
- * @param word Mot à insérer
+ * @param word Mot à insérer.
  * @return void
  **/
 void insertWord(CSTree *t, char *word)
