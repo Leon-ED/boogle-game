@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import {BACKEND_URL} from "../env";
 
 function Login() {
   const history = useNavigate();
@@ -81,7 +82,7 @@ function Login() {
 }
 async function submitForm(e: any, history: any) {
     e.preventDefault();
-    const reponse = await fetch("http://localhost:3000/api/auth/login", {
+    const reponse = await fetch(BACKEND_URL+"/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

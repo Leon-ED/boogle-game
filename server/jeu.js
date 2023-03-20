@@ -1,3 +1,6 @@
+require('dotenv').config();
+const CWD = process.env.CWD;
+
 
 
 getGrille = function (req, res, next)  {
@@ -5,7 +8,8 @@ getGrille = function (req, res, next)  {
     const exec = require('child_process').exec;
     const lignes = req.params.lignes;
     const colonnes = req.params.colonnes;
-    exec('cd /usr/src/app/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
+    
+    exec('cd '+CWD+'/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
         if (err) {
             console.error(err);
             return res.status(400).json({
@@ -40,7 +44,7 @@ verifMot = function (req, res, next) {
     const exec = require('child_process').exec;
     const {mot, grille, lignes, colonnes, langue} = req.body;
 
-    const cmd = 'cd /usr/src/app/bin && ./grid_path ' + mot.toUpperCase() + ' '+ lignes + ' ' + colonnes + ' ' + grille;
+    const cmd = 'cd '+CWD+'/bin && ./grid_path ' + mot.toUpperCase() + ' '+ lignes + ' ' + colonnes + ' ' + grille;
     exec(cmd, (err, stdout, stderr) => {
         console.log('stdout: ' + stdout);
         // check if the program has returned code 0
@@ -64,7 +68,7 @@ verifMot = function (req, res, next) {
     });
 
     const exec2 = require('child_process').exec;
-    const cmd2 =  'cd /usr/src/app/bin && ./dictionnary_lookup ../utils/dico_fr.lex ' + mot.toUpperCase();
+    const cmd2 =  'cd '+CWD+'/bin && ./dictionnary_lookup ../utils/dico_fr.lex ' + mot.toUpperCase();
     exec2(cmd2, (err, stdout, stderr) => {
         // check if the program has returned code 0
         if (err) {

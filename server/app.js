@@ -2,11 +2,13 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
+require('bcryptjs');
 require('dotenv').config();
-const auth = require('./auth');
-const base = require('./base');
-const jeu = require('./jeu');
+require('./auth');
+require('./base');
+require('./jeu');
+const CWD = process.env.CWD;
+
 
 app.use(cors());
 
@@ -23,21 +25,13 @@ app.get("/", (req, res, next) => {
 
 
 
-app.use('/api/auth/check', (req, res, next) => {
-
-    console.log('Auth check successfful!');
-    res.status(200).json({
-        status : 'success',
-        message: 'Auth check successful!EE'
-    });
-    next();
-
-});
 
 app.post('/api/auth/login', login);
 app.post("/api/auth/logout", disconnect);
 app.get("/api/jeu/grille/:lignes/:colonnes", getGrille);
 app.post("/api/jeu/verify", verifMot);
+app.post("/api/auth/check", check);
+
 
 
 
@@ -47,7 +41,7 @@ app.get("/api/definitions/:mot", (req, res, next) => {
     console.log('Recherche de définitions pour le mot ' + req.params.mot);
     const exec = require('child_process').exec;
     const mot = req.params.mot;
-    exec('cd /usr/src/app/bin && java -cp jdict.jar fr.uge.jdict.DictionarySearcher definitions ' + mot + ' ../utils/dictionary.index ../utils/definitions_fr.json', (err, stdout, stderr) => {
+    exec('cd '+CWD+'/bin && java -cp jdict.jar fr.uge.jdict.DictionarySearcher definitions ' + mot + ' ../utils/dictionary.index ../utils/definitions_fr.json', (err, stdout, stderr) => {
         if (err) {
             console.error(err);
             res.status(400).json({

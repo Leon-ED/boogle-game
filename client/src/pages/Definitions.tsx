@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Definition from '../components/Definition';
 import { useParams, } from 'react-router-dom';
+import { BACKEND_URL } from "../env";
+
 
 function Definitions() {
     const [word, setWord] = useState('');
@@ -25,7 +27,7 @@ function Definitions() {
 
     function searchDefinition(e: any, search?: string) {
         const localWord = search || word;
-        const url = 'http://localhost:3000/api/definitions/' + localWord;
+        const url = BACKEND_URL+'/definitions/' + localWord;
         fetch(url)
             .then(response => {
 

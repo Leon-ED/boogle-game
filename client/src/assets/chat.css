@@ -1,0 +1,64 @@
+
+.chat-messages {
+    width: 90%;
+    display: flex;
+    max-height: 500px;
+   overflow-y: scroll;
+    flex-direction: column;
+    height: 100%;
+}
+
+.message{
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    width: 90%;
+    border-bottom: gainsboro 1px solid;
+}
+
+.message-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    width: 100%;
+}
+
+.message-author{
+    font-weight: bolder;
+}
+
+.message-date{
+    font-size: 0.8em;
+}
+
+
+
+.system .message-author{
+    font-weight: bolder;
+    color:var(--red);
+
+}
+
+.author-verified{
+    color:var(--red);
+    height: 20px;
+}
+.author-verified:hover{
+    /* add little box saying verified */
+    content: "Verified";
+    font-size: 30em;
+
+
+
+}
+
+.chat-message-footer{
+    width: 40%
+}
+
+.chat-message-footer input{
+    width: 80%;
+}

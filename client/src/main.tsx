@@ -9,13 +9,39 @@ import Definitions from './pages/Definitions';
 import Error404 from './pages/404';
 import './index.css'
 import Logout from './actions/Logout';
+import { BACKEND_URL } from './env';
 
+
+function isConnected(){
+  fetch(BACKEND_URL+"/auth/check", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      token: localStorage.getItem("token"),
+    }),
+  }).then((response) => {
+    return response.json();
+  }
+  ).then((data) => {
+    if (data.status === "success") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  );
+
+}
 
 
 function Main() {
+  var loggedIn = isConnected();
+  console.warn(loggedIn);
   return (
     <BrowserRouter>
-      <NavBar />
+      <NavBar connecte={loggedIn} />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />

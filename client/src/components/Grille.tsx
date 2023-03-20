@@ -1,5 +1,10 @@
 import "../assets/grille.css";
 import { useEffect, useState } from "react";
+// import env file
+import { BACKEND_URL } from "../env";
+
+
+
 
 function Grille(props: { largeur: number, hauteur: number }) {
     const { largeur, hauteur } = props;
@@ -25,7 +30,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
 
     function generateGrille() {
 
-        fetch('http://localhost:3000/api/jeu/grille/' + lignes + '/' + colonnes, {
+        fetch(BACKEND_URL+'/jeu/grille/' + lignes + '/' + colonnes, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,7 +79,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
 
 
     function verifierMot() {
-        fetch('http://localhost:3000/api/jeu/verify/', {
+        fetch(BACKEND_URL+'/jeu/verify/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,7 +145,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
                 </div>
             </section>
             <section>
-                <h1>Temps: {tempsString} </h1>
+                <h1>Temps: {temps} min </h1>
                 <div id="grille" className="grille" >
 
                     {
