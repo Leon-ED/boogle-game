@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "include/grid_build.h"
-#include "include/libs.h"
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
@@ -20,12 +19,8 @@
 int grid_build(FILE *file, int num_lines, int num_columns)
 {
     // Allocation mémoire
-    const int letter_count = number_of_lines(file);
-    Letter_occurence counts[letter_count];
-    if (counts == NULL)
-    {
-        return MEMORY_ERROR;
-    }
+    int num_lines2 = 27;
+    Letter_occurence counts[num_lines2];
     float total_count = 0.0f;
     Letter_occurence *counts_ptr = counts;
     // On lit le fichier ligne par ligne et on récupère les 2 premières caractères et le nombre d'occurence
@@ -56,7 +51,7 @@ int grid_build(FILE *file, int num_lines, int num_columns)
         {
 
             float random = rand() % 101;
-            for (int i = 0; i < letter_count; i++)
+            for (int i = 0; i < num_lines2; i++)
             {
                 if (random <= counts[i].count)
                 {
@@ -68,7 +63,7 @@ int grid_build(FILE *file, int num_lines, int num_columns)
     }
 
 
-    return OK;
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -81,22 +76,21 @@ int main(int argc, char *argv[])
     if (argc > 4)
     {
         printf("GRID_BUILD : Trop d'arguments\nSyntaxe : grid_build <fichier> <nbLignes> <nbColonnes> \n");
-        return TOO_MANY_PARAMS;
+        return 4;
     }
     if (argc < 4)
     {
         printf("GRID_BUILD : Pas assez d'arguments\nSyntaxe : grid_build <fichier> <nbLignes> <nbColonnes> \n");
-        return MISSING_PARAMS;
+        return 4;
     }
 
     freq_FILE = fopen(argv[1], "r");
     if (freq_FILE == NULL)
     {
         printf("GRID_BUILD: Erreur lors de l'ouverture du fichier, le chemin spécifié (%s) est-il correct ? \n", argv[1]);
-        return FILE_NOT_FOUND;
+        return 4;
     }
     int build_result = grid_build(freq_FILE, atoi(argv[2]), atoi(argv[3]));
-    fclose(freq_FILE);
     printf("\n");
     return build_result;
 }
