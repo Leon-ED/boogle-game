@@ -5,11 +5,13 @@ import '../assets/chat.css';
 function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
   const { sendMessage, lastMessage } = useWebSocket(WS_URL);
+  const [rooms, setRooms] = useState<any[]>([]);
 
 
 
 
   function handleSendMessage(event: any) {
+  
     event.preventDefault();
     const message = event.target.elements[0].value;
     if (message === '') return;
@@ -22,10 +24,30 @@ function Chat() {
   }
 
   useEffect(() => {
-    if (lastMessage !== null) {
-      setMessages([...messages, JSON.parse(lastMessage.data)]);
+    if(lastMessage === null)
+      return;
+    const lastMessageData = JSON.parse(lastMessage.data);
+    if(lastMessageData.type === "message"){
+     return setMessages([...messages, { author: lastMessageData.author, date: lastMessageData.date, content: lastMessageData.content }]);
     }
+    if(lastMessageData.type === "got"){
+      return setRooms(lastMessageData.rooms);
+    }
+
+
+
+
+
   }, [lastMessage]);
+
+
+  useEffect(() => {
+    const getAllRooms = {
+      type: "get",
+      token: localStorage.getItem("token"),
+    }
+    sendMessage(JSON.stringify(getAllRooms));
+  }, []);
 
 
 
@@ -41,10 +63,10 @@ function Chat() {
 
         </div>
         <div className="chat-rooms">
-            <ChatRoom nom="Général" id="GLOBAL"/>
-            <ChatRoom nom="Chat 1" id="1"/>
-            <ChatRoom nom="Chat 2" id="2"/>
-            <ChatRoom nom="Chat 3" id="3"/>
+          {rooms.map((room, index) => (
+            <ChatRoom key={index} id={room.id} nom={room.name} number={room.number}  />
+          ))}
+
 
 
         </div>
@@ -59,6 +81,7 @@ function Chat() {
   function ChatRoom(props: any){
     const nom: string = props.nom;
     const id: string = props.id;
+    const number: number = props.number;
   
   
   
@@ -66,7 +89,7 @@ function Chat() {
       <div className="chat-room">
           <h2 className="room-name">{nom}</h2>
           <div className='room-content'>
-          <p className='romm-users'>5 connectés</p>
+          <p className='romm-users'>{number} utilisateurs</p>
           <button onClick={joinRoom}>Rejoindre</button>
           </div>
       </div>
