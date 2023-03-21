@@ -104,7 +104,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
             return response.json();
         }
         ).then((data) => {
-            if (data.reponse === "ok") {
+            if (data.status === "success") {
                 alert("Mot trouvé");
             } else {
                 alert("Mot non trouvé");
