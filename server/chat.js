@@ -5,7 +5,7 @@ const SERVER_PSEUDO = 'Système';
 const CANT_SEND_MESSAGE = 'Vous devez être connecté pour envoyer un message.';
 const MAX_MSG_PER_SECOND = 1;
 const RATE_LIMIT_MESSAGE = 'Vous ne pouvez pas envoyer plus de ' + MAX_MSG_PER_SECOND + ' messages par seconde.';
-
+const GLOBAL_ROOM = 'global';
 
 
 function sendError(ws, message) {
@@ -33,16 +33,23 @@ initWS = function (server) {
     wss.on('connection', (ws) => {
         ws.id = wss.getUniqueID();
         ws.lastMessage = null;
+        ws.room = GLOBAL_ROOM;        
 
         ws.on('message', (message) => {
             console.log('received: %s', message);
             var message = JSON.parse(message);
+            var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            if(message.type === 'join' && message.roomId){
+                ws.room = message.roomId;
+                ws.send(JSON.stringify({ type: 'join',status:"success", roomId: message.roomId, system: true , date: formattedDate, author: SERVER_PSEUDO, content: 'Vous avez rejoint la room ' + message.roomId}));
+                return;
+            }
             auth.returnUserFromToken(message.token).then((user) => {
                 if (user) {
                     newMessage = {
                         content: message.content,
                         author: user.pseudoUser,
-                        date: Date.now()
+                        date: formattedDate
                     }
                 } else {
                     sendError(ws, CANT_SEND_MESSAGE);
@@ -55,7 +62,7 @@ initWS = function (server) {
                 ws.lastMessage = newMessage;
 
                 wss.clients.forEach(function each(client) {
-                    if (client.readyState === WebSocket.OPEN && client.id != ws.id) {
+                    if (client.readyState === WebSocket.OPEN && client.id != ws.id && client.room == ws.room) {
                         client.send(JSON.stringify(newMessage));
                     }
                 });
