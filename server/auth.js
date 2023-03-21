@@ -18,7 +18,7 @@ generateToken = function (user) {
 insertToken = async function (token, idUser) {
   await deleteUserToken(idUser);
   const conn = await base.getBase();
-  const query = `INSERT INTO tokens (idUser, token) VALUES (?, ?, ?)`;
+  const query = `INSERT INTO tokens (idUser, token, expiration) VALUES (?, ?, ?)`;
   const expiration = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
   console.log(idUser);
   const ret = await conn.execute(query, [idUser, token, expiration]);
