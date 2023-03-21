@@ -4,10 +4,10 @@ const CWD = process.env.CWD;
 
 
 getGrille = function (req, res, next)  {
-    console.log('Recherche de grille de taille ' + req.params.longueur + 'x' + req.params.largeur);
     const exec = require('child_process').exec;
-    const lignes = req.params.lignes;
-    const colonnes = req.params.colonnes;
+    const lignes = Math.max(2,req.params.lignes);
+    const colonnes = Math.max(2,req.params.colonnes);
+    console.log('Recherche de grille de ' + lignes + ' lignes et ' + colonnes + ' colonnes.');
     
     exec('cd '+CWD+'/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
         if (err) {
@@ -29,7 +29,9 @@ getGrille = function (req, res, next)  {
         return res.status(200).json({
             status: 'success',
             message: 'Recherche réussie.',
-            grille: stdout
+            grille: stdout,
+            lignes: lignes,
+            colonnes: colonnes
         });
         
     });

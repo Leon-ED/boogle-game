@@ -4,9 +4,24 @@ const crypto = require('crypto');
 const base = require('./base');
 require('dotenv').config();
 const mariadb = require('mariadb');
+const { send } = require('process');
 generateToken = function (user) {
   return crypto.randomBytes(64).toString('hex');
 }
+
+
+function getConnection() {
+  const con = mariadb.createConnection({
+    host: 'localhost',
+    password: 'root',
+    database: 'boogle',
+    user: 'root'
+  });
+  const conn = con;
+
+  return conn;
+}
+
 
 insertToken = async function (token, idUser) {
   deleteUserToken(idUser);
@@ -73,7 +88,49 @@ disconnect = async function (req, res, next) {
   } 
 }
 
+function sendRes(res,status,code,message){
+  return res.status(code).json({
+    status: status,
+    message: message
+  });
+}
 
+
+register = async function(req,res,next){
+  const conn = await getConnection();
+  const login = req.body.login;
+  const password = req.body.password;
+  const password_confirm = req.body.password_confirm;
+  const email = req.body.email;
+
+  if (password != password_confirm){
+    return sendRes(res,'error',400,'Les mots de passe ne correspondent pas');
+  }
+  
+  let query = 'SELECT * FROM utilisateur WHERE login = ? OR email = ?';
+  let params = [login,email];
+  let result = await conn.query(query, params);
+  console.log(result);
+  if (result.length > 0){
+    return sendRes(res,'error',400,'Ce login ou email est déjà utilisé');
+  }
+  
+  const hashed_password = bcrypt.hashSync(password);
+  query = 'INSERT INTO utilisateur (login, password, email,pseudoUser) VALUES (?,?,?,?)';
+  params = [login,hashed_password,email,login];
+
+  (await conn).execute(query, params);
+  return sendRes(res,'success',200,'Inscription réussie');
+  
+
+
+
+
+
+
+
+
+}
 
 
 
@@ -153,7 +210,8 @@ module.exports = {
   login,
   returnUserFromToken,
   disconnect,
-  check
+  check,
+  register
 };
 
 

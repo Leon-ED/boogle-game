@@ -5,6 +5,26 @@ const SERVER_PSEUDO = 'Système';
 const CANT_SEND_MESSAGE = 'Vous devez être connecté pour envoyer un message.';
 const MAX_MSG_PER_SECOND = 1;
 const RATE_LIMIT_MESSAGE = 'Vous ne pouvez pas envoyer plus de ' + MAX_MSG_PER_SECOND + ' messages par seconde.';
+const GLOBAL_ROOM = 'global';
+
+var rooms = {
+    [GLOBAL_ROOM]: {
+        name: 'Global',
+        id: GLOBAL_ROOM,
+        users : []
+    },
+    ['room1']: {
+        name: 'Room 1',
+        id: 'room1',
+        users : []
+    },
+    ['room2']: {
+        name: 'Room 2',
+        id: 'room2',
+        users : []
+    }
+
+};
 
 
 
@@ -16,6 +36,92 @@ function sendError(ws, message) {
         system: true
     }));
 }
+
+function handleNewMessage(wss,ws, message) {
+    console.log(ws.id + ' ' + ws.room)
+    const formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    auth.returnUserFromToken(message.token).then((user) => {
+        if (user) {
+            newMessage = {
+                type: 'message',
+                content: message.content,
+                author: user.pseudoUser,
+                date: formattedDate
+            }
+        } else {
+            sendError(ws, CANT_SEND_MESSAGE);
+            return;
+        }
+        if (ws.lastMessage && Date.now() - ws.lastMessage.date < 1000 / MAX_MSG_PER_SECOND) {
+         sendError(ws, RATE_LIMIT_MESSAGE);
+        return;
+        }
+        ws.lastMessage = newMessage;
+
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN && client.id != ws.id && client.room == ws.room) {
+                client.send(JSON.stringify(newMessage));
+            }
+        });
+    });
+
+
+
+
+}
+
+function handleJoinRoom(wss,ws, message) {
+    var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    if (!rooms[message.roomId]) {
+        ws.send(JSON.stringify({ type: 'join',status:"error", roomId: message.roomId, system: true , date: formattedDate, author: SERVER_PSEUDO, content: 'La room ' + message.roomId + ' n\'existe pas.'}));
+        return;
+    }
+    // On enlève l'utilisateur de la room précédente
+    rooms[ws.room].users = rooms[ws.room].users.filter((user) => user.id != ws.id);
+    // On ajoute l'utilisateur à la nouvelle room
+    rooms[message.roomId].users.push({ id: ws.id, pseudo: ws.pseudo });
+    // On change la room de l'utilisateur
+    ws.room = message.roomId;
+    // On envoie un update à tous les utilisateurs du serveur avec les infos sur les rooms
+    wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+            handleAvailableRooms(client);
+        }
+    });
+
+
+
+    ws.send(JSON.stringify({ type: 'join',status:"success", roomId: message.roomId, system: true , date: formattedDate, author: SERVER_PSEUDO, content: 'Vous avez rejoint la room ' + message.roomId}));
+    return;
+}
+
+function handleAvailableRooms(ws, message) {
+    var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    ws.send(JSON.stringify({
+        type: "got"
+        , status: "success"
+        , system: true
+        , date: formattedDate
+        ,rooms: [{ id: GLOBAL_ROOM, name: "Global" ,number : rooms[GLOBAL_ROOM].users.length},
+                 { id: "room1", name: "Room 1", number : rooms["room1"].users.length },
+                { id: "room2", name: "Room 2", number : rooms["room2"].users.length }]
+
+
+
+
+
+    }))
+
+
+
+
+
+}
+
+
+
+
+
 
 
 
@@ -29,51 +135,52 @@ initWS = function (server) {
     };
 
     
-    const clients = [];
     wss.on('connection', (ws) => {
+        // On utilise un id unique pour chaque client
         ws.id = wss.getUniqueID();
         ws.lastMessage = null;
+        ws.room = GLOBAL_ROOM;
+        // On ajoute l'utilisateur à la room global
+        rooms[GLOBAL_ROOM].users.push(ws);
+        // On envoie un update à tous les utilisateurs du serveur avec les infos sur les rooms
+        wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+                handleAvailableRooms(client);
+            }
+        });
 
-        ws.on('message', (message) => {
-            console.log('received: %s', message);
-            var message = JSON.parse(message);
-            auth.returnUserFromToken(message.token).then((user) => {
-                if (user) {
-                    newMessage = {
-                        content: message.content,
-                        author: user.pseudoUser,
-                        date: Date.now()
-                    }
-                } else {
-                    sendError(ws, CANT_SEND_MESSAGE);
-                    return;
-                }
-                if (ws.lastMessage && Date.now() - ws.lastMessage.date < 1000 / MAX_MSG_PER_SECOND) {
-                 sendError(ws, RATE_LIMIT_MESSAGE);
-                return;
-                }
-                ws.lastMessage = newMessage;
 
-                wss.clients.forEach(function each(client) {
-                    if (client.readyState === WebSocket.OPEN && client.id != ws.id) {
-                        client.send(JSON.stringify(newMessage));
-                    }
-                });
-            });
-
-            });
-
-            //send immediatly a feedback to the incoming connection    
-
-            //forEAch client send the message
+        
+        ws.on('message', (packet) => {
+            var packet = JSON.parse(packet);
+            if(packet.type === 'join' && packet.roomId)
+                return handleJoinRoom(wss,ws, packet);
+            if(packet.type == "message" && packet.content && packet.token)
+                return handleNewMessage(wss,ws, packet);
+            if(packet.type == "get")
+                return handleAvailableRooms(ws, packet);
+            
+            
+        });
 
 
 
         });
 
-
+        wss.on('close', (ws) => {
+            // On enlève l'utilisateur de la room
+            rooms[ws.room].users = rooms[ws.room].users.filter((user) => user.id != ws.id);
+            // On envoie un update à tous les utilisateurs du serveur avec les infos sur les rooms
+            wss.clients.forEach(function each(client) {
+                if (client.readyState === WebSocket.OPEN) {
+                    handleAvailableRooms(client);
+                }
+            });
+        });
 
     }
+
+
 
 module.exports = {
             initWS

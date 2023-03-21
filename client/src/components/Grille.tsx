@@ -11,7 +11,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
     const [inputWord, setInputWord] = useState<string>("");
     const [colonnes, setColonnes] = useState<number>(4);
     const [lignes, setLignes] = useState<number>(4);
-    const [grille, setGrille] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
+    const [grille, setGrille] = useState<Array<Array<string>>>(Array(4).fill(Array(4).fill("X")));
     const [temps, setTemps] = useState<number>(3);
     const [tempsSec, setTempsSec] = useState<number>(3*60);
     const [tempsString, setTempsString] = useState<string>("3:00");
@@ -43,9 +43,13 @@ function Grille(props: { largeur: number, hauteur: number }) {
         }
         ).then((data) => {
             const grilleJSON = data.grille.split(" ");
+            const lignesJSON = data.lignes;
+            const colonnesJSON = data.colonnes;
+            setColonnes(colonnesJSON);
+            setLignes(lignesJSON);
             // remove last 
             grilleJSON.pop();
-            while (grilleJSON.length <= lignes * colonnes) {
+            while (grilleJSON.length <= lignesJSON * colonnesJSON) {
                 grilleJSON.push("A");
             }
             setGrilleOrigine(grilleJSON);
@@ -53,8 +57,8 @@ function Grille(props: { largeur: number, hauteur: number }) {
 
 
             const grille2D = [];
-            for (let i = 0; i < lignes; i++) {
-                const row = grilleJSON.slice(i * colonnes, (i + 1) * colonnes);
+            for (let i = 0; i < lignesJSON; i++) {
+                const row = grilleJSON.slice(i * colonnesJSON, (i + 1) * colonnesJSON);
                 grille2D.push(row);
             }
             setGrille(grille2D);
@@ -118,7 +122,11 @@ function Grille(props: { largeur: number, hauteur: number }) {
                         <label htmlFor="largeur">Lignes</label>
                         <input name="lignes" value={lignes} min="2" max="10" type="number" onChange={
                             (e) => {
-                                setLignes(parseInt(e.target.value));
+                                let value:any = e.target.value;
+     
+                                
+
+                                setLignes(parseInt(value));
                             }
 
                         }/>
