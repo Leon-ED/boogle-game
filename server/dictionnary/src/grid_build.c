@@ -19,7 +19,7 @@
 int grid_build(FILE *file, int num_lines, int num_columns)
 {
     // Allocation mémoire
-    int num_lines2 = 27;
+    int num_lines2 = 35;
     Letter_occurence counts[num_lines2];
     float total_count = 0.0f;
     Letter_occurence *counts_ptr = counts;
