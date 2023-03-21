@@ -1,15 +1,15 @@
 const mariadb = require('mariadb');
 let base = null;
 async function getBase() {
-  console.log('getBase');
-  if(base) return base;
-  base = await mariadb.createPool({
+  const con = mariadb.createConnection({
     host: 'localhost',
     password: 'root',
     database: 'boogle',
-    user: 'root',
-}
-);
+    user: 'root'
+  });
+  const conn = con;
+
+  return conn;
 return base;
 }
 module.exports = {
