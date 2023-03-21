@@ -7,7 +7,6 @@ getGrille = function (req, res, next)  {
     const exec = require('child_process').exec;
     const lignes = Math.max(2,req.params.lignes);
     const colonnes = Math.max(2,req.params.colonnes);
-    console.log('Recherche de grille de ' + lignes + ' lignes et ' + colonnes + ' colonnes.');
     
     exec('cd '+CWD+'/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
         if (err) {
