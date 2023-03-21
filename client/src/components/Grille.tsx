@@ -11,7 +11,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
     const [inputWord, setInputWord] = useState<string>("");
     const [colonnes, setColonnes] = useState<number>(4);
     const [lignes, setLignes] = useState<number>(4);
-    const [grille, setGrille] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
+    const [grille, setGrille] = useState<Array<Array<string>>>(Array(4).fill(Array(4).fill("X")));
     const [temps, setTemps] = useState<number>(3);
     const [tempsSec, setTempsSec] = useState<number>(3*60);
     const [tempsString, setTempsString] = useState<string>("3:00");
@@ -118,7 +118,11 @@ function Grille(props: { largeur: number, hauteur: number }) {
                         <label htmlFor="largeur">Lignes</label>
                         <input name="lignes" value={lignes} min="2" max="10" type="number" onChange={
                             (e) => {
-                                setLignes(parseInt(e.target.value));
+                                let value:any = e.target.value;
+     
+                                
+
+                                setLignes(parseInt(value));
                             }
 
                         }/>

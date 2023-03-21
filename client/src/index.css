@@ -286,13 +286,31 @@ button:disabled{
 
 
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 800px) {
+  nav{
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+  }
+  .grille-header{
+    flex-direction: column;
+  }
+  .case{
+    width: 60px;
+    height: 60px;
+  }
   .grid-columns {
       display: block;
   }
+  .main-home{
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
 
+  }
   section {
-      width: 90%;
+      width: 90% !important;
+
   }
   section h1{
       text-align: center;
@@ -311,6 +329,18 @@ button:disabled{
   .partie{
       width: 100%;
   }
+  .chat-container{
+      display: grid;
+      grid-template-columns: 1fr;
+      /* reverse order */
+      
+    }
+
+  .chat-rooms{
+    max-height: 150px;
+  }
+
+  
 
 }
   
