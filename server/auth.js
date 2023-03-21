@@ -5,39 +5,20 @@ const base = require('./base');
 require('dotenv').config();
 const mariadb = require('mariadb');
 const { send } = require('process');
+
+
+
+
 generateToken = function (user) {
   return crypto.randomBytes(64).toString('hex');
 }
 
 
-function getConnection() {
-  const con = mariadb.createConnection({
-    host: 'localhost',
-    password: 'root',
-    database: 'boogle',
-    user: 'root'
-  });
-  const conn = con;
-
-  return conn;
-}
-
 
 insertToken = async function (token, idUser) {
   deleteUserToken(idUser);
-  const con = mariadb.createConnection({
-    host: 'localhost',
-    password: 'root',
-    database: 'boogle',
-    user: 'root'
-  });
-  const conn = con;
-
+  const conn = await base.getBase();
   
-
-
-
-
   const query = `INSERT INTO tokens (idUser, token,expiration) VALUES (?, ?,?)`;
   // expire in 2days
   const expiration = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);

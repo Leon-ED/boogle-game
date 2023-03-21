@@ -1,22 +1,16 @@
 const mariadb = require('mariadb');
-let base = null;
-async function getBase() {
-  const con = mariadb.createConnection({
-    host: 'localhost',
-    password: 'root',
-    database: 'boogle',
-    user: 'root'
-  });
-  const conn = con;
+require('dotenv').config();
 
+
+async function getBase() {
+  const conn = mariadb.createConnection({
+    host: process.env.DB_HOST,
+    password: process.env.DB_PWD,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USR
+  });
   return conn;
-return base;
 }
 module.exports = {
   getBase
 };
-
-
-// generate a token with crypto
-// const crypto = require('crypto');
-// const token = crypto.randomBytes(64).toString('hex');
