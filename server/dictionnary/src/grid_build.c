@@ -27,14 +27,14 @@ int grid_build(FILE *file, int num_lines, int num_columns)
         return MEMORY_ERROR;
     }
     float total_count = 0.0f;
-
+    Letter_occurence *counts_ptr = counts;
     // On lit le fichier ligne par ligne et on récupère les 2 premières caractères et le nombre d'occurence
     // On mets tout ça dans le tableau
     char line[16];
     int i = 0;
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        char *letter = malloc(2 * sizeof(char));
+        
         float item_pc;
         sscanf(line, "%2s %f", counts[i].letter, &item_pc);
         total_count += item_pc;
@@ -47,7 +47,8 @@ int grid_build(FILE *file, int num_lines, int num_columns)
     struct timeval tps;
     gettimeofday(&tps, NULL);
     fclose(file);
-    srand((((long long)tps.tv_sec)*1000)+(tps.tv_usec/1000));
+    srand((((long long)tps.tv_sec) * 1000) + (tps.tv_usec / 1000));
+    
 
     for (int i = 0; i < num_lines; i++)
     {
@@ -65,6 +66,7 @@ int grid_build(FILE *file, int num_lines, int num_columns)
             }
         }
     }
+
 
     return OK;
 }
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
         return FILE_NOT_FOUND;
     }
     int build_result = grid_build(freq_FILE, atoi(argv[2]), atoi(argv[3]));
+    fclose(freq_FILE);
     printf("\n");
     return build_result;
 }

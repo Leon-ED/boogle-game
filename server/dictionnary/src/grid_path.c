@@ -168,7 +168,7 @@ int main(int argc, char **argv)
     grid.rows = atoi(argv[2]);
     grid.cols = atoi(argv[3]);
     grid.size = grid.rows * grid.cols;
-    grid.letters = malloc(grid.size * sizeof(char));
+    grid.letters = malloc((grid.size + 1) * sizeof(char));
     char *word = argv[1];
     // On remplace les QU par un caractère spécial
     cleanWord(word);
@@ -182,13 +182,39 @@ int main(int argc, char **argv)
     // printf("Mot à chercher: %s\n", word);
     char letters[argc - 4];
     // On fait pareil pour la grille
-
     cleanGrid(argc, argv, letters);
-    strcpy(grid.letters, letters); // On met le résultat dans la struct
+    strncpy(grid.letters, letters, grid.size); // On met le résultat dans la struct
+    grid.letters[grid.size] = '\0'; // On ajoute le caractère nul de fin de chaîne
     // printGrid(&grid);
-    int result = grid_path(word, &grid,1);
+    int result = grid_path(word, &grid, 1);
     free(grid.letters);
     // printf("%d", result);
     return result;
 }
+
 #endif
+
+
+// int main(int argc, char *argv[])
+// {
+//     if (argc < 4)
+//     {
+//         printf("Usage: %s grid_file rows cols word1 [word2 ...]\n", argv[0]);
+//         exit(EXIT_FAILURE);
+//     }
+
+//     char *grid_file = argv[1];
+//     int rows = atoi(argv[2]);
+//     int cols = atoi(argv[3]);
+
+//     // Alloue suffisamment d'espace pour stocker la chaîne de caractères d'entrée
+//     int word_length = strlen(argv[4]);
+//     char *word = malloc(word_length + 1);
+//     strcpy(word, argv[4]);
+
+//     // Utilisez la chaîne de caractères allouée pour effectuer les opérations nécessaires
+//     // ...
+
+//     free(word); // N'oubliez pas de libérer la mémoire allouée après utilisation
+//     return 0;
+// }
