@@ -43,9 +43,13 @@ function Grille(props: { largeur: number, hauteur: number }) {
         }
         ).then((data) => {
             const grilleJSON = data.grille.split(" ");
+            const lignesJSON = data.lignes;
+            const colonnesJSON = data.colonnes;
+            setColonnes(colonnesJSON);
+            setLignes(lignesJSON);
             // remove last 
             grilleJSON.pop();
-            while (grilleJSON.length <= lignes * colonnes) {
+            while (grilleJSON.length <= lignesJSON * colonnesJSON) {
                 grilleJSON.push("A");
             }
             setGrilleOrigine(grilleJSON);
@@ -53,8 +57,8 @@ function Grille(props: { largeur: number, hauteur: number }) {
 
 
             const grille2D = [];
-            for (let i = 0; i < lignes; i++) {
-                const row = grilleJSON.slice(i * colonnes, (i + 1) * colonnes);
+            for (let i = 0; i < lignesJSON; i++) {
+                const row = grilleJSON.slice(i * colonnesJSON, (i + 1) * colonnesJSON);
                 grille2D.push(row);
             }
             setGrille(grille2D);
