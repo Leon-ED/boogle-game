@@ -7,7 +7,6 @@ getGrille = function (req, res, next)  {
     const exec = require('child_process').exec;
     const lignes = Math.max(2,req.params.lignes);
     const colonnes = Math.max(2,req.params.colonnes);
-    console.log('Recherche de grille de ' + lignes + ' lignes et ' + colonnes + ' colonnes.');
     
     exec('cd '+CWD+'/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
         if (err) {
@@ -48,7 +47,6 @@ verifMot = function (req, res, next) {
 
     const cmd = 'cd '+CWD+'/bin && ./grid_path ' + mot.toUpperCase() + ' '+ lignes + ' ' + colonnes + ' ' + grille;
     exec(cmd, (err, stdout, stderr) => {
-        console.log('stdout: ' + stdout);
         // check if the program has returned code 0
         if (err) {
             console.error(err);
@@ -89,10 +87,14 @@ verifMot = function (req, res, next) {
             });
       
         }
-        return res.status(200).json({
+        if(stdout == "0")
+            return res.status(200).json({
             status: 'success',
             message: 'Recherche réussie.',
-            definitions: stdout
+        });
+        return res.status(400).json({
+            status: 'error',
+            message: 'Recherche réussie.',
         });
     });
 }
