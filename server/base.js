@@ -1,11 +1,15 @@
 const mariadb = require('mariadb');
 let base = null;
+
+require('dotenv').config();
+const CWD = process.env.CWD;
+
 async function getBase() {
   const con = mariadb.createConnection({
-    host: 'localhost',
-    password: 'root',
-    database: 'boogle',
-    user: 'root'
+    host: process.env.DB_HOST,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
   });
   const conn = con;
 
