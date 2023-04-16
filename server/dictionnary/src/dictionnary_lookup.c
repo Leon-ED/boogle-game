@@ -98,6 +98,6 @@ int main(int argc, char **argv)
     }
     int lookup_code = dictionnary_lookup(dico_LEX, argv[2]);
     printf("%d", lookup_code);
-    return lookup_code;
+    return OK;
 }
 #endif

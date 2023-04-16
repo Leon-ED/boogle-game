@@ -129,7 +129,7 @@ int grid_path(char *word, Grid *grid,int verbose)
             }
         }
     }
-
+    printf("%d", NOT_FOUND);
     return NOT_FOUND;
 }
 
@@ -189,7 +189,7 @@ int main(int argc, char **argv)
     int result = grid_path(word, &grid, 1);
     free(grid.letters);
     // printf("%d", result);
-    return result;
+    return OK;
 }
 
 #endif
