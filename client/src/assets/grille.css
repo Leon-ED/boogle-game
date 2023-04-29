@@ -19,7 +19,10 @@ section{
     align-items: center;
     width: 100%;
 }
-
+#grille-sec-container{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+}
 .case {
     display: flex;
     border: 1px solid var(--green);

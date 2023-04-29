@@ -7,7 +7,6 @@ export default function Logout() {
 
   React.useEffect(() => {
     console.log(localStorage);
-
     if (localStorage.getItem('token') === null) {
       navigate('/', { replace: true });
       return;
@@ -25,10 +24,13 @@ export default function Logout() {
 
     // On supprime le token du localStorage
     localStorage.removeItem('token');
-
+    window.location.href = "/";
     // On redirige l'utilisateur vers la page d'accueil
     navigate('/', { replace: true });
   }, [navigate]);
+
+
+
 
   return null;
 }

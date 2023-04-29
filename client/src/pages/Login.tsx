@@ -96,6 +96,7 @@ async function submitForm(e: any, history: any) {
     if (data.status === "success") {
       localStorage.setItem("token", data.token);
       history("/");
+      window.location.href = "/";
     } else {
       
     }

@@ -2,7 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
-import NavBar from './components/NavBar';
+import {ConnectedNavBar,NavBar} from './components/NavBar'
+
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Definitions from './pages/Definitions';
@@ -12,36 +13,37 @@ import Logout from './actions/Logout';
 import { BACKEND_URL } from './env';
 
 
-function isConnected(){
-  fetch(BACKEND_URL+"/auth/check", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      token: localStorage.getItem("token"),
-    }),
-  }).then((response) => {
-    return response.json();
-  }
-  ).then((data) => {
-    if (data.status === "success") {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  );
-
-}
-
-
 function Main() {
-  var loggedIn = isConnected();
-  console.warn(loggedIn);
+  const [loggedIn, setLoggedIn] = React.useState(false);
+
+
+  React.useEffect(() => {
+    fetch(BACKEND_URL + "/auth/check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token: localStorage.getItem("token"),
+      }),
+    }).then((response) => {
+      return response.json();
+    }
+    ).then((data) => {
+      if (data.status === "success") {
+        setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
+      }
+    }
+    );
+  }, []);
+
+
   return (
     <BrowserRouter>
-      <NavBar connecte={loggedIn} />
+      {loggedIn && <ConnectedNavBar />}
+      {!loggedIn && <NavBar />}
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />
@@ -49,7 +51,7 @@ function Main() {
         <Route path="/definitions" element={<Definitions />} />
         <Route path="/definitions/:search" element={<Definitions />} />
         <Route path="*" element={<Error404 />} />
-        <Route path="/logout" element={<Logout />}  />
+        <Route path="/logout" element={<Logout />} />
       </Routes>
     </BrowserRouter>
   );
