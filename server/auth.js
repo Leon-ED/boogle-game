@@ -38,8 +38,6 @@ deleteUserToken = async function (idUser) {
 
 check = async function (req, res, next) {
   const user = await returnUserFromToken(req.body.token);
-  console.log(req.body.token);
-  console.log(user);
   return (user == false ? res.status(401).json({ status: 'error', message: 'Token invalide' }) : res.status(200).json({ status: 'success', message: 'Token valide' }));
 }
 
@@ -162,13 +160,14 @@ login = async function (req, res, next) {
 
 returnUserFromToken = async function (token) {
   let conn;
+  if(token == undefined || token == null)
+    return false;
   try {
     conn = await base.getBase();
     let query = `SELECT * FROM tokens WHERE token = ? AND expiration > NOW()`;
     let params = [token];
 
     let results = await conn.query(query, params);
-    console.log(results);
     if (results.length == 0 || results.length > 1) {
       return false;
     }

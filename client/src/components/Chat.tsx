@@ -20,7 +20,6 @@ function Chat() {
     sendMessage(jsonMessage);
 
 
-    setMessages([...messages, { author: 'Moi', date: new Date().getTime(), content: message }]);
   }
 
   useEffect(() => {
@@ -28,7 +27,7 @@ function Chat() {
       return;
     const lastMessageData = JSON.parse(lastMessage.data);
     if(lastMessageData.type === "message"){
-     return setMessages([...messages, { author: lastMessageData.author, date: lastMessageData.date, content: lastMessageData.content }]);
+     return setMessages([...messages, lastMessageData]);
     }
     if(lastMessageData.type === "got"){
       return setRooms(lastMessageData.rooms);
@@ -125,9 +124,16 @@ function Message(message: any) {
       </div>
     );
   }
+  var className='message'
+
+  if(message.cancelled == true)
+    className='message cancelled';
+
+
   return (
 
-    <div className='message'>
+    
+ <div className={className}>
       <div className='message-header'>
         <span className='message-author'>{message.author}</span>
         <span className='message-date'>{message.date}</span>
