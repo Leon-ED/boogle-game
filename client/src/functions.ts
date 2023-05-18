@@ -23,8 +23,7 @@ export const auth = async (): Promise<boolean> => {
 
 
 export const getGameUUID = async (): Promise<string> => {
-    return "4543574153.74zeze";
-    return fetch(BACKEND_URL + "/game/getuuid", {
+    return fetch(BACKEND_URL + "/jeu/create", {
         method: "GET",
         headers: {
             "Content-Type": "application/json",

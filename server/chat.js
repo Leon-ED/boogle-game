@@ -6,24 +6,15 @@ const CANT_SEND_MESSAGE = 'Vous devez être connecté pour envoyer un message.';
 const MAX_MSG_PER_SECOND = 1;
 const RATE_LIMIT_MESSAGE = 'Vous ne pouvez pas envoyer plus de ' + MAX_MSG_PER_SECOND + ' messages par seconde.';
 const GLOBAL_ROOM = 'global';
+const { getGameFromUUID } = require('./jeu');
+
 
 var rooms = {
     [GLOBAL_ROOM]: {
         name: 'Global',
         id: GLOBAL_ROOM,
         users: []
-    },
-    ['room1']: {
-        name: 'Room 1',
-        id: 'room1',
-        users: []
-    },
-    ['room2']: {
-        name: 'Room 2',
-        id: 'room2',
-        users: []
     }
-
 };
 
 
@@ -56,7 +47,6 @@ function handleNewMessage(wss, ws, message) {
 
 
         if (ws.lastMessage && Date.now() - ws.lastMessage.date < 1000 / MAX_MSG_PER_SECOND) {
-            console.log("RATE LIMIT");
             sendError(ws, RATE_LIMIT_MESSAGE);
             return;
         }
@@ -74,8 +64,26 @@ function handleNewMessage(wss, ws, message) {
 
 }
 
-function handleJoinRoom(wss, ws, message) {
+
+async function handleJoinRoom(wss, ws, message) {
     var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    // On vérife déjà que l'utilisateur ne soit pas déjà dans la room
+    if (ws.room == message.roomId) {
+        return;
+    }
+
+
+
+    if (message.roomId.startsWith("game_")) {
+        message.roomId = message.roomId.replace("game_", "");
+        const result = await getGameFromUUID(message.roomId)
+        if (result == false){
+            ws.send(JSON.stringify({ type: 'join', status: "error", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'La room ' + message.roomId + ' n\'existe pas.' }));
+        }else{
+            createGameChatRoom(message.roomId);
+        }
+    }
+
     if (!rooms[message.roomId]) {
         ws.send(JSON.stringify({ type: 'join', status: "error", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'La room ' + message.roomId + ' n\'existe pas.' }));
         return;
@@ -95,20 +103,25 @@ function handleJoinRoom(wss, ws, message) {
 
 
 
-    ws.send(JSON.stringify({ type: 'join', status: "success", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'Vous avez rejoint la room ' + message.roomId }));
+    ws.send(JSON.stringify({ type: 'join', status: "success", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'Vous avez rejoint la room ' + rooms[message.roomId].name + '.' }));
     return;
 }
 
 function handleAvailableRooms(ws, message) {
     var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const roomsArray = [];
+    for (const room in rooms) {
+        roomsArray.push({ id: rooms[room].id, name: rooms[room].name, number: rooms[room].users.length });
+    }
+
+
+
     ws.send(JSON.stringify({
         type: "got"
         , status: "success"
         , system: true
         , date: formattedDate
-        , rooms: [{ id: GLOBAL_ROOM, name: "Global", number: rooms[GLOBAL_ROOM].users.length },
-        { id: "room1", name: "Room 1", number: rooms["room1"].users.length },
-        { id: "room2", name: "Room 2", number: rooms["room2"].users.length }]
+        , rooms: roomsArray
 
 
 
@@ -157,9 +170,11 @@ initWS = function (server) {
 
         ws.on('message', (packet) => {
             var packet = JSON.parse(packet);
+            // console.log(packet);
             if (packet.type === 'join' && packet.roomId)
                 return handleJoinRoom(wss, ws, packet);
             if (packet.type == "message" && packet.content) {
+
                 return handleNewMessage(wss, ws, packet);
 
             }
@@ -185,7 +200,17 @@ initWS = function (server) {
     });
 
 }
-
+function createGameChatRoom(gameID) {
+    console.log("createGameChatRoom");
+    rooms[gameID] = {
+        name: 'Chat de partie',
+        id: gameID,
+        users: []
+    };
+}
+function deleteGameChatRoom(gameID) {
+    delete rooms[gameID];
+}
 
 
 module.exports = {

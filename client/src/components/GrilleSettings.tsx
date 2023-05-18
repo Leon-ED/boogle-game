@@ -2,24 +2,14 @@ import { useEffect, useState } from "react";
 import { BACKEND_URL, FRONT_HOST } from "../env";
 import { getGameUUID } from "../functions";
 
-export const GrilleSettings = ({getSettings} : {getSettings:Function}) => {
+export const GrilleSettings = ({gameID,setSettings} : {gameID:string,setSettings:Function}) => {
     const [colonnes, setColonnes] = useState<number>(4);
     const [lignes, setLignes] = useState<number>(4);
     const [grille, setGrille] = useState<Array<Array<string>>>(Array(4).fill(Array(4).fill("X")));
     const [grilleOrigine, setGrilleOrigine] = useState<Array<string>>([]);
-    const [gameID, setGameID] = useState<string>("");
 
 
 
-    useEffect(() => {
-
-        getGameUUID().then((data) => {
-            setGameID(data);
-        }
-        );
-    }, []);
-
-    
 
     return (
         <>
@@ -48,25 +38,40 @@ export const GrilleSettings = ({getSettings} : {getSettings:Function}) => {
                     <label htmlFor="temps">Temps : Indisponible</label>
                     <input type="range" name="temps" value="4" min="1" max="10" />
                 </div>
-                <div className="grille-header-container">
-                    <label htmlFor="lien">Lien</label>
-                    <input type="text" name="lien" disabled readOnly value={gameID} onClick={() => {
+                <div className="grille-header-container" onClick={() => {
                         navigator.clipboard.writeText(FRONT_HOST + "/game/" + gameID);
 
-                    }} />
+                    }}>
+                    <label htmlFor="lien">Lien</label>
+                    <input type="text" name="lien" disabled readOnly value={gameID}  />
                 </div>
-                <button value="Générer" onClick={launchGame} >Lancer</button>
+                <div className="grille-header-container">
+                    <label htmlFor="lien">Politique de score</label>
+                    <select name="politique" id="politique">
+                        <option value="1">1 point par mot</option>
+                        <option value="2">1 point par lettre</option>
+                        <option value="3">Par fréquence des mots</option>
+                    </select>
+                </div>
+                <div className="grille-header-container">
+                    <label htmlFor="lien">Bloquer mots déjà trouvés</label>
+                    <input type="checkbox" name="bloquer" id="bloquer" />
+                </div>
+                    
+                        
+                <button value="Générer" onClick={launchGame} >Save</button>
             </div>
         </>
     );
 
     function launchGame() {
-
-        getSettings({
+        setSettings({
             lignes: lignes,
             colonnes: colonnes,
-            grille: grilleOrigine,
-            gameID: gameID
+            gameID: gameID,
+            temps: 4,
+            bloquerMots: false,
+            politiqueScore: 1,
         });
         }
 

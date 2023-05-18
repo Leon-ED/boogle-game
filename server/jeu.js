@@ -1,6 +1,50 @@
 require('dotenv').config();
 const CWD = process.env.CWD;
+const base = require('./base');
 
+
+
+createGame = async function (req, res, next) {
+    const uuid = require('uuid');
+    const uuidv4 = uuid.v4();
+    const conn = await base.getBase();
+    const query = 'INSERT INTO partie (idPartie) VALUES (?)';
+    const params = [uuidv4];
+    conn.query(query, params, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return res.status(400).json({
+                status: 'error',
+                message: 'Une erreur est survenue lors de la création de la partie.'
+            });
+        }
+    });
+    conn.end();
+    return res.status(200).json({
+        status: 'success',
+        message: 'Partie créée.',
+        uuid: uuidv4
+    });
+}
+getGameFromUUID = async function (uuid) {
+    const conn = await base.getBase();
+    const query = 'SELECT * FROM partie WHERE idPartie = ?';
+    const params = [uuid];
+
+    conn.execute(query, params, function (err, rows) {
+        if (err) {
+            console.log(err);
+            return false;
+        }
+        if (rows.length == 0)
+            return false;
+        return rows[0];
+    }
+    );
+
+    await conn.end();
+}
+    
 
 
 getGrille = function (req, res, next) {
@@ -109,6 +153,8 @@ verifMot = function (req, res, next) {
 
 module.exports = {
     getGrille: getGrille,
-    verifMot: verifMot
+    verifMot: verifMot,
+    createGame: createGame,
+    getGameFromUUID: getGameFromUUID
 }
 

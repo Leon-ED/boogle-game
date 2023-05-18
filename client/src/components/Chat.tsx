@@ -1,5 +1,5 @@
 import useWebSocket from 'react-use-websocket';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { BACKEND_URL, WS_URL } from '../env';
 import '../assets/chat.css';
 function Chat(props: any) {
@@ -7,14 +7,6 @@ function Chat(props: any) {
   const { sendMessage, lastMessage } = useWebSocket(WS_URL);
   const [rooms, setRooms] = useState<any[]>([]);
 
-  if (props.roomID !== undefined) {
-    const joinRoom = {
-      type: "join",
-      token: localStorage.getItem("token"),
-      roomID: props.roomID
-    }
-    sendMessage(JSON.stringify(joinRoom));
-  }
 
 
 
@@ -56,8 +48,25 @@ function Chat(props: any) {
       token: localStorage.getItem("token"),
     }
     sendMessage(JSON.stringify(getAllRooms));
+
+ 
   }, []);
 
+  useEffect(() => {
+    if (!props.gameID)
+      return;
+
+
+      const joinRoom = {
+        type: "join",
+        token: localStorage.getItem("token"),
+        roomId: "game_"+props.gameID
+      }
+      sendMessage(JSON.stringify(joinRoom));
+
+
+
+  }, [props.gameID]);
 
 
   return (
@@ -98,7 +107,7 @@ function Chat(props: any) {
       <div className="chat-room">
         <h2 className="room-name">{nom}</h2>
         <div className='room-content'>
-          <p className='romm-users'>{number} utilisateurs</p>
+          <p className='romm-users'>{number} user(s)</p>
           <button onClick={joinRoom}>Rejoindre</button>
         </div>
       </div>
