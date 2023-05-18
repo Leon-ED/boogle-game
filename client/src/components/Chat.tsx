@@ -2,16 +2,24 @@ import useWebSocket from 'react-use-websocket';
 import { useState, useEffect } from 'react';
 import { BACKEND_URL, WS_URL } from '../env';
 import '../assets/chat.css';
-function Chat() {
+function Chat(props: any) {
   const [messages, setMessages] = useState<any[]>([]);
   const { sendMessage, lastMessage } = useWebSocket(WS_URL);
   const [rooms, setRooms] = useState<any[]>([]);
 
+  if (props.roomID !== undefined) {
+    const joinRoom = {
+      type: "join",
+      token: localStorage.getItem("token"),
+      roomID: props.roomID
+    }
+    sendMessage(JSON.stringify(joinRoom));
+  }
 
 
 
   function handleSendMessage(event: any) {
-  
+
     event.preventDefault();
     const message = event.target.elements[0].value;
     if (message === '') return;
@@ -23,16 +31,18 @@ function Chat() {
   }
 
   useEffect(() => {
-    if(lastMessage === null)
+    if (lastMessage === null)
       return;
     const lastMessageData = JSON.parse(lastMessage.data);
-    if(lastMessageData.type === "message"){
-     return setMessages([...messages, lastMessageData]);
+    if (lastMessageData.type === "message") {
+      return setMessages([...messages, lastMessageData]);
     }
-    if(lastMessageData.type === "got"){
+    if (lastMessageData.type === "got") {
       return setRooms(lastMessageData.rooms);
     }
-
+    if (lastMessageData.type === "join") {
+      return setMessages([...messages, lastMessageData]);
+    }
 
 
 
@@ -63,7 +73,7 @@ function Chat() {
         </div>
         <div className="chat-rooms">
           {rooms.map((room, index) => (
-            <ChatRoom key={index} id={room.id} nom={room.name} number={room.number}  />
+            <ChatRoom key={index} id={room.id} nom={room.name} number={room.number} />
           ))}
 
 
@@ -77,28 +87,28 @@ function Chat() {
     </section>
   );
 
-  function ChatRoom(props: any){
+  function ChatRoom(props: any) {
     const nom: string = props.nom;
     const id: string = props.id;
     const number: number = props.number;
-  
-  
-  
-  return(
+
+
+
+    return (
       <div className="chat-room">
-          <h2 className="room-name">{nom}</h2>
-          <div className='room-content'>
+        <h2 className="room-name">{nom}</h2>
+        <div className='room-content'>
           <p className='romm-users'>{number} utilisateurs</p>
           <button onClick={joinRoom}>Rejoindre</button>
-          </div>
+        </div>
       </div>
-  )
-  
-  function joinRoom(){
-    sendMessage(JSON.stringify({type: "join", token: localStorage.getItem("token"), roomId: id}));
-  }
-  
-    
+    )
+
+    function joinRoom() {
+      sendMessage(JSON.stringify({ type: "join", token: localStorage.getItem("token"), roomId: id }));
+    }
+
+
   }
 }
 
@@ -124,16 +134,16 @@ function Message(message: any) {
       </div>
     );
   }
-  var className='message'
+  var className = 'message'
 
-  if(message.cancelled == true)
-    className='message cancelled';
+  if (message.cancelled == true)
+    className = 'message cancelled';
 
 
   return (
 
-    
- <div className={className}>
+
+    <div className={className}>
       <div className='message-header'>
         <span className='message-author'>{message.author}</span>
         <span className='message-date'>{message.date}</span>

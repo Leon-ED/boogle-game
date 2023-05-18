@@ -11,6 +11,7 @@ import Error404 from './pages/404';
 import './index.css'
 import Logout from './actions/Logout';
 import { BACKEND_URL } from './env';
+import { Lobby } from './pages/Lobby';
 
 
 function Main() {
@@ -50,6 +51,7 @@ function Main() {
         <Route path="/register" element={<Register />} />
         <Route path="/definitions" element={<Definitions />} />
         <Route path="/definitions/:search" element={<Definitions />} />
+        <Route path="/create" element={<Lobby />} />
         <Route path="*" element={<Error404 />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>
