@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const { getGameFromUUID } = require('./jeu');
 require('bcryptjs');
 require('dotenv').config();
 require('./auth');
@@ -33,7 +34,7 @@ app.post("/api/jeu/verify", verifMot);
 app.post("/api/auth/check", check);
 app.post("/api/auth/register", register);
 app.get("/api/jeu/create", createGame);
-
+app.post("/api/jeu/verifID", apiGetGameFromUUID);
 
 
 

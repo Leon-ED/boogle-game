@@ -35,6 +35,9 @@ function Chat(props: any) {
     if (lastMessageData.type === "join") {
       return setMessages([...messages, lastMessageData]);
     }
+    if (lastMessageData.type === "got_update") {
+      return setRooms([...rooms,lastMessageData.room]);
+    }
 
 
 

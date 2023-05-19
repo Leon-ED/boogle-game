@@ -31,20 +31,31 @@ getGameFromUUID = async function (uuid) {
     const query = 'SELECT * FROM partie WHERE idPartie = ?';
     const params = [uuid];
 
-    conn.execute(query, params, function (err, rows) {
-        if (err) {
-            console.log(err);
-            return false;
-        }
-        if (rows.length == 0)
-            return false;
-        return rows[0];
+    const result = await conn.execute(query, params);
+    if (result.length == 0) {
+        conn.end();
+        return false;
     }
-    );
-
+    const game = result[0];
+    return game;
     await conn.end();
 }
-    
+
+apiGetGameFromUUID = async function (req, res, next) {
+    const game = await getGameFromUUID(req.body.uuid);
+    if (game == false)
+        return res.status(400).json({
+            status: 'error',
+            message: 'La partie n\'existe pas.'
+        });
+    return res.status(200).json({
+        status: 'success',
+        message: 'Partie trouvée.',
+        game: game
+    });
+}
+
+
 
 
 getGrille = function (req, res, next) {
@@ -155,6 +166,7 @@ module.exports = {
     getGrille: getGrille,
     verifMot: verifMot,
     createGame: createGame,
-    getGameFromUUID: getGameFromUUID
+    getGameFromUUID: getGameFromUUID,
+    apiGetGameFromUUID:apiGetGameFromUUID
 }
 

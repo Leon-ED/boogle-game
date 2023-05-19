@@ -20,6 +20,27 @@ export const auth = async (): Promise<boolean> => {
     }
     );
 }
+export const verifGameID = async (gameID: string): Promise<boolean> => {
+    return fetch(BACKEND_URL + "/jeu/verifID", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            uuid: gameID,
+        }),
+    }).then((response) => {
+        return response.json();
+    }
+    ).then((data) => {
+        if (data.status === "success") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    );
+}
 
 
 export const getGameUUID = async (): Promise<string> => {

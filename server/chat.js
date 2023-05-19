@@ -9,16 +9,20 @@ const GLOBAL_ROOM = 'global';
 const { getGameFromUUID } = require('./jeu');
 
 
+// Les salons de discussion par défaut 
 var rooms = {
     [GLOBAL_ROOM]: {
-        name: 'Global',
-        id: GLOBAL_ROOM,
-        users: []
+        name: 'Global', // Le nom du salon, visible par les utilisateurs
+        id: GLOBAL_ROOM, // L'id du salon, utilisé par le serveur
+        users: [], // Les utilisateurs connectés au salon
+        visible: true, // Si le salon est visible par défaut dans la liste des salons 
+        whitelist: [] // Les utilisateurs qui peuvent rejoindre le salon quand il n'est pas visible
     }
 };
 
 
 
+// Envoie un message d'erreur à l'utilisateur sous le nom du serveur
 function sendError(ws, message) {
     ws.send(JSON.stringify({
         type: 'message',
@@ -29,15 +33,22 @@ function sendError(ws, message) {
     }));
 }
 
+
+// Gère l'envoi d'un message
 function handleNewMessage(wss, ws, message) {
+    // La date du message, gérée par le serveur
     const formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    
+    // On vérifie que l'utilisateur soit connecté
     auth.returnUserFromToken(message.token).then((user) => {
+        // On formatte le message
         newMessage = {
             type: 'message',
             content: message.content,
             author: user.pseudoUser,
             date: formattedDate
         }
+        // Il n'est pas connecté alors on envoie un message d'erreur et on annule l'envoi du message
         if (user === false) {
             newMessage.cancelled = true;
             ws.send(JSON.stringify(newMessage));
@@ -45,13 +56,14 @@ function handleNewMessage(wss, ws, message) {
             return;
         }
 
-
+        // On vérifie que l'utilisateur ne soit pas rate limited 
         if (ws.lastMessage && Date.now() - ws.lastMessage.date < 1000 / MAX_MSG_PER_SECOND) {
             sendError(ws, RATE_LIMIT_MESSAGE);
             return;
         }
-        ws.lastMessage = newMessage;
 
+        ws.lastMessage = newMessage;
+        // On envoie le message à tous les utilisateurs de la room
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN && client.room == ws.room) {
                 client.send(JSON.stringify(newMessage));
@@ -65,25 +77,37 @@ function handleNewMessage(wss, ws, message) {
 }
 
 
+
+
+// Gère la connexion d'un utilisateur à un salon de discussion
 async function handleJoinRoom(wss, ws, message) {
-    var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    // Définit si le salon est un salon de jeu ou non
+    let isGame = false;
+
     // On vérife déjà que l'utilisateur ne soit pas déjà dans la room
     if (ws.room == message.roomId) {
         return;
     }
-
-
-
+    // Si c'est un salon de jeu, on vérifie que la partie existe
     if (message.roomId.startsWith("game_")) {
-        message.roomId = message.roomId.replace("game_", "");
-        const result = await getGameFromUUID(message.roomId)
-        if (result == false){
+        isGame = true;
+        message.roomId = message.roomId.replace("game_", ""); // On enlève le préfixe game_
+        const result = await getGameFromUUID(message.roomId) // On vérifie que la partie existe
+        if (result == false) {
+            // Elle n'existe pas on envoie un message d'erreur et on annule la connexion
             ws.send(JSON.stringify({ type: 'join', status: "error", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'La room ' + message.roomId + ' n\'existe pas.' }));
-        }else{
-            createGameChatRoom(message.roomId);
+            return
         }
+        // On crée la room de chat de la partie si elle n'existe pas
+        if (!rooms[message.roomId])
+            createGameChatRoom(message.roomId);
+        // On ajoute l'utilisateur à la whitelist de la room
+        rooms[message.roomId].whitelist.push(ws.id);
     }
 
+    // On vérifie que la room existe, sinon erreur
     if (!rooms[message.roomId]) {
         ws.send(JSON.stringify({ type: 'join', status: "error", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'La room ' + message.roomId + ' n\'existe pas.' }));
         return;
@@ -103,37 +127,33 @@ async function handleJoinRoom(wss, ws, message) {
 
 
 
+    // Enfin, on confirme la réussite de la connexion à l'utilisateur
     ws.send(JSON.stringify({ type: 'join', status: "success", roomId: message.roomId, system: true, date: formattedDate, author: SERVER_PSEUDO, content: 'Vous avez rejoint la room ' + rooms[message.roomId].name + '.' }));
     return;
 }
 
+// Gère l'envoi des infos sur les rooms à un utilisateur
 function handleAvailableRooms(ws, message) {
-    var formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
     const roomsArray = [];
     for (const room in rooms) {
+        // On vérifie que l'utilisateur ait le droit de voir la room, càd qu'il soit dans la whitelist ou que la room soit visible
+        if (!rooms[room].visible && rooms[room].whitelist.indexOf(ws.id) == -1)
+            continue;
         roomsArray.push({ id: rooms[room].id, name: rooms[room].name, number: rooms[room].users.length });
     }
-
-
-
+    // On envoie les infos sur les rooms à l'utilisateur
     ws.send(JSON.stringify({
         type: "got"
         , status: "success"
         , system: true
         , date: formattedDate
         , rooms: roomsArray
-
-
-
-
-
     }))
-
-
-
-
-
 }
+
+
 
 
 
@@ -144,6 +164,7 @@ function handleAvailableRooms(ws, message) {
 
 initWS = function (server) {
     const wss = new WebSocket.Server({ server });
+    // Attribue un id unique à un utilisateur
     wss.getUniqueID = function () {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -151,7 +172,7 @@ initWS = function (server) {
         return s4() + s4() + '-' + s4();
     };
 
-
+    // A chaque connexion,
     wss.on('connection', (ws) => {
         // On utilise un id unique pour chaque client
         ws.id = wss.getUniqueID();
@@ -167,10 +188,9 @@ initWS = function (server) {
         });
 
 
-
+        // A chaque message reçu
         ws.on('message', (packet) => {
             var packet = JSON.parse(packet);
-            // console.log(packet);
             if (packet.type === 'join' && packet.roomId)
                 return handleJoinRoom(wss, ws, packet);
             if (packet.type == "message" && packet.content) {
@@ -181,13 +201,13 @@ initWS = function (server) {
             if (packet.type == "get")
                 return handleAvailableRooms(ws, packet);
 
-
         });
 
 
 
     });
 
+    // A chaque déconnexion
     wss.on('close', (ws) => {
         // On enlève l'utilisateur de la room
         rooms[ws.room].users = rooms[ws.room].users.filter((user) => user.id != ws.id);
@@ -200,14 +220,18 @@ initWS = function (server) {
     });
 
 }
+// Crée une room de chat de partie
 function createGameChatRoom(gameID) {
     console.log("createGameChatRoom");
     rooms[gameID] = {
         name: 'Chat de partie',
         id: gameID,
-        users: []
+        users: [],
+        visible: false,
+        whitelist: []
     };
 }
+
 function deleteGameChatRoom(gameID) {
     delete rooms[gameID];
 }

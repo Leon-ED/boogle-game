@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import { auth, getGameUUID } from "../functions"
-import { useNavigate } from "react-router-dom"
+import { auth, getGameUUID,verifGameID } from "../functions"
+import { useNavigate, useParams } from "react-router-dom"
 import { GrilleSettings } from "../components/GrilleSettings"
 import Chat from "../components/Chat"
 
@@ -19,17 +19,30 @@ export const Lobby = () => {
     const navigate = useNavigate()
     const [settings, setSettings] = useState<Settings>({ largeur: 4, hauteur: 4, temps: 3, gameID: "", bloquerMots: false, politiqueScore: 1});
     const [gameID, setGameID] = useState<string>("");
+    const { id } = useParams();
+
     useEffect(() => {
         auth().then((data) => {
             if (!data) {
                 navigate("/login")
             }
         })
-        getGameUUID().then((data) => {
-            setGameID(data);
-        }
-        );
+        console.log(id);
+        if(id){
+            verifGameID(id).then((data) => {
+                if(!data){
+                    navigate("/");
+                }
+                setGameID(id);
+            })
 
+
+        }else{
+            getGameUUID().then((data) => {
+                setGameID(data);
+            }
+            );
+        }
 
     }, [])
 
