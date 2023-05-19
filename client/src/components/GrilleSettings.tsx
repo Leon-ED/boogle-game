@@ -2,14 +2,45 @@ import { useEffect, useState } from "react";
 import { BACKEND_URL, FRONT_HOST } from "../env";
 import { getGameUUID } from "../functions";
 
-export const GrilleSettings = ({gameID,setSettings} : {gameID:string,setSettings:Function}) => {
+
+interface Settings{
+    lignes: number,
+    colonnes: number,
+    temps: number,
+    gameID: string,
+    bloquerMots: boolean,
+    politiqueScore: number,
+}
+
+export const GrilleSettings = ({settings, onSettingsChange,gameID,isAdmin} : {settings:Settings, onSettingsChange:Function,gameID:string,isAdmin:boolean }) => {
     const [colonnes, setColonnes] = useState<number>(4);
     const [lignes, setLignes] = useState<number>(4);
-    const [grille, setGrille] = useState<Array<Array<string>>>(Array(4).fill(Array(4).fill("X")));
-    const [grilleOrigine, setGrilleOrigine] = useState<Array<string>>([]);
+    const [time, setTime] = useState<number>(3);
+    const [politiqueScore, setPolitiqueScore] = useState<number>(1);
+    const [bloquerMots, setBloquerMots] = useState<boolean>(false);
 
 
+    useEffect(() => {
+        if(!settings)
+            return;
 
+        setLignes(settings.lignes);
+        setColonnes(settings.colonnes);
+        setTime(settings.temps);
+        setPolitiqueScore(settings.politiqueScore);
+        setBloquerMots(settings.bloquerMots);
+
+    }, [settings]);
+
+    useEffect(() => {
+        onSettingsChange({lignes, colonnes,time,politiqueScore,bloquerMots});
+    }, [lignes, colonnes, time, politiqueScore, bloquerMots]);
+
+    useEffect(() => {
+        if(!politiqueScore)
+            return;
+        selectPolitiqueScoreElement(parseInt(politiqueScore.toString()));
+    }, [politiqueScore]);
 
     return (
         <>
@@ -23,7 +54,7 @@ export const GrilleSettings = ({gameID,setSettings} : {gameID:string,setSettings
                             setLignes(parseInt(value));
                         }
 
-                    } />
+                    } { ...(isAdmin ? {} : {disabled: true}) } />
                 </div>
                 <div className="grille-header-container">
                     <label htmlFor="largeur">Colonnes</label>
@@ -32,11 +63,16 @@ export const GrilleSettings = ({gameID,setSettings} : {gameID:string,setSettings
                             setColonnes(parseInt(e.target.value));
                         }
 
-                    } />
+                    } { ...(isAdmin ? {} : {disabled: true}) } />
                 </div>
                 <div className="grille-header-container">
                     <label htmlFor="temps">Temps : Indisponible</label>
-                    <input type="range" name="temps" value="4" min="1" max="10" />
+                    <input type="range" name="temps"  value={time} min="1" max="10" onChange={
+                        () =>{
+                            setTime(parseInt(time.toString()));
+                        }
+
+                    }{ ...(isAdmin ? {} : {disabled: true}) }  />
                 </div>
                 <div className="grille-header-container" onClick={() => {
                         navigator.clipboard.writeText(FRONT_HOST + "/game/" + gameID);
@@ -47,32 +83,47 @@ export const GrilleSettings = ({gameID,setSettings} : {gameID:string,setSettings
                 </div>
                 <div className="grille-header-container">
                     <label htmlFor="lien">Politique de score</label>
-                    <select name="politique" id="politique">
-                        <option value="1">1 point par mot</option>
-                        <option value="2">1 point par lettre</option>
-                        <option value="3">Par fréquence des mots</option>
+                    <select name="politique" id="politique" onChange={
+                        (e) => {
+                            setPolitiqueScore(parseInt(e.target.value));
+                        }
+                    } { ...(isAdmin ? {} : {disabled: true}) } >
+
+                        <option id="politique_1" value="1" selected>1 point par mot</option>
+                        <option id="politique_2" value="2">1 point par lettre</option>
+                        <option  id="politique_3"value="3">Par fréquence des mots</option>
                     </select>
                 </div>
                 <div className="grille-header-container">
                     <label htmlFor="lien">Bloquer mots déjà trouvés</label>
-                    <input type="checkbox" name="bloquer" id="bloquer" />
+                    {bloquerMots && <input type="checkbox" name="bloquer" checked onChange={handleBloquerMots} { ...(isAdmin ? {} : {disabled: true}) }  />}
+                    {!bloquerMots && <input type="checkbox" name="bloquer" onChange={handleBloquerMots}  { ...(isAdmin ? {} : {disabled: true}) } />}
+
                 </div>
                     
                         
-                <button value="Générer" onClick={launchGame} >Save</button>
+                <button value="Générer">Save</button>
             </div>
         </>
     );
 
-    function launchGame() {
-        setSettings({
-            lignes: lignes,
-            colonnes: colonnes,
-            gameID: gameID,
-            temps: 4,
-            bloquerMots: false,
-            politiqueScore: 1,
+    function selectPolitiqueScoreElement(id:number){
+        const elements = document.querySelectorAll("[id^='politique_']");
+        elements.forEach((element) => {
+            element.removeAttribute("selected");
         });
-        }
+
+        const element = document.getElementById("politique_"+id.toString());
+
+        if(!element)
+            return;
+        element.setAttribute("selected","selected");
+
+    }
+
+    function handleBloquerMots(e: any) {
+        setBloquerMots(e.target.checked);
+    }
+ 
 
     }

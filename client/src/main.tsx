@@ -53,6 +53,7 @@ function Main() {
         <Route path="/definitions/:search" element={<Definitions />} />
         <Route path="/create" element={<Lobby />} />
         <Route path="/join/:id" element={<Lobby />} />
+        <Route path="/lobby/:id" element={<Lobby />} />
         <Route path="*" element={<Error404 />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>

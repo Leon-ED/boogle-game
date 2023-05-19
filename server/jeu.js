@@ -7,9 +7,14 @@ const base = require('./base');
 createGame = async function (req, res, next) {
     const uuid = require('uuid');
     const uuidv4 = uuid.v4();
+    const user = await returnUserFromToken(req.body.token);
+    console.log(user);
+    if (user == false)
+        return res.status(500);
+    const idUser = user.idUser;
     const conn = await base.getBase();
-    const query = 'INSERT INTO partie (idPartie) VALUES (?)';
-    const params = [uuidv4];
+    const query = 'INSERT INTO partie (idPartie,gameAdmin) VALUES (?,?)';
+    const params = [uuidv4, idUser];
     conn.query(query, params, function (err, rows) {
         if (err) {
             console.log(err);
@@ -26,23 +31,32 @@ createGame = async function (req, res, next) {
         uuid: uuidv4
     });
 }
-getGameFromUUID = async function (uuid) {
+getGameFromUUID = async function (uuid, token = undefined) {
     const conn = await base.getBase();
     const query = 'SELECT * FROM partie WHERE idPartie = ?';
     const params = [uuid];
 
     const result = await conn.execute(query, params);
+    const user = await returnUserFromToken(token);
+
+
     if (result.length == 0) {
         conn.end();
         return false;
     }
     const game = result[0];
-    return game;
+    if(user != false && user.idUser == game.gameAdmin)
+        game.admin = true;
+    else
+        game.admin = false;
+
     await conn.end();
+    return game;
+
 }
 
 apiGetGameFromUUID = async function (req, res, next) {
-    const game = await getGameFromUUID(req.body.uuid);
+    const game = await getGameFromUUID(req.body.uuid, req.body.token);
     if (game == false)
         return res.status(400).json({
             status: 'error',

@@ -38,7 +38,7 @@ function sendError(ws, message) {
 function handleNewMessage(wss, ws, message) {
     // La date du message, gérée par le serveur
     const formattedDate = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    
+
     // On vérifie que l'utilisateur soit connecté
     auth.returnUserFromToken(message.token).then((user) => {
         // On formatte le message
@@ -163,7 +163,7 @@ function handleAvailableRooms(ws, message) {
 
 
 initWS = function (server) {
-    const wss = new WebSocket.Server({ server });
+    const wss = new WebSocket.Server({ noServer: true });
     // Attribue un id unique à un utilisateur
     wss.getUniqueID = function () {
         function s4() {
@@ -172,8 +172,23 @@ initWS = function (server) {
         return s4() + s4() + '-' + s4();
     };
 
+    const interval = setInterval(function ping() {
+        // console.log("nombre de clients "+ wss.clients.size);
+        wss.clients.forEach(function each(ws) {
+
+            if (ws.isAlive === false) { console.log("Client inactif, connexion terminée"); return ws.terminate(); }
+            ws.isAlive = false;
+            ws.ping();
+        });
+    }, 1000);
+
+
+
     // A chaque connexion,
     wss.on('connection', (ws) => {
+        ws.isAlive = true;
+        ws.on('error', console.error);
+        ws.on('pong', heartbeat);
         // On utilise un id unique pour chaque client
         ws.id = wss.getUniqueID();
         ws.lastMessage = null;
@@ -203,22 +218,15 @@ initWS = function (server) {
 
         });
 
-
+        ws.on('close', (ws) => {
+            clearInterval(interval);
+        });
 
     });
 
     // A chaque déconnexion
-    wss.on('close', (ws) => {
-        // On enlève l'utilisateur de la room
-        rooms[ws.room].users = rooms[ws.room].users.filter((user) => user.id != ws.id);
-        // On envoie un update à tous les utilisateurs du serveur avec les infos sur les rooms
-        wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                handleAvailableRooms(client);
-            }
-        });
-    });
 
+    return wss;
 }
 // Crée une room de chat de partie
 function createGameChatRoom(gameID) {
@@ -235,8 +243,13 @@ function createGameChatRoom(gameID) {
 function deleteGameChatRoom(gameID) {
     delete rooms[gameID];
 }
+function heartbeat() {
+    // console.log("heartbeat + " + new Date());
+    this.isAlive = true;
+}
 
 
 module.exports = {
-    initWS
+    initChat: initWS,
 }
+

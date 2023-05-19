@@ -110,7 +110,6 @@ function Chat(props: any) {
       <div className="chat-room">
         <h2 className="room-name">{nom}</h2>
         <div className='room-content'>
-          <p className='romm-users'>{number} user(s)</p>
           <button onClick={joinRoom}>Rejoindre</button>
         </div>
       </div>

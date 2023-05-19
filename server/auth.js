@@ -86,7 +86,6 @@ register = async function (req, res, next) {
   let query = 'SELECT * FROM utilisateur WHERE login = ? OR email = ?';
   let params = [login, email];
   let result = await conn.query(query, params);
-  console.log(result);
   if (result.length > 0) {
     conn.end();
     return sendRes(res, 'error', 400, 'Ce login ou email est déjà utilisé');

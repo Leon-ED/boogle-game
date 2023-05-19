@@ -33,7 +33,7 @@ app.get("/api/jeu/grille/:lignes/:colonnes", getGrille);
 app.post("/api/jeu/verify", verifMot);
 app.post("/api/auth/check", check);
 app.post("/api/auth/register", register);
-app.get("/api/jeu/create", createGame);
+app.post("/api/jeu/create", createGame);
 app.post("/api/jeu/verifID", apiGetGameFromUUID);
 
 
