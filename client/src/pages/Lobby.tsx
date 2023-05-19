@@ -22,9 +22,9 @@ interface Response {
     game: GameDB,
 }
 interface GameDB {
-    admin :boolean
-    gameAdmin : string
-    idPartie : string
+    admin: boolean
+    gameAdmin: string
+    idPartie: string
 
 }
 
@@ -34,6 +34,8 @@ export const Lobby = () => {
     const [gameID, setGameID] = useState<string>("");
     const { lastMessage, sendJsonMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+
 
     const { id } = useParams();
 
@@ -67,8 +69,12 @@ export const Lobby = () => {
             setIsAdmin(true);
             getGameUUID().then((data) => {
                 setGameID(data);
+                if(data){
+                    navigate("/lobby/" + data);
+                }
             }
-            );
+            )
+
         }
 
     }, [])
@@ -95,7 +101,10 @@ export const Lobby = () => {
         if (data.type === "update") {
             setSettings(data.game.settings);
         }
-
+        if (data.type === "start") {
+            navigate("/game/" + gameID);
+        }
+        
 
     }, [lastMessage]);
 
@@ -106,16 +115,16 @@ export const Lobby = () => {
         <>
             <section>
                 <h1>Lobby</h1>
-                <h2>Créez votre partie et jouez contre vos amis</h2>
+                <p>Créez votre partie et jouez contre vos amis</p>
                 <hr />
-                <GrilleSettings onSettingsChange={handleChange} settings={settings} gameID={gameID} isAdmin={isAdmin} />
+                <GrilleSettings onSettingsChange={handleChange} settings={settings} gameID={gameID} isAdmin={isAdmin} isStarted={handleGameStart} />
             </section>
             <Chat gameID={gameID} />
 
         </>
     )
     function handleChange(settings: Settings) {
-        if(!isAdmin)
+        if (!isAdmin)
             return;
         setSettings(settings);
 
@@ -129,6 +138,15 @@ export const Lobby = () => {
 
 
 
-
+    function handleGameStart(boolean: boolean) {
+        if (!isAdmin || !boolean)
+            return;
+        console.log("start");
+        sendMessage(JSON.stringify({
+            type: "start",
+            token: localStorage.getItem("token"),
+            gameID: gameID,
+        }));
+    }
 
 }

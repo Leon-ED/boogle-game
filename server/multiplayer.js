@@ -20,8 +20,8 @@ initMultiplayer = function (server) {
 
     const interval = setInterval(function ping() {
         wss.clients.forEach(function each(ws) {
-            console.log("On teste si le client est alive");
-            if (ws.isAlive === false) { console.log("Client inactif, connexion terminée"); return ws.terminate(); }
+            //console.log("On teste si le client est alive");
+            if (ws.isAlive === false) {  return ws.terminate(); }
             ws.isAlive = false;
             ws.ping();
         });
@@ -34,7 +34,7 @@ initMultiplayer = function (server) {
         ws.isAlive = true;
         ws.on('error', console.error);
         ws.on('pong', heartbeat);
-        console.log("Nouvelle connexion");
+        //console.log("Nouvelle connexion");
         ws.id = wss.getUniqueID();
 
 
@@ -49,6 +49,7 @@ initMultiplayer = function (server) {
                     console.log("L'utilisateur n'est pas connecté");
                     return;
                 }
+                console.log("L'utilisateur est connecté");
                 ws.user = user;
             }
 
@@ -84,21 +85,56 @@ initMultiplayer = function (server) {
     return wss;
 }
 
+async function handleStart(ws, message) {
+    console.log("On démarre la partie");
+    const game = games[message.gameID];
+    if (!game) {
+        console.log("La partie n'existe pas");
+        return;
+    }
+    if(game.statut != 'lobby'){
+        console.log("La partie n'est pas en lobby, on ne peut pas la démarrer");
+        return;
+    }
+
+    if (game.adminID != ws.user.idUser) {
+        console.log("L'utilisateur n'est pas admin");
+        return;
+    }
+    game.statut = "game";
+    const colonnes = game.settings.colonnes;
+    const lignes = game.settings.lignes;
+    const grille = await jeu.getGrille(colonnes, lignes, game.settings.langue);
+    game.settings.grille = grille;
+    //console.log("On envoie la grille à tous les joueurs");
+    game.players.forEach((player) => {
+        console.log("On envoie la grille à : " + player.user.login);
+        player.send(JSON.stringify({
+            type: 'start',
+            settings: game.settings,
+            grille: grille,
+        }));
+    });
+
+    }
+
+
+
 function heartbeat() {
     this.isAlive = true;
 }
 async function handleSettings(ws, message) {
     const game = games[message.gameID];
     if (!game) {
-        console.log("La partie n'existe pas");
+        //console.log("La partie n'existe pas");
         return;
     }
     if (game.adminID != ws.user.idUser) {
-        console.log("L'utilisateur n'est pas admin");
+        //console.log("L'utilisateur n'est pas admin");
         return;
     }
     game.settings = message.settings;
-    console.log("On envoie l'update");
+    //console.log("On envoie l'update");
     sendGameUpdate(ws,game);
 
 
@@ -109,48 +145,100 @@ async function handleJoin(ws, message) {
 
     // Si la partie n'existe pas, on la crée
     if (!games[message.gameID]) {
-        await createGame(ws, message);
+        console.log("La partie n'existe pas, on la crée");
+        if(message.status == "game")
+            await createGame(ws, message,"game");
+        else
+            await createGame(ws, message);
         return;
     }
     const game = games[message.gameID];
+
+    // Si un joueur s'est déconnecté et qu'il revient, on le remet dans la partie
+    if(message.status == "game" && game.statut == "game" && !game.players.includes(ws.user)){
+        console.log("Un joueur s'est déconnecté et revient, on le remet dans la partie");
+        sendGameStart(ws,game);
+    }
+
+
     // Si l'utilisateur est déjà dans la partie, on ne fait rien
-    if (game.players.includes(ws.user))
+    if (game.players.includes(ws.user)){
+        console.log("L'utilisateur est déjà dans la partie");
         return;
+    }
     // Max 4 joueurs
     if (game.players.length >= 4){
         // TODO: Rajouter un return quand on aura fix le problème des clients inactifs
     }
     // On ajoute le joueur à la partie
     game.players.push(ws);
+
     // On envoie un update à tous les joueurs
     sendGameUpdate(ws,game);
 }
-function sendGameUpdate(ws,gameToUpdate) {
-    console.log("On envoie l'update à tous les joueurs, gameToUpdate : " + gameToUpdate.players.length);
-    const game = JSON.parse(JSON.stringify(gameToUpdate));
-    for (const player of gameToUpdate.players) {
-        console.log("On teste : " + player.user.login
-        );
-        if (player.readyState !== WebSocket.OPEN) {
-            console.log("Le joueur n'est pas prêt");
-            continue;
-        }
-        if (player.user.idUser == gameToUpdate.adminID) {
-            console.log("L'utilisateur est admin");
-            continue;
 
-        }
-        console.log("On envoie l'update à : " + ws.user.login);
-        player.send(JSON.stringify({
-            type: 'update',
-            game: game,
-        }));
-
-    }
+function sendGameStart(client,game){
+    client.send(JSON.stringify({
+        type: 'start',
+        settings: game.settings,
+        grille: game.settings.grille,
+    }));
 }
 
 
-async function createGame(ws, message) {
+function sendGameUpdate(ws, gameToUpdate) {
+    console.log("On envoie l'update à tous les joueurs, gameToUpdate : " + gameToUpdate.players.length);
+    
+    // Create a deep copy of the gameToUpdate object without circular references
+    const game = deepCopyWithoutCircular(gameToUpdate);
+    
+    for (const player of gameToUpdate.players) {
+      if (player.readyState !== WebSocket.OPEN) {
+        continue;
+      }
+      
+      if (player.user.idUser === gameToUpdate.adminID) {
+        continue;
+      }
+      
+      player.send(JSON.stringify({
+        type: 'update',
+        game: game,
+      }));
+    }
+  }
+  
+  // Function to create a deep copy of an object without circular references
+  function deepCopyWithoutCircular(obj) {
+    const cache = new WeakMap();
+  
+    function clone(value) {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.has(value)) {
+          return cache.get(value);
+        }
+  
+        const isArray = Array.isArray(value);
+        const cloneObj = isArray ? [] : {};
+  
+        cache.set(value, cloneObj);
+  
+        const keys = isArray ? value : Object.keys(value);
+        for (const key of keys) {
+          cloneObj[key] = clone(value[key]);
+        }
+  
+        return cloneObj;
+      }
+  
+      return value;
+    }
+  
+    return clone(obj);
+  }
+  
+
+async function createGame(ws, message,status = "lobby") {
     if (!message.token || !message.gameID)
         return;
     const game = await jeu.getGameFromUUID(message.gameID);
@@ -159,10 +247,13 @@ async function createGame(ws, message) {
 
     if (ws.user.idUser != game.gameAdmin)
         return;
+
+
     const gameObj = {
         id: message.gameID,
         adminID: ws.user.idUser,
         players: [ws],
+        statut: "lobby",
         settings: {
             colonnes: 10,
             lignes: 4,
@@ -176,12 +267,15 @@ async function createGame(ws, message) {
             }
         }
     }
+
     ws.send(JSON.stringify({
         type: 'update',
         game: gameObj,
     }));
     games[message.gameID] = gameObj;
-
+    if(status == "game"){
+        handleStart(ws,message);
+    }
 
 }
 

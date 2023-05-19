@@ -12,6 +12,7 @@ import './index.css'
 import Logout from './actions/Logout';
 import { BACKEND_URL } from './env';
 import { Lobby } from './pages/Lobby';
+import { Partie } from './pages/Partie';
 
 
 function Main() {
@@ -52,6 +53,7 @@ function Main() {
         <Route path="/definitions" element={<Definitions />} />
         <Route path="/definitions/:search" element={<Definitions />} />
         <Route path="/create" element={<Lobby />} />
+        <Route path="/game/:id" element={<Partie />} />
         <Route path="/join/:id" element={<Lobby />} />
         <Route path="/lobby/:id" element={<Lobby />} />
         <Route path="*" element={<Error404 />} />

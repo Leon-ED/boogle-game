@@ -72,40 +72,41 @@ apiGetGameFromUUID = async function (req, res, next) {
 
 
 
-getGrille = function (req, res, next) {
-    const exec = require('child_process').exec;
+APIgetGrille = async function (req, res, next) {
     const lignes = Math.max(2, req.params.lignes);
     const colonnes = Math.max(2, req.params.colonnes);
+    const grille = await getGrille(lignes, colonnes);
 
-    exec('cd ' + CWD + '/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes, (err, stdout, stderr) => {
-        if (err) {
-            console.error(err);
-            return res.status(400).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la recherche.'
-            });
-
-        }
-        if (stderr) {
-            console.error(stderr);
-            return res.status(400).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la recherche.'
-            });
-
-        }
-        return res.status(200).json({
-            status: 'success',
-            message: 'Recherche réussie.',
-            grille: stdout,
-            lignes: lignes,
-            colonnes: colonnes
+    if (!grille)
+        return res.status(400).json({
+            status: 'error',
+            message: 'Une erreur est survenue lors de la création de la grille.'
         });
 
+    return res.status(200).json({
+            status: 'success',
+            message: 'Recherche réussie.',
+            grille: grille.replace(/\n/g, ''),
+            lignes: lignes,
+            colonnes: colonnes
     });
 
 
+   
 
+
+
+}
+
+getGrille =  function (lignes,colonnes) {
+    const exec = require("child_process").execSync;
+    lignes = Math.max(2, lignes);
+    colonnes = Math.max(2, colonnes);
+
+    const result = exec('cd ' + CWD + '/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes).toString();
+    const grille = result
+    return grille;
+    
 }
 
 
@@ -178,6 +179,7 @@ verifMot = function (req, res, next) {
 
 module.exports = {
     getGrille: getGrille,
+    APIgetGrille: APIgetGrille,
     verifMot: verifMot,
     createGame: createGame,
     getGameFromUUID: getGameFromUUID,

@@ -13,6 +13,7 @@ export function ConnectedNavBar() {
                 <h1>oogle - Le jeu </h1>
             </Link>
             <div className="flex-row right">
+                <h3><Link to="/create">Jouer</Link></h3>
                 <h3><Link to="definitions/">Dictionnaire</Link></h3>
                 <h3><Link to="account"> Mon compte</Link></h3>
                 <h3><Link className="logout" to="/logout">Deconnexion</Link></h3>

@@ -68,6 +68,11 @@ function Grille(props: { largeur: number, hauteur: number }) {
 
 
     function verifierMot() {
+        if(foundWords.includes(inputWord.toUpperCase())){
+            alert("Mot déjà trouvé");
+            return
+        }
+
         fetch(BACKEND_URL + '/jeu/verify/', {
             method: 'POST',
             headers: {
@@ -92,7 +97,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
             if (data.status === "success") {
 
                 alert("Mot trouvé");
-                setFoundWords([...foundWords, inputWord]);
+                setFoundWords([...foundWords, inputWord.toUpperCase()]);
             } else {
                 alert(data.message);
             }

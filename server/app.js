@@ -29,7 +29,7 @@ app.get("/", (req, res, next) => {
 
 app.post('/api/auth/login', login);
 app.post("/api/auth/logout", disconnect);
-app.get("/api/jeu/grille/:lignes/:colonnes", getGrille);
+app.get("/api/jeu/grille/:lignes/:colonnes", APIgetGrille);
 app.post("/api/jeu/verify", verifMot);
 app.post("/api/auth/check", check);
 app.post("/api/auth/register", register);
