@@ -14,6 +14,7 @@ yarn-error.log*
 !**/glob-import/dir/node_modules
 /.vscode/
 dump.sql
+bin/
 mysql
 definitions_*.json
 /docs/.vitepress/cache
