@@ -122,34 +122,22 @@ function preVerifMot(mot,lignes,colonnes){
 }
 
 
-verifMot = function (req, res, next) {
+verifMot = async function (req, res, next) {
 
-    const exec = require('child_process').exec;
+    const exec = require("child_process").execSync;
     const { mot, grille, lignes, colonnes, langue } = req.body;
     if(!preVerifMot(mot,lignes,colonnes))
-        return res.status(400).json({ status: 'error', message: 'Le mot ne peut pas être recherché.' });
+        return res.status(400).json({ status: 'error', message: 'Le mot ne peut pas être recherché' });
+    if(!grille || !lignes || !colonnes || !langue)
+        return res.status(400).json({ status: 'error', message: 'Erreur dans les paramètres fournis' });
+
 
     const cmd = 'cd ' + CWD + '/bin && ./grid_path ' + mot.toUpperCase() + ' ' + lignes + ' ' + colonnes + ' ' + grille;
-    exec(cmd, (err, stdout, stderr) => {
-        if (err) {
-            console.error(err);
-            return res.status(400).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la recherche.'
-            });
+    const result = await exec(cmd).toString();
+    if(result == 1){
+        return res.status(200).json({ status: 'error', message: 'Le mot n\'est pas dans la grille' });
 
-        }
-        if (stderr) {
-            console.error(stderr);
-            return res.status(400).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la recherche.'
-            });
-
-        }
-
-    });
-
+    }
     const exec2 = require('child_process').exec;
     const cmd2 = 'cd ' + CWD + '/bin && ./dictionnary_lookup ../utils/dico_fr.lex ' + mot.toUpperCase();
     try {
@@ -162,7 +150,7 @@ verifMot = function (req, res, next) {
                 });
             return res.status(400).json({
                 status: 'error',
-                message: 'Recherche réussie.',
+                message: 'Le mot n\'existe pas dans le dictionnaire.',
             });
         });
     } catch (e) {

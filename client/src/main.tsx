@@ -11,8 +11,8 @@ import Error404 from './pages/404';
 import './index.css'
 import Logout from './actions/Logout';
 import { BACKEND_URL } from './env';
-import { Lobby } from './pages/Lobby';
-import { Partie } from './pages/Partie';
+import { GameManager } from './pages/GameManager';
+import { Partie } from './components/Partie';
 import { Account } from './pages/Account';
 
 
@@ -53,13 +53,13 @@ function Main() {
         <Route path="/register" element={<Register />} />
         <Route path="/definitions" element={<Definitions />} />
         <Route path="/definitions/:search" element={<Definitions />} />
-        <Route path="/create" element={<Lobby />} />
-        <Route path="/game/:id" element={<Partie />} />
+        <Route path="/create" element={<GameManager />} />
+        <Route path="/game/:id" element={<GameManager />} />
         <Route path="/account" element={<Account />} />
         <Route path="/account/:id" element={<Account />} />
   
-        <Route path="/join/:id" element={<Lobby />} />
-        <Route path="/lobby/:id" element={<Lobby />} />
+        <Route path="/join/:id" element={<GameManager />} />
+        <Route path="/lobby/:id" element={<GameManager />} />
         <Route path="*" element={<Error404 />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>

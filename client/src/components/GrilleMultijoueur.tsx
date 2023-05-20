@@ -18,9 +18,12 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
     useEffect(displayGrid, [grilleProps]);
 
     function displayGrid() {
-        grilleProps.pop();
-        if(grilleProps.length === 0)
+        if(grilleProps[grilleProps.length - 1] === "\n")
+            grilleProps.pop();
+
+        if(grilleProps.length === 0 || !grilleProps){
             return;
+        }
         const newGrille2D = [];
         for (let i = 0; i < lignes; i++) {
             const row = grilleProps.slice(i * colonnes, (i + 1) * colonnes);
@@ -28,12 +31,17 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
         }
 
         setGrille2D(newGrille2D);
-        setGrille1D(grille1D);
+        setGrille1D(grilleProps);
+        console.log(grilleProps);
+        console.log(grille1D);
     }
 
 
 
     function verifierMot() {
+        console.log(grille1D);
+        console.log(lignes);
+        console.log(colonnes);
         fetch(BACKEND_URL + '/jeu/verify/', {
             method: 'POST',
             headers: {
@@ -44,8 +52,8 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
             body: JSON.stringify({
                 mot: inputWord,
                 grille: grille1D.join(" "),
-                lignesGrille: lignes,
-                colonnesGrille: colonnes,
+                lignes,
+                colonnes,
                 langue: "fr"
             })
 

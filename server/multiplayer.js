@@ -62,6 +62,8 @@ initMultiplayer = function (server) {
             switch (message.type) {
                 case 'join':
                     return handleJoin(ws, message);
+                case 'rejoin':
+                    return handleRejoin(ws, message);
                 case 'leave':
                     return handleLeave(ws, message);
                 case 'move':
@@ -92,10 +94,10 @@ async function handleStart(ws, message) {
         console.log("La partie n'existe pas");
         return;
     }
-    if(game.statut != 'lobby'){
-        console.log("La partie n'est pas en lobby, on ne peut pas la démarrer");
-        return;
-    }
+    // if(game.statut != 'lobby'){
+    //     console.log("La partie n'est pas en lobby, on ne peut pas la démarrer");
+    //     return;
+    // }
 
     if (game.adminID != ws.user.idUser) {
         console.log("L'utilisateur n'est pas admin");
@@ -141,7 +143,8 @@ async function handleSettings(ws, message) {
 
 }
 async function handleJoin(ws, message) {
-    // On vérifie que l'utilisateur soit connecté
+    if(!message.gameID)
+        return;
 
     // Si la partie n'existe pas, on la crée
     if (!games[message.gameID]) {
@@ -239,14 +242,20 @@ function sendGameUpdate(ws, gameToUpdate) {
   
 
 async function createGame(ws, message,status = "lobby") {
-    if (!message.token || !message.gameID)
+    if (!message.token || !message.gameID){
+        console.log("Création annulée: token ou gameID non fourni");
         return;
+    }
     const game = await jeu.getGameFromUUID(message.gameID);
-    if (!game)
+    if (!game){
+        console.log("Création annulée: partie non trouvée en BDD");
         return;
+    }
 
-    if (ws.user.idUser != game.gameAdmin)
+    if (ws.user.idUser != game.gameAdmin){
+        console.log("Création annulée: pas admin");
         return;
+    }
 
 
     const gameObj = {
@@ -255,7 +264,7 @@ async function createGame(ws, message,status = "lobby") {
         players: [ws],
         statut: "lobby",
         settings: {
-            colonnes: 10,
+            colonnes: 4,
             lignes: 4,
             langue: 'fr',
             temps: 60,
@@ -273,11 +282,27 @@ async function createGame(ws, message,status = "lobby") {
         game: gameObj,
     }));
     games[message.gameID] = gameObj;
+    console.log("Partie crée");
     if(status == "game"){
         handleStart(ws,message);
     }
 
 }
+function handleRejoin(ws, message) {
+    if(!message.gameID)
+        return;
+    const game = games[message.gameID];
+    if(!game)
+        return
+    
+    ws.send(JSON.stringify({
+        type: 'rejoin',
+        game: game,
+    }));
+
+
+}
+
 
 
 const gameExemple = {

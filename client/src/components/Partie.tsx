@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom"
-import Chat from "../components/Chat"
+import Chat from "./Chat"
 
-import { GrilleMultijoueur } from "../components/GrilleMultijoueur"
+import { GrilleMultijoueur } from "./GrilleMultijoueur"
 import { useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { MP_WS_URL } from "../env";
@@ -41,7 +41,7 @@ export const Partie = (props: any) => {
             });
         }
     }, [lastMessage]);
-    
+
 
 
     function connectToGame(id: string) {
@@ -57,12 +57,8 @@ export const Partie = (props: any) => {
 
 
     return (
-        <>
-            <Chat gameID={gameID} />
-            <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} />
+        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} />
 
-
-        </>
     )
 
 

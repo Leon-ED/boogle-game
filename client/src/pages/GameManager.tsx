@@ -5,6 +5,7 @@ import { GrilleSettings } from "../components/GrilleSettings"
 import Chat from "../components/Chat"
 import useWebSocket from 'react-use-websocket';
 import { BACKEND_URL, MP_WS_URL } from '../env';
+import { Partie } from "../components/Partie"
 
 
 interface Settings {
@@ -28,13 +29,13 @@ interface GameDB {
 
 }
 
-export const Lobby = () => {
+export const GameManager = () => {
     const navigate = useNavigate()
     const [settings, setSettings] = useState<Settings>({ lignes: 4, colonnes: 4, temps: 3, gameID: "", bloquerMots: false, politiqueScore: 1 });
     const [gameID, setGameID] = useState<string>("");
     const { lastMessage, sendJsonMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
-
+    const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
 
 
     const { id } = useParams();
@@ -69,7 +70,7 @@ export const Lobby = () => {
             setIsAdmin(true);
             getGameUUID().then((data) => {
                 setGameID(data);
-                if(data){
+                if (data) {
                     navigate("/lobby/" + data);
                 }
             }
@@ -78,6 +79,17 @@ export const Lobby = () => {
         }
 
     }, [])
+
+    useEffect(() => {
+        const path = window.location.pathname.split("/")[1];
+        console.log(path);
+        switch (path) {
+            case "game": setIsGameStarted(true); console.log("handleGameURL"); break;
+        }
+
+
+    }, [window.location.pathname]);
+
 
 
     useEffect(() => {
@@ -102,23 +114,28 @@ export const Lobby = () => {
             setSettings(data.game.settings);
         }
         if (data.type === "start") {
+            setIsGameStarted(true);
             navigate("/game/" + gameID);
+
         }
-        
+
 
     }, [lastMessage]);
 
-
+    const lobby: JSX.Element = (
+        <section>
+            <h1>Lobby</h1>
+            <h1>{isGameStarted ? "true" : "false"}</h1>
+            <p>Créez votre partie et jouez contre vos amis</p>
+            <hr />
+            <GrilleSettings onSettingsChange={handleChange} settings={settings} gameID={gameID} isAdmin={isAdmin} isStarted={handleGameStart} />
+        </section>
+    )
 
 
     return (
         <>
-            <section>
-                <h1>Lobby</h1>
-                <p>Créez votre partie et jouez contre vos amis</p>
-                <hr />
-                <GrilleSettings onSettingsChange={handleChange} settings={settings} gameID={gameID} isAdmin={isAdmin} isStarted={handleGameStart} />
-            </section>
+            {!isGameStarted ? lobby : <Partie gameID={gameID} />}
             <Chat gameID={gameID} />
 
         </>
@@ -137,11 +154,23 @@ export const Lobby = () => {
     }
 
 
+    function handleGameURL() {
+        console.log("game: " + id);
+        if (!id)
+            return;
+        const JSON = {
+            id,
+            type: "rejoin",
+            token: localStorage.getItem("token"),
+        }
+        sendJsonMessage(JSON);
+    }
 
     function handleGameStart(boolean: boolean) {
         if (!isAdmin || !boolean)
             return;
         console.log("start");
+        setIsGameStarted(true);
         sendMessage(JSON.stringify({
             type: "start",
             token: localStorage.getItem("token"),
@@ -150,3 +179,5 @@ export const Lobby = () => {
     }
 
 }
+
+
