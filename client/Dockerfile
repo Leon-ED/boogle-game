@@ -10,6 +10,8 @@ WORKDIR /app
 RUN npm ci
 # 4. Copy the source code to /app dir
 COPY . .
+#4.5 create the node_modules folder
+RUN npm install
 # 5. Expose port 3000 on the container
 RUN apk update && apk add nano
 EXPOSE 8080
