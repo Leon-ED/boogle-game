@@ -72,7 +72,7 @@ function sendRes(res, status, code, message) {
 
 
 register = async function (req, res, next) {
-  const conn = await getConnection();
+  const conn = await base.getBase();
   const login = req.body.login;
   const password = req.body.password;
   const password_confirm = req.body.password_confirm;
@@ -82,6 +82,15 @@ register = async function (req, res, next) {
     conn.end();
     return sendRes(res, 'error', 400, 'Les mots de passe ne correspondent pas');
   }
+  if(login.length < 3 || login.length > 50){
+    conn.end();
+    return sendRes(res, 'error', 400, 'Le login doit faire entre 3 et 50 caractères');
+  }
+  if(email.length < 3 || email.length > 50){
+    conn.end();
+    return sendRes(res, 'error', 400, 'L\'email doit faire entre 3 et 50 caractères');
+  }
+  
 
   let query = 'SELECT * FROM utilisateur WHERE login = ? OR email = ?';
   let params = [login, email];
@@ -95,8 +104,8 @@ register = async function (req, res, next) {
   query = 'INSERT INTO utilisateur (login, password, email,pseudoUser) VALUES (?,?,?,?)';
   params = [login, hashed_password, email, login];
 
-  (await conn).execute(query, params);
-  conn.end();
+  await conn.execute(query, params);
+  await conn.end();
   return sendRes(res, 'success', 200, 'Inscription réussie');
 
 

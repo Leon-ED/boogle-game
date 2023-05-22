@@ -1,6 +1,9 @@
-import {Link } from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
+import { BACKEND_URL } from "../env";
 
 function Register() {
+  const navigate = useNavigate();
+  const postURL = BACKEND_URL + "/auth/register";
   return (
     <main style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       <section style={{ marginTop: "10%", marginBottom: "5%" }}>
@@ -14,7 +17,7 @@ function Register() {
       </div>
       <section className="login-section" style={{ width: "30%" }}>
         <fieldset id="fieldset">
-          <form className="form" method="POST" action="controller/auth.php">
+          <form className="form" method="POST" action={postURL} onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="login">Identifiant</label>
               <input type="text" className="form-control" id="login" name="login" aria-describedby="emailHelp" placeholder="Identifiant" required />
@@ -41,6 +44,33 @@ function Register() {
       </section>
     </main>
   );
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  fetch(postURL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      login: e.currentTarget.login.value,
+      email: e.currentTarget.email.value,
+      password: e.currentTarget.password.value,
+      password_confirm: e.currentTarget.password_confirm.value,
+    }),
+  }).then((response) => {
+    return response.json();
+  }).then((data) => {
+    if (data.status === "success") {
+      alert("Compte créé avec succès, veuillez vous connecter");
+      navigate("/login");
+    } else {
+      alert(data.message);
+    }
+  });
+
 }
+
+}
+
 
 export default Register;

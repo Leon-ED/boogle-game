@@ -3,6 +3,12 @@ const app = require('./app');
 const {initChat} = require('./chat');
 const { parse } = require('url');
 const {initMultiplayer} = require('./multiplayer');
+const fs = require('fs');
+// const options = {
+//   key: fs.readFileSync('{PATH/TO/CERTIFICATE-KEY-FILENAME}.pem'),
+//   cert: fs.readFileSync('{PATH/TO/CERTIFICATE-FILENAME}.pem'),
+// }
+
 const server = http.createServer(app);
 
 

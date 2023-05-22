@@ -4,7 +4,8 @@ const auth = require('./auth');
 const SERVER_PSEUDO = 'Système';
 const CANT_SEND_MESSAGE = 'Vous devez être connecté pour envoyer un message.';
 const MAX_MSG_PER_SECOND = 1;
-const RATE_LIMIT_MESSAGE = 'Vous ne pouvez pas envoyer plus de ' + MAX_MSG_PER_SECOND + ' messages par seconde.';
+const MSG_SEND_COOLDOWN = 2.5;
+const RATE_LIMIT_MESSAGE = 'Vous ne pouvez pas envoyer plus de 1 message toutes les ' + MSG_SEND_COOLDOWN + ' secondes.';
 const GLOBAL_ROOM = 'global';
 const { getGameFromUUID } = require('./jeu');
 
@@ -57,12 +58,13 @@ function handleNewMessage(wss, ws, message) {
         }
 
         // On vérifie que l'utilisateur ne soit pas rate limited 
-        if (ws.lastMessage && Date.now() - ws.lastMessage.date < 1000 / MAX_MSG_PER_SECOND) {
+        if (ws.lastMessage && Date.now() - ws.lastMessage.date < MSG_SEND_COOLDOWN*1_000 / MAX_MSG_PER_SECOND) {
             sendError(ws, RATE_LIMIT_MESSAGE);
             return;
         }
 
         ws.lastMessage = newMessage;
+        ws.lastMessage.date = Date.now();
         // On envoie le message à tous les utilisateurs de la room
         wss.clients.forEach(function each(client) {
             if (client.readyState === WebSocket.OPEN && client.room == ws.room) {
