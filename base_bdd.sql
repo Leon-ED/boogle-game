@@ -1,0 +1,696 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Hôte : mysql
+-- Généré le : lun. 22 mai 2023 à 12:11
+-- Version du serveur : 10.5.8-MariaDB-1:10.5.8+maria~focal
+-- Version de PHP : 8.1.15
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de données : `boogle`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `amis`
+--
+
+CREATE TABLE `amis` (
+  `idUser1` int(11) NOT NULL,
+  `idUser2` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Déchargement des données de la table `amis`
+--
+
+INSERT INTO `amis` (`idUser1`, `idUser2`) VALUES
+(3, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `chatprive`
+--
+
+CREATE TABLE `chatprive` (
+  `idChat` varchar(50) NOT NULL,
+  `messageChat` varchar(50) DEFAULT NULL,
+  `idMessageJoueur` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `jouer`
+--
+
+CREATE TABLE `jouer` (
+  `idUser` int(11) NOT NULL,
+  `idPartie` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `jouer`
+--
+
+INSERT INTO `jouer` (`idUser`, `idPartie`) VALUES
+(3, '158673bef73beeae14cfdc10713a13e8'),
+(3, '1f19a5bae1c1d2b06041090e5cae3aa6'),
+(3, '34489944aea10854268db0b4036459aa'),
+(3, '424cf35f417a6478842e1fb49ce497eb'),
+(3, '43012d611131ed486fd75f4033670400'),
+(3, '430c1ab2244efad841dced15c68086be'),
+(3, '6fa24f022c6d2f565b041241e9696d02'),
+(3, '7354dcaf2696938a902f3c6811819ebe'),
+(3, '82187c0c8e3022ab539a204aaf84701a'),
+(3, 'c4b418e7675a8e0ef9ab64d46e73ec6f'),
+(3, 'd81e3ebc8c3b6405ed1001ffe845c8de'),
+(3, 'da80673b641a663a4e46ce91f9a85ca7'),
+(3, 'e9bc5073427fe762c45205a8b534fa45'),
+(3, 'f3f7f0c02fc3338ff43b69297ee61a6a'),
+(4, '108c53fbd48f991ccfb0b6ea57343be2'),
+(4, '1ba1d1d3ad1f04dd9e015d215a705f9c'),
+(4, '2f06feaab45657ac5ff9b8c1945f628a'),
+(4, '54f10b753116b9ed594d44822308e037'),
+(4, 'b6650d0c96dd625647a4fa96ef78694b'),
+(4, 'd064929bde6a156248333d825d32aa96'),
+(4, 'dcd94ccbc8d6fbf4187835670ea62362'),
+(4, 'df3752fd67b519596080b7ce8d052507'),
+(4, 'e01009993b60ce12a794d4d05e068c16'),
+(5, '0055e6527ddef75bf5fc35185b64550a'),
+(5, 'd75a6c88192ae98cfab3fd4a9a5ef8aa');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `partie`
+--
+
+CREATE TABLE `partie` (
+  `idPartie` varchar(50) NOT NULL,
+  `NbMotsTrouves` varchar(50) DEFAULT NULL,
+  `idVainqueur` varchar(50) DEFAULT NULL,
+  `dimensionsGrille` varchar(10) NOT NULL DEFAULT '4x4',
+  `Grille` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`Grille`)),
+  `NomDicoUtilise` varchar(50) DEFAULT NULL,
+  `DateDebutPartie` datetime DEFAULT NULL,
+  `DateFinPartie` datetime DEFAULT NULL,
+  `idChat` varchar(50) DEFAULT NULL,
+  `gameAdmin` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `partie`
+--
+
+INSERT INTO `partie` (`idPartie`, `NbMotsTrouves`, `idVainqueur`, `dimensionsGrille`, `Grille`, `NomDicoUtilise`, `DateDebutPartie`, `DateFinPartie`, `idChat`, `gameAdmin`) VALUES
+('0055e6527ddef75bf5fc35185b64550a', '1', '5', '4x4', '[[\"M\",\"T\",\"F\",\"E\"],[\"S\",\"S\",\"D\",\"N\"],[\"E\",\"D\",\"D\",\"R\"],[\"O\",\"QU\",\"D\",\"N\"]]', NULL, '2023-01-31 13:24:41', '2023-01-31 13:24:55', NULL, NULL),
+('00efbd3f-48fb-4fe5-a7d0-ea5ccd943352', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('010fe104-6009-41a7-a62e-9a2e382b9e94', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('016870f6-c033-465a-bb04-0e9c21e65f2b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('02a78491-6bc7-4288-a3c1-982d02be1867', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('033b6474-eda3-43af-bbf7-c3f6415e060e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('033f1816-abcd-475e-907e-09e05400e175', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('04cdb4ad-f3c5-4253-bd92-d758242a8d1b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('04cf8094-2527-4821-bafb-5415181c8099', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('0526e19f-1409-4528-b3b8-728265fc3d01', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0688904d-f874-4021-83d8-411cf4e4e76a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('076195d0-b1ca-4146-80a9-f14eabf8e4db', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('077999a6-de91-4bd0-bbbd-3a7295f093c0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('07da5c6d-76e1-4672-ac5f-b08a68b8eba7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('0856edeb-2233-47d1-ba32-ca44dec81848', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('087a8d29-d10a-4720-a7b4-f81cc0453de0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('091107ae-a8ad-4297-bc6d-93daccd0c274', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('09d18c76-c3a7-4cd9-96bc-f74d4bd9b094', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0b433cff-b9f1-4dfe-8e53-2e1009c21608', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0bcb4af2-b3ec-45ce-a314-7924dfea18fb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0d35188a-f7a0-448d-ac27-cc19b880e322', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('0d39c075-bcf2-43fe-b700-b26a491a575f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('0e283036-e651-4242-8e66-2a75a555f1ed', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0e4f7297-2d82-4e3e-a453-9da97af385d5', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('0ee2ae8c-9227-402f-9c63-a6e08cdbb67c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('10381781-26a4-42df-8d21-6224b7fb4b7c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('108c53fbd48f991ccfb0b6ea57343be2', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:28:37', NULL, NULL),
+('1108a68d-d197-40f1-ab9d-44ca5c20c6bb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('1222bddc-5cd5-4f03-a10d-08c04c6f4306', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('129d32cf-e9df-4124-8c31-04c787aed436', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('12d4153d-0007-4454-b468-babcb9d9fbb5', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('13236baf-f86c-435e-a74f-54ae74e0a937', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('13af839b-a293-489a-b854-2f16201c1369', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('147b9085-b164-40c0-a074-d903947cf7c8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('152aaaf7-e1d9-444b-b93a-ebe2c49922b6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('158673bef73beeae14cfdc10713a13e8', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:52', NULL, NULL),
+('15a2e512-5e96-4828-bec7-dc89f5606fe1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('161ef584-965f-4301-bc24-d39993122afe', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('16ae8f17-128e-40a3-b2de-ed89c06b3be2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('178f2c8b-742a-4667-b552-7efa91efdc23', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('180da898-1428-47a5-b698-f7edbf0c6b9d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('186d9818-48cb-49c5-87df-32a032304cbd', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1950d0f5-965d-4f9e-a6d1-7e906191da9e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1a044cd2-cdae-4372-842a-2c3757228027', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1a48bbd9-4451-4b1a-8a52-f87ac9c997a0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1aac3e2c-d44d-4c64-9d4f-52f658fe0682', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1ba1d1d3ad1f04dd9e015d215a705f9c', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:29:02', NULL, NULL),
+('1c63f886-999a-4afa-91b6-cf61f8f1ba5a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1c92139e-90d4-4436-8bfc-fc1340d15d76', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1db8d415-0ae1-49ed-88a3-9e997662d50b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('1df99779-b70e-44d2-869a-d1d7cb071c6f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('1e6818d1-4bd9-40b5-b60a-a41326fd9717', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1ea0c9ab-68ab-47a5-a9e0-130b73d10e5d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('1f19a5bae1c1d2b06041090e5cae3aa6', '1', '3', '4x4', '[[\"E\",\"D\",\"E\",\"N\"],[\"E\",\"M\",\"E\",\"M\"],[\"I\",\"E\",\"N\",\"V\"],[\"R\",\"N\",\"E\",\"F\"]]', NULL, '2023-01-26 00:29:13', '2023-01-26 00:33:14', NULL, NULL),
+('1fe371e7-a36a-4eb9-8b3a-c31941cb7ad1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('22978a96-300b-4e9e-98c4-0b3e05ccf55c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('23bfee61-ff9d-4861-993a-f94c5abadd06', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('2439a23a-f1c8-499d-86ff-03c1ef5658f7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('248d31e4-88fb-4387-880b-1ff512c0d584', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('248e55fb-40df-48bb-b50a-ae8e0fb7ecc1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('24ace68a-931a-4be0-862f-d610beaae910', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('24af44fd-fd53-496b-ad91-60710b44540c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('24bf9a64-5d6d-4d8a-865e-c9629f7c89c6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('2565c468-d68b-46d9-89af-78e4309e0559', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('2673369e-1d7e-4a1a-a029-36e8f1a61100', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('27cb61dc-94d5-4ab8-8d77-83b17f8aa4aa', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('280a00a8-750a-499e-8813-e640abe902a0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('281c4bc1-c61c-482e-b119-4beed5409b4b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('2cee9bd3-5920-47a4-b8d9-3a9466cdb714', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('2f06feaab45657ac5ff9b8c1945f628a', '1', '4', '4x4', '[[\"P\",\"O\",\"I\",\"O\"],[\"I\",\"T\",\"G\",\"E\"],[\"E\",\"A\",\"E\",\"U\"],[\"E\",\"U\",\"U\",\"E\"]]', NULL, '2023-01-25 21:43:03', '2023-01-25 21:46:31', NULL, NULL),
+('2f6a1205-7030-4ca5-a5ae-4a5808bbca2a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('303618a9-6968-473b-af10-26956993337a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('3062e435-3535-49ec-a197-44ca6193baf8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('3384f5b0-aca2-480b-8c91-c273cdb583c3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('3416e6c7-d3a7-467b-a70c-0abf6e2bc237', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('34489944aea10854268db0b4036459aa', '1', '3', '4x4', '[[\"T\",\"E\",\"T\",\"R\"],[\"D\",\"A\",\"F\",\"F\"],[\"I\",\"E\",\"I\",\"N\"],[\"S\",\"V\",\"S\",\"S\"]]', NULL, '2023-01-31 13:10:10', '2023-01-31 13:10:34', NULL, NULL),
+('34bed758-24ac-4b8d-b544-8d0f1ad5bd59', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3557c946-c61f-4033-a197-2f481bde10f2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('35f57db1-cba0-40b8-bf60-1077c2fd26a7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('361fb7a4-a224-42f9-a98c-bd4f06dd4f01', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('368b5b00-78de-41ac-b45b-0d0a0ccc929a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('36f279ea-cd20-473d-929b-af629d9c4e98', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('386912cf-d130-47f0-9183-53f4fb149f8d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('389c8611-6db0-4517-8cd5-9d575ef0c8ce', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('393168b0-7a8e-4d58-8e3e-37b30f8fa74c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('399df7dd-a078-4b40-9fbb-f925566dba25', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('3ac5a22a-8a10-481c-8ebc-3326b3df0908', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3bdce7c3-4b54-4f21-985d-844dcc095194', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3bece673-d84a-4d82-a46f-ec7ad4dbb6b0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3c200322-d7b3-415d-87ca-abc23b5af8ee', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3cffd20e-84b3-4d32-8f9a-b40521014885', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3e08972e-326b-4df9-b2b8-5f56c68f33bf', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('3e76cadb-4d44-4077-8924-aef4f7f8f8af', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('3f37126e-7927-4be6-b69d-b9cd0395ec40', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('40748d5d-1eaa-49fb-a1c2-f2d0d1b4834a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('407ec76d-1bb9-424c-9354-8cc68493124a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('415543ae-b74b-43fe-a693-be0246d5ebe8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('4209a1ff-5daa-42b1-9113-d37c85c3dcc6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('424cf35f417a6478842e1fb49ce497eb', '1', '3', '4x4', '[[\"N\",\"N\",\"P\",\"O\"],[\"U\",\"D\",\"A\",\"N\"],[\"A\",\"P\",\"M\",\"O\"],[\"S\",\"F\",\"F\",\"N\"]]', NULL, '2023-01-25 20:18:43', '2023-01-25 20:18:58', NULL, NULL),
+('43012d611131ed486fd75f4033670400', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:48', NULL, NULL),
+('430c1ab2244efad841dced15c68086be', '1', '3', '4x4', '[[\"E\",\"M\",\"N\",\"N\"],[\"T\",\"I\",\"QU\",\"D\"],[\"I\",\"L\",\"L\",\"L\"],[\"C\",\"P\",\"E\",\"E\"]]', NULL, '2023-01-27 11:31:51', '2023-01-27 11:57:47', NULL, NULL),
+('43369e1a-505b-43e7-9db5-a69409726a7b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('4406ba49-70a6-4452-8094-b6d9b47fb71e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('444d26a0-0bbc-40aa-9af7-9420bc72ecf3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('45421d17-dd29-4a69-8ba3-0aca7b97306b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('4549b405-14ac-4c17-a183-bef1e388dcf5', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('45af6a1d-aa0e-4458-84a2-c1d032df916b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('45e3f8ba-0d88-4025-b3db-f022762d07d6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('471b2e42-de5a-4fc5-b955-5d57e2e40aa6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('47a1eee1-fd46-462f-adbc-be3030220a39', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('4d5935ab-a502-41bd-bb86-e49df2b10ff0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('4d690785-5abf-4d09-b604-9ab23504a536', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('4e54d268-9c95-4fc6-949e-9b3437a72381', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('4fdee7ea-c394-41d6-9284-f3470f348ac8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('50694a69-82f2-4046-99fa-52c8ff2b1fd6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5072e19c-65c1-40a0-b5e9-ffe0469759fc', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('509a8d6d-2ce9-4edf-bc0a-21a30d31b2b2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('50e2300a-8c77-4f37-9adc-f80415814ae6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('515eb443-6964-47a0-840c-eb58ee37a7f1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('52371ac0-e9f1-40f1-8072-617067f6db30', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('53127908-f738-4560-b0e6-1e542afc3d7a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('532cd173-826f-4559-afed-298c67d706c7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('532fdbc7-ded4-4138-bb30-f7f8351edcac', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('535c5cae-64d1-4eba-b919-36c5a0566b2f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5475a24d-ea87-4bac-8bd5-affbb21c0f9d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('54e3c6f1-b963-454e-a60e-4db419f52ce7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('54f10b753116b9ed594d44822308e037', '1', '4', '4x4', '[[\"S\",\"R\",\"T\",\"A\"],[\"S\",\"P\",\"QU\",\"G\"],[\"D\",\"U\",\"A\",\"H\"],[\"R\",\"N\",\"R\",\"R\"]]', NULL, '2023-01-25 21:31:49', '2023-01-25 21:34:46', NULL, NULL),
+('55e98c63-1a6d-4706-8262-0a3a09a5c487', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('5651646a-bfa9-45a5-8ca8-79b8401b08f6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('5676b0bd-cdb7-4059-81dc-52e40e82daf6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('5690c5fb-dbd7-4676-bbdd-0944d5673dbf', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('57147da1-b5bb-4515-8a2a-9c0b40307d99', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('575234e5-8a4d-4002-a05b-826eb63a3546', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('5787694e-68d1-497d-8dfe-073b32cdb0d3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('587bd952-0449-4b09-8e88-b2a23fb3a8b6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('58f65d0f-d39b-457a-a778-9c142352080a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('59b369d1-783c-4543-9eaa-14de40ab2861', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('59e3cc73-f1e9-46e1-ae3a-31c64dbd3650', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5b0b7bf5-5130-4685-9644-7654fbffac09', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('5c820937-8e9a-4cd0-be0b-1fa64861aa1b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5df32dfc-0f03-4d72-ace8-8c3dd8070e63', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5e5df9c2-6822-4525-b104-7e0807b4e94a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('5ebe8835-bef9-40a1-83fc-386f9b83e5d0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('5f0b7894-6fac-447f-ba58-f857b4c8864b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('634eeb54-2e2a-4cde-8c47-ce3298e192b7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('63702884-47be-45aa-ae44-452c7d58f88c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('63bbaaa1-f29c-4d01-b669-89390a91b919', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('64f2f545-21c1-4691-86e7-9c02b1655664', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('673d1528-3a20-4155-a197-964e2c34f2a4', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('678bf57b-1421-41bf-abfd-201c738756bb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('68e150db-4ca7-485b-80ff-46fe90edd1b3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('6a190f19-ff4e-4edc-90f9-fce2dcfabb26', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('6b944300-576c-485e-a824-7eea169612a7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('6d348d02-c13c-4297-ba5b-9c22f1d8c036', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('6dc19902-d536-4df6-8c98-6b302233d043', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('6ebbdd52-04ac-4c48-a0ba-56550a7f2cc5', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('6fa24f022c6d2f565b041241e9696d02', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:47', NULL, NULL),
+('71556196-4682-4278-88fe-e3515173dc96', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('71ed5411-8f66-4161-b41f-9968474b6aa1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('7354dcaf2696938a902f3c6811819ebe', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:47', NULL, NULL),
+('74869e72-adbe-453e-b1b0-05924b9dd784', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('74f77756-f6b0-4654-bf25-7661d134dcb7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('757acdb2-7f1f-460b-a0c9-1789e9f75c00', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('75b2edb7-b228-478e-b2ff-71cf0ec210ef', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('762661d9-aa2b-4207-899e-364f47c22d65', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('76427488-aa89-4a11-9b7c-36a00ce73ca8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('765700c3-32d2-4057-9996-597495a31a02', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('76c83de9-3e0f-430b-877c-11af57ac1201', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('77107d86-a0da-45a0-bb63-8b77dde92af8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('77f993cd-d0a5-4ee8-8445-54fb01c57c95', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('7849d72a-766b-496f-b0b8-cdc06c575305', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('78b6e5a1-267d-4eea-b838-0a3c85a19d15', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('79fb0fe2-730e-41c7-ba3a-4b3f382dafa3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('7a0dada7-1a74-4689-b129-e34efc764215', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('7a52e207-628f-418f-b3d0-985f950b1c4f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('7aeea769-7cbb-4565-ac09-7590f98dcfad', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('80e912e8-6a93-4893-a7a6-f984ab709724', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('81d54557-b738-4905-b518-158c7b335542', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('81e640b5-1f8a-49de-8ee9-c8c82212fd2d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('82187c0c8e3022ab539a204aaf84701a', '1', '3', '4x6', '[[\"S\",\"R\",\"P\",\"N\",\"E\",\"G\"],[\"J\",\"F\",\"E\",\"U\",\"R\",\"I\"],[\"W\",\"E\",\"L\",\"M\",\"U\",\"O\"],[\"N\",\"I\",\"E\",\"R\",\"V\",\"A\"]]', NULL, '2023-01-25 20:54:33', '2023-01-25 20:56:44', NULL, NULL),
+('8319b8cf-651e-412f-ac4c-9ee417f89e9f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('838323eb-8f3d-4101-ab53-e08c39186d9e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('83fb5ea7-db1c-4429-9586-6b09485365f0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('841439c4-7905-4300-9213-bbc28c7b510f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('84760947-c2bb-4593-9600-b17b3be1f86e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('858cee10-cfab-4b65-be18-b04d8883cea8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('861c34ba-4bbe-45a6-92e6-a921c55040f0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('86fedc9c-b7e8-4d65-89d0-1176f6b20efa', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('8704df88-4490-4f11-afe5-29e5639d222b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('882286a5-2a12-4fa1-a246-664f15c7df19', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('887de295-b9f6-4716-8cb2-267973d449b7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('888c42ee-37ff-4290-9b7f-b4de3d09652a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('8a27ee08-cdc4-412a-8b4d-45eece465177', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('8a6769f3-d585-4c62-acf5-a447cf982012', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('8a86c48d-6a4a-4525-aee0-5d683d5b3f79', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('8a8ccbe6-cf63-4298-a9a8-8514588e6db3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('8c55bec1-a582-4a39-85cb-3249ee3ae966', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('8d95daa9-12cc-4202-b7c5-b28fb2a6cdce', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('8e96e13b-687b-4424-bf84-f91736b9036d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('8eca8f06-3b6a-418f-9b62-2a00249976e3', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('8f609773-3ffe-49b9-ace1-7b56f7f922f8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('90495f75-1ce8-44d4-87f5-aeba65b2498d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('90803d87-ebc6-413a-8e91-b22da572979e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('934638ac-aaca-42dc-9cf8-4eb9286f50f1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('934f6cb8-ec25-4359-8fcb-d6d2ac062602', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('93a843f6-edf9-4bd5-9187-90c641d9bf6c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('94197dc2-a992-4a63-958d-9bbecc2ff67a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('94987b6f-49e1-410c-9ec3-3283c765cd40', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('9522f635-2594-4831-aa74-bd8f3321d41f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('9562539d-1a42-4604-a621-475f63af7475', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('96d5f888-1f52-4c2d-be92-6735158e8029', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('97ad6d8a-046e-4870-858a-4c90d56ddd6f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('97e8167f-429a-4144-b41e-7c5459a48cfb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('98c2b4e4-241a-42e1-a4a9-c34662d04dc0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('99849868-cb82-442a-93d0-77bd1acfeb35', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('9b88c096-eaff-4dea-88c7-365032d19867', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('9d31302e-7bb1-41eb-9231-b3d662a7b8f1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('9df22079-c01a-4934-939f-c877ea9c62bc', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('9dfad03b-f002-47c3-a363-127bf63cb357', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('9e5ff06a-c1db-48ef-abcb-49a016041b89', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('9e7c5fcb-e464-4c97-9bfd-3785cf7dea14', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('9f012f35-1404-4cc0-ae9e-beddd63767bc', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('9f8a7261-6fd7-483f-8d0e-1eab613967cb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('9fbfed0c-9070-40cf-ae20-d01353e108ee', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('a0f85871-7349-45c2-b438-828f4a246976', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('a1f9f7ad-775f-4d7c-97fd-ecb7a8f76c94', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('a3fd8012-4682-4b00-b384-8b38551596e1', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('a515608f-380c-4449-bc17-465d4a051fac', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('a69b5a14-28b2-4289-a1c7-15d82ae6b21d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('a6ce755d-f523-413f-b4cf-c553839cfe5e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('a8344f70-bd17-42ba-a1c1-bb5de044571d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('a868b1cc-55aa-4ee5-8dbf-8ac8e89e8fe8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('a91384bb-b51c-4cca-a258-290df8f9ae6e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('aa749af3-1f08-49d1-ba12-c8a5c497b019', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('ab1e55fc-c19f-43af-a79d-71b5db556005', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('ab33224d-859d-472a-9e84-f06cd922db27', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('ac83728e-2b5c-4945-bf8b-1c3a4ddd3912', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('af328204-a9ce-44b7-a90a-ce1f71958cbc', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('afb41f20-64bf-4034-9ae7-509c62dc32ce', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('b0bd99ad-f41e-49e3-a77f-b488f4183495', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('b1088eea-a856-4a23-b280-2c95241f6521', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('b330b0df-eda3-4a09-a466-0f51c87011eb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('b3ce4427-a942-4211-bcf6-905312ebcd63', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('b6650d0c96dd625647a4fa96ef78694b', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:29:02', NULL, NULL),
+('b6a482ea-335c-4dae-a6a3-6c4cdf7340fb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('b89cadbf-7516-4a95-8a02-09dc9d30e648', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('ba45a6a7-7ab0-4ff7-b357-b30648aef9d0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('ba537a1f-dec3-491f-a088-fc8bf59d743f', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('bb225a94-110f-4a9d-b59a-dcf9834f00aa', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('bb32eeac-479d-4e73-b690-e1cbda212c07', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('bbd694b6-b81a-4c71-89fd-4f9f08d6744e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('bd6fc45d-30db-4789-bdb7-3176a10769c8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('bd80c2eb-7e18-4a0b-8575-2c64ec9e0738', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('bfefcb22-464d-4290-ba63-fb42bb8fa1be', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('c00e3a8e-c6b6-4eea-a72c-5f98c6e17245', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c0dcc390-d51b-43bc-8a30-028257629694', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('c12322d3-88e5-432b-9369-1f03da074301', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c12a2f0c-cbe7-4dd2-807c-e521731630e2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c1c12341-d6f8-4824-9318-7b3f00419a14', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c4830180-a1d7-4e4b-a348-fab376410733', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c4b418e7675a8e0ef9ab64d46e73ec6f', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:54', NULL, NULL),
+('c5ec471e-ce1f-4aaf-b245-3784c55e6847', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('c606dd48-ba3f-4141-9982-7162cc6cfe3c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('c6177be3-824f-4e20-aa2f-23682b421c8a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c65dad42-8dbb-4446-b0ce-32d0941129db', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c67a9ef6-c20e-4825-9100-7fef8bbdd1eb', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('c85a273b-3f6d-46f3-b684-fd9821d60f22', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c9845829-4b35-4ed5-bd62-cc00cf3d9ad7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('c9a0a3b9-5d07-40aa-93ea-11d362e07a21', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('cbbd7dc8-0a53-414d-a85c-858defb0803d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('cce37905-dcbb-44ec-a925-568d57f71033', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('cdf5b9e9-c95e-4114-948b-3f7fa905b385', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('cfc6c3cd-60ee-4030-9647-7c3912b7a544', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('d03821f3-db12-4743-be6b-199b849a14c2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('d064929bde6a156248333d825d32aa96', '1', '4', '4x4', '[[\"U\",\"I\",\"R\",\"U\"],[\"L\",\"I\",\"G\",\"E\"],[\"I\",\"U\",\"E\",\"A\"],[\"N\",\"N\",\"B\",\"U\"]]', NULL, '2023-01-26 00:17:06', '2023-01-26 00:19:16', NULL, NULL),
+('d3b84e36-6262-461f-948c-78293e04d640', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('d42571d5-6855-44bb-8ea1-f98379f479f7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('d442cc9c-e153-464e-9650-185bf30d0663', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('d57a57c1-a9f3-4f51-b03a-67e6e2e65dc8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('d5d05597-9a75-43b9-a16d-643a0e579c8c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('d706c191-922c-4da2-9895-d26b15eb1073', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('d75a6c88192ae98cfab3fd4a9a5ef8aa', '1', '5', '4x4', '[[\"E\",\"E\",\"R\",\"M\"],[\"A\",\"N\",\"L\",\"O\"],[\"A\",\"R\",\"U\",\"L\"],[\"E\",\"D\",\"R\",\"C\"]]', NULL, '2023-01-31 13:23:27', '2023-01-31 13:24:22', NULL, NULL),
+('d81e3ebc8c3b6405ed1001ffe845c8de', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:45', NULL, NULL),
+('d839796e-d7c3-4758-9a40-cf7a1238f886', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('d87de727-1c0b-47f2-831e-e5a82d635410', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('d8a3d98f-2637-4170-abca-c4e8b5573428', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('d9d6c31e-168d-4cdf-86db-7346075752f2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('d9ed368f-492f-4085-b740-e6251cdb486c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('da80673b641a663a4e46ce91f9a85ca7', '1', '3', '4x4', '[[\"E\",\"D\",\"V\",\"E\"],[\"I\",\"I\",\"M\",\"S\"],[\"E\",\"P\",\"T\",\"L\"],[\"D\",\"S\",\"P\",\"U\"]]', NULL, '2023-01-26 19:50:28', '2023-01-26 19:56:48', NULL, NULL),
+('dbaf63d2-0036-45ff-9cb9-3acfde653149', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('dc211229-7d9e-4200-a2c0-ec88a226a224', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('dc2b1053-5621-4e04-b621-1370076b8f06', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('dcd94ccbc8d6fbf4187835670ea62362', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:28:46', NULL, NULL),
+('df3752fd67b519596080b7ce8d052507', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:28:45', NULL, NULL),
+('df579639-35d1-40e2-ba72-159c439b0800', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e01009993b60ce12a794d4d05e068c16', '1', '4', '4x4', '[[\"L\",\"E\",\"I\",\"U\"],[\"E\",\"R\",\"D\",\"E\"],[\"I\",\"D\",\"D\",\"E\"],[\"E\",\"N\",\"P\",\"S\"]]', NULL, '2023-01-26 00:19:16', '2023-01-26 00:28:43', NULL, NULL),
+('e01e3c9c-9a3a-42d3-a6ee-153916d6cb78', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e0cb7b42-b397-482c-800b-f9dc8b0d3039', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e1f8ea38-717b-4f75-a667-dbc4f784105a', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e2433f43-d1dd-4c40-adf0-86f445fad53b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e3098287-81c1-43c6-b872-0b71ba378369', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e4016f34-1e52-4fac-8227-2b6c22e1bf2c', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('e4d399f4-9cfa-4fb6-ab52-00768fa4249d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e4f0fe32-8eec-48a4-b4a1-06ade35a6b67', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e4f29fb6-cbe2-4868-9985-b2a976b55f7b', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('e5bc3a5e-7137-41b4-a28c-64f27c49ae13', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('e857e795-2de8-48ee-8c6e-a26613e87e69', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('e9bc5073427fe762c45205a8b534fa45', '1', '3', '4x4', '[[\"I\",\"I\",\"I\",\"E\"],[\"A\",\"O\",\"T\",\"N\"],[\"N\",\"S\",\"R\",\"E\"],[\"P\",\"A\",\"D\",\"O\"]]', NULL, '2023-01-27 11:57:50', '2023-01-27 11:59:05', NULL, NULL),
+('eb6050bf-ba6a-446a-be42-520a3681fb78', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('ebb033fc-7e9e-4b7d-bbe5-5e25394bbd4d', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('ecf3cccb-3621-410b-b1f8-5b342f1fe8d0', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('ed8af1da-1a76-4ae1-870d-34af456e6cda', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('eeefcddd-2f45-4d35-846d-3626680951e4', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('ef1c9dd4-ff97-4acd-9798-a5cfc93f4825', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f0abf162-c8a4-4750-9435-012c25f302bf', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f1ab1286-c38b-49fc-9670-3a94c5df62fe', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('f1c505b6-4444-451c-abb8-7fb6322583af', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f2709c4e-8af3-4487-81a0-2282907440c5', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f2be4cbd-e889-4a52-b4d4-f14b3e9a915e', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f3002a9d-8cdb-4b12-b144-5c6cf6ae9b08', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f3f7f0c02fc3338ff43b69297ee61a6a', '1', '3', '4x4', '[[\"O\",\"N\",\"M\",\"O\"],[\"H\",\"M\",\"O\",\"U\"],[\"T\",\"S\",\"C\",\"G\"],[\"QU\",\"R\",\"F\",\"U\"]]', NULL, '2023-01-25 21:01:56', '2023-01-25 22:13:22', NULL, NULL),
+('f450fe79-ba1f-4b82-9e6b-c7ae7ca22a09', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('f4aaee41-e613-4bf1-8afa-77249514e885', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f57a6b0e-15e3-4692-9a49-554c7b47aa75', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f62b3987-a8f8-4685-bd14-904010070a42', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f6924974-ee8f-470e-97de-bf0dff048bb7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('f6e3d39c-8b08-47b1-8656-f03491c06bc2', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('f7b1bf7c-2d19-40ca-9db2-0009c5ec70c7', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('f7f8a3eb-58ca-46b4-8f2a-ae840ad173e9', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 4),
+('fd1d872a-0e9d-4f60-a99f-1f6dbdd1ee86', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('fd25391c-2435-4e6c-9b43-b84dbc781d19', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('fd67e65a-7271-4a1e-b0c4-9bd7501320a6', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, 3),
+('fdc805f6-1c18-43b4-a867-cb9bae8230ba', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL),
+('fefdc6fa-0ab8-46c6-a7c4-086ca89f01b8', NULL, NULL, '4x4', NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `proposemots`
+--
+
+CREATE TABLE `proposemots` (
+  `idUser` varchar(50) NOT NULL,
+  `idPartie` varchar(50) NOT NULL,
+  `MotsPropose` varchar(50) NOT NULL,
+  `ScoreMots` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `proposemots`
+--
+
+INSERT INTO `proposemots` (`idUser`, `idPartie`, `MotsPropose`, `ScoreMots`) VALUES
+('3', '158673bef73beeae14cfdc10713a13e8', '', '0'),
+('3', '158673bef73beeae14cfdc10713a13e8', 'DEP', '0'),
+('3', '1f19a5bae1c1d2b06041090e5cae3aa6', 'FEN', '0'),
+('3', '1f19a5bae1c1d2b06041090e5cae3aa6', 'RIEN', '0'),
+('3', '1f19a5bae1c1d2b06041090e5cae3aa6', 'VEM', '0'),
+('3', '34489944aea10854268db0b4036459aa', '', '0'),
+('3', '34489944aea10854268db0b4036459aa', 'TET', '0'),
+('3', '424cf35f417a6478842e1fb49ce497eb', 'PAN', '0'),
+('3', '43012d611131ed486fd75f4033670400', '', '0'),
+('3', '43012d611131ed486fd75f4033670400', 'DEP', '0'),
+('3', '430c1ab2244efad841dced15c68086be', 'LE', '0'),
+('3', '6fa24f022c6d2f565b041241e9696d02', '', '0'),
+('3', '6fa24f022c6d2f565b041241e9696d02', 'DEP', '0'),
+('3', '7354dcaf2696938a902f3c6811819ebe', '', '0'),
+('3', '7354dcaf2696938a902f3c6811819ebe', 'DEP', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'FEU', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'MU', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'MUR', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'MURE', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'NI', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'NIE', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'NIER', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'RE', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'RI', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'VA', '0'),
+('3', '82187c0c8e3022ab539a204aaf84701a', 'VU', '0'),
+('3', 'c4b418e7675a8e0ef9ab64d46e73ec6f', '', '0'),
+('3', 'c4b418e7675a8e0ef9ab64d46e73ec6f', 'DEP', '0'),
+('3', 'd81e3ebc8c3b6405ed1001ffe845c8de', '', '0'),
+('3', 'd81e3ebc8c3b6405ed1001ffe845c8de', 'DEP', '0'),
+('3', 'da80673b641a663a4e46ce91f9a85ca7', '', '0'),
+('3', 'da80673b641a663a4e46ce91f9a85ca7', 'DEP', '0'),
+('3', 'e9bc5073427fe762c45205a8b534fa45', 'RE', '0'),
+('3', 'e9bc5073427fe762c45205a8b534fa45', 'ROTE', '0'),
+('3', 'f3f7f0c02fc3338ff43b69297ee61a6a', 'HOMO', '0'),
+('3', 'f3f7f0c02fc3338ff43b69297ee61a6a', 'HOMOS', '0'),
+('4', '108c53fbd48f991ccfb0b6ea57343be2', 'BONJOUR', '0'),
+('4', '108c53fbd48f991ccfb0b6ea57343be2', 'ERDE', '0'),
+('4', '1ba1d1d3ad1f04dd9e015d215a705f9c', 'BONJOUR', '0'),
+('4', '1ba1d1d3ad1f04dd9e015d215a705f9c', 'ERDE', '0'),
+('4', '2f06feaab45657ac5ff9b8c1945f628a', 'EAU', '0'),
+('4', '2f06feaab45657ac5ff9b8c1945f628a', 'EU', '0'),
+('4', '2f06feaab45657ac5ff9b8c1945f628a', 'POTAGE', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'DU', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'DUP', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'PUA', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'QUA', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'RUA', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'RUS', '0'),
+('4', '54f10b753116b9ed594d44822308e037', 'TA', '0'),
+('4', 'b6650d0c96dd625647a4fa96ef78694b', 'BONJOUR', '0'),
+('4', 'b6650d0c96dd625647a4fa96ef78694b', 'ERDE', '0'),
+('4', 'd064929bde6a156248333d825d32aa96', 'BUA', '0'),
+('4', 'd064929bde6a156248333d825d32aa96', 'LIGEA', '0'),
+('4', 'd064929bde6a156248333d825d32aa96', 'LIRE', '0'),
+('4', 'd064929bde6a156248333d825d32aa96', 'RIULI', '0'),
+('4', 'dcd94ccbc8d6fbf4187835670ea62362', 'BONJOUR', '0'),
+('4', 'dcd94ccbc8d6fbf4187835670ea62362', 'ERDE', '0'),
+('4', 'df3752fd67b519596080b7ce8d052507', 'BONJOUR', '0'),
+('4', 'df3752fd67b519596080b7ce8d052507', 'ERDE', '0'),
+('4', 'e01009993b60ce12a794d4d05e068c16', 'BONJOUR', '0'),
+('4', 'e01009993b60ce12a794d4d05e068c16', 'ERDE', '0'),
+('5', '0055e6527ddef75bf5fc35185b64550a', 'DE', '0'),
+('5', '0055e6527ddef75bf5fc35185b64550a', 'QUO', '0'),
+('5', 'd75a6c88192ae98cfab3fd4a9a5ef8aa', 'DRU', '0'),
+('5', 'd75a6c88192ae98cfab3fd4a9a5ef8aa', 'MOLE', '0'),
+('5', 'd75a6c88192ae98cfab3fd4a9a5ef8aa', 'RADE', '0'),
+('5', 'd75a6c88192ae98cfab3fd4a9a5ef8aa', 'RE', '0'),
+('5', 'd75a6c88192ae98cfab3fd4a9a5ef8aa', 'RU', '0');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `tokens`
+--
+
+CREATE TABLE `tokens` (
+  `idToken` int(10) UNSIGNED NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `idUser` int(11) NOT NULL,
+  `expiration` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Déchargement des données de la table `tokens`
+--
+
+INSERT INTO `tokens` (`idToken`, `token`, `idUser`, `expiration`) VALUES
+(145, 'd664e5271c91bb05b628925925f71df852ee964ca3c6ad1bb1c116d3b35db31fd769cb4964e70aed63cdad99c884ea505c5a06a02882c83b50e13811a90a9629', 3, '2023-05-24 14:00:33'),
+(146, '566c64e7a7675e6778a0e0530e8dea0f4ca7dfd257a95a11b6ce551b24a014a58342aba69d3e515745262ade9a465201f04ccc9fc1fbdb34135ac3ffd4696300', 4, '2023-05-24 14:10:23');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `utilisateur`
+--
+
+CREATE TABLE `utilisateur` (
+  `idUser` int(11) NOT NULL,
+  `photoProfil` varchar(50) DEFAULT NULL,
+  `pseudoUser` varchar(50) DEFAULT NULL,
+  `login` varchar(50) DEFAULT NULL,
+  `email` varchar(50) NOT NULL,
+  `password` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `utilisateur`
+--
+
+INSERT INTO `utilisateur` (`idUser`, `photoProfil`, `pseudoUser`, `login`, `email`, `password`) VALUES
+(3, NULL, 'admin', 'admin', 'admin@boogle.edmeeleon.fr', '$2y$10$s.HHKAJMA868P74ez.xzKey3PPPESS4zgsyhQQBWyvb4YBB35tzfG'),
+(4, NULL, 'soso', 'soso', 'soso@reims.fr', '$2y$10$61JS21Vok3wGm/2KT5mAYOdqnBb/JDCoLJ8D/4.TCZxH17Eu4FQC6'),
+(5, NULL, 'test', 'test', 'test@email.fr', '$2y$10$7rE0FTy4GMtWKZrGIL7Ka.Xedbpy5.qUNo3anNRC8zW6WSLozsS5e'),
+(6, NULL, 'admin', 'admin', 'test', '$2a$10$x6iXMbXMxWG6uOMEqUmlFOaDx2HoSPi0NWZO7qxh0WrBl3KL5BgNW'),
+(7, NULL, 'admien', 'admien', 'test', '$2a$10$5YtiToVwR/jFdr/NnTTuiuqACm8dszEzHolysuv92xmw/1h1LuBdy'),
+(8, NULL, 'admien', 'admien', 'test', '$2a$10$QYMO5nmTE2cBpNuV2wUpvOGfQFrvcq2PEaWIDtHyiojWS9oXIPcES'),
+(9, NULL, 'MeufCool', 'MeufCool', 'Meuf', '$2a$10$Jxvq8p85YDQYwI.95N4f9e5cgWqO9.DvXb0MopSlAQe8pLMXt.v6a');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `verifmail`
+--
+
+CREATE TABLE `verifmail` (
+  `idVerif` varchar(50) NOT NULL,
+  `idLien` varchar(50) DEFAULT NULL,
+  `codeVerif` varchar(6) DEFAULT NULL,
+  `idUser` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `amis`
+--
+ALTER TABLE `amis`
+  ADD PRIMARY KEY (`idUser1`,`idUser2`),
+  ADD KEY `idUser2` (`idUser2`),
+  ADD KEY `idUser1` (`idUser1`);
+
+--
+-- Index pour la table `chatprive`
+--
+ALTER TABLE `chatprive`
+  ADD PRIMARY KEY (`idChat`);
+
+--
+-- Index pour la table `jouer`
+--
+ALTER TABLE `jouer`
+  ADD PRIMARY KEY (`idUser`,`idPartie`);
+
+--
+-- Index pour la table `partie`
+--
+ALTER TABLE `partie`
+  ADD PRIMARY KEY (`idPartie`);
+
+--
+-- Index pour la table `proposemots`
+--
+ALTER TABLE `proposemots`
+  ADD PRIMARY KEY (`idUser`,`idPartie`,`MotsPropose`);
+
+--
+-- Index pour la table `tokens`
+--
+ALTER TABLE `tokens`
+  ADD PRIMARY KEY (`idToken`),
+  ADD KEY `idUser` (`idUser`);
+
+--
+-- Index pour la table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  ADD PRIMARY KEY (`idUser`);
+
+--
+-- AUTO_INCREMENT pour les tables déchargées
+--
+
+--
+-- AUTO_INCREMENT pour la table `jouer`
+--
+ALTER TABLE `jouer`
+  MODIFY `idUser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT pour la table `tokens`
+--
+ALTER TABLE `tokens`
+  MODIFY `idToken` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+
+--
+-- AUTO_INCREMENT pour la table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  MODIFY `idUser` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `amis`
+--
+ALTER TABLE `amis`
+  ADD CONSTRAINT `amis_ibfk_1` FOREIGN KEY (`idUser1`) REFERENCES `utilisateur` (`idUser`),
+  ADD CONSTRAINT `amis_ibfk_2` FOREIGN KEY (`idUser2`) REFERENCES `utilisateur` (`idUser`);
+
+--
+-- Contraintes pour la table `tokens`
+--
+ALTER TABLE `tokens`
+  ADD CONSTRAINT `tokens_ibfk_1` FOREIGN KEY (`idUser`) REFERENCES `utilisateur` (`idUser`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

@@ -14,6 +14,7 @@ services:
     volumes:
       - /app/node_modules
       - ./client:/app
+
   server:
     image: "server"
     build:
@@ -26,6 +27,7 @@ services:
     volumes:
       - /app/node_modules
       - ./server:/app
+
   mysql:
     image: mariadb:10.5.8
     ports:
@@ -34,6 +36,8 @@ services:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'boogle'
       MYSQL_PASSWORD: 'root'
+    volumes:
+      - ./base_bdd.sql:/docker-entrypoint-initdb.d/base_bdd.sql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
