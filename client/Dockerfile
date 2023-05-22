@@ -14,4 +14,4 @@ COPY . .
 RUN apk update && apk add nano
 EXPOSE 8080
 # 6. Run the app
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev"]z
