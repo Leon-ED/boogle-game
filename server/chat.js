@@ -58,10 +58,7 @@ function handleNewMessage(wss, ws, message) {
         }
 
         // On vérifie que l'utilisateur ne soit pas rate limited 
-        if (ws.lastMessage && Date.now() - ws.lastMessage.date < MSG_SEND_COOLDOWN*1_000 / MAX_MSG_PER_SECOND) {
-            sendError(ws, RATE_LIMIT_MESSAGE);
-            return;
-        }
+
 
         ws.lastMessage = newMessage;
         ws.lastMessage.date = Date.now();
@@ -208,6 +205,11 @@ initWS = function (server) {
         // A chaque message reçu
         ws.on('message', (packet) => {
             var packet = JSON.parse(packet);
+            if (ws.lastMessage && Date.now() - ws.lastMessage.date < MSG_SEND_COOLDOWN*1_000 / MAX_MSG_PER_SECOND) {
+                sendError(ws, RATE_LIMIT_MESSAGE);
+                return;
+            }
+
             if (packet.type === 'join' && packet.roomId)
                 return handleJoinRoom(wss, ws, packet);
             if (packet.type == "message" && packet.content) {
