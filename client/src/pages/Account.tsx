@@ -13,7 +13,7 @@ export const Account = () => {
             return;
         }
         setIsMyAccount(false);
-        setTitle("Compte de " + idUser);
+        setTitle("Visualisation d'un profil");
     }, []);
 
 

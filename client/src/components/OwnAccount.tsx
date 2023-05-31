@@ -14,6 +14,7 @@ interface User {
 
 export const MyAccount = () => {
     const [user, setUser] = useState<User | null>(null);
+    const [image, setImage] = useState<string>();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -21,7 +22,7 @@ export const MyAccount = () => {
         console.log(user);
         if (user) {
             const userOBj: User = JSON.parse(user);
-            userOBj.photoProfil = "https://gravatar.com/avatar/" + userOBj.hash + "?s=200&d=retro";
+            setImage(BACKEND_URL + "/account/get/image/" + userOBj.idUser);
             setUser(userOBj);
         } else {
             setUser(null);
@@ -40,17 +41,14 @@ export const MyAccount = () => {
             <section>
                 <div className="profile-container">
                     <div className="profile-picture">
-                        <img onClick={uploadPicture} src={user.photoProfil} alt="profile" />
+                        <img onClick={uploadPicture} src={image} alt="profile" />
                     </div>
                     <div className="profile-info">
                         <div className="profile-info-item">
                             <h4>Email: <span className="profile-info-item-value">{user.email}</span></h4>
                         </div>
                         <div className="profile-info-item">
-                            <h4>Membre depuis le : <span className="profile-info-item-value">{user.email}</span></h4>
-                        </div>
-                        <div className="profile-info-item">
-                            <h4>Parties jouées : <span className="profile-info-item-value">{user.email}</span></h4>
+                            <h4>Parties jouées : <span className="profile-info-item-value">Pas d'informations</span></h4>
                         </div>
                     </div>
 
@@ -77,15 +75,8 @@ export const MyAccount = () => {
                     .then((res) => res.json())
                     .then((res) => {
                         console.log(res);
-                        if (res.success) {
-                            const user = localStorage.getItem("user");
-                            if (user) {
-                                const userObj: User = JSON.parse(user);
-                                userObj.hash = res.hash;
-                                localStorage.setItem("user", JSON.stringify(userObj));
-                                setUser(userObj);
-                            }
-                        }
+                        setImage(BACKEND_URL + "/account/get/image/" + user?.idUser+"?"+Date.now());
+                    
                     });
             }
         });

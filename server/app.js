@@ -37,6 +37,9 @@ app.post("/api/auth/register", register);
 app.post("/api/jeu/create", createGame);
 app.post("/api/jeu/verifID", apiGetGameFromUUID);
 app.post("/api/account/upload", compte.upload);
+app.get("/api/account/get/image/:idUser", compte.getPicture);
+app.get("/api/account/get/profile/:idUser", compte.getProfile);
+
 
 
 

@@ -101,3 +101,55 @@ export const isGameAdmin = async (gameID: string): Promise<boolean> => {
     }
     );
 }
+
+
+export const getProfilePicture = async (): Promise<File> => {
+    return fetch(BACKEND_URL + "/profile/getProfilePicture", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            token: localStorage.getItem("token"),
+        }),
+
+    }).then((response) => {
+        return response.json();
+    }
+    ).then((data) => {
+        if (data.status === "success") {
+            return data.file;
+        } else {
+            return null;
+        }
+    }
+    );
+}
+
+interface User {
+    idUser: string;
+    login: string;
+    photoProfil: string;
+}
+
+
+export const getUserInfo = async (idUser:string): Promise<User> => {
+    return fetch(BACKEND_URL + "/account/get/profile/"+idUser, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        }
+
+    }).then((response) => {
+        return response.json();
+    }
+    ).then((data) => {
+        if (data.status === "success") {
+            return data.data;
+        } else {
+            return null;
+        }
+    }
+    );
+
+}

@@ -5,6 +5,36 @@ const base = require('./base');
 
 
 
+function getPicture(req, res, next) {
+    const idUser = req.params.idUser;
+    const path = process.env.UPLOAD_DIR + idUser + '_picture.png';
+    if (!require('fs').existsSync(path)) {
+        return res.sendFile(process.env.UPLOAD_DIR + 'default.png');
+    }
+    return res.sendFile(path);
+}
+
+async function getProfile(req, res, next) {
+    const idUser = req.params.idUser;
+    const conn = await base.getBase();
+    const [rows] = await conn.query('SELECT `idUser`, `login`, `photoProfil` FROM `utilisateur` WHERE `idUser` = ?;', [idUser]);
+    
+    await conn.end();
+    if (!rows || rows.length === 0) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Utilisateur introuvable.'
+        });
+    }
+    return res.status(200).json({
+        status: 'success',
+        message: 'Utilisateur trouvé.',
+        data: rows
+    });
+}
+
+
+
 async function upload(req, res, next) {
     const formidable = require('formidable');
     const form = new formidable.IncomingForm();
@@ -21,8 +51,9 @@ async function upload(req, res, next) {
             return;
         }
         const fs = require('fs');
-        const newpath = process.env.UPLOAD_DIR + user.idUser + '_picture.png';
-        fs.copyFile(files.file.filepath, newpath, function (err) {
+        const newName = user.idUser + '_picture.png';
+        const newpath = process.env.UPLOAD_DIR + newName;
+        fs.copyFile(files.file.filepath, newpath, async function (err) {
             if (err) {
                 console.log(err);
                 res.status(400).json({
@@ -31,8 +62,8 @@ async function upload(req, res, next) {
                 });
                 return;
             }
-            conn.query(conn, 'UPDATE user SET photoProfil = ? WHERE idUser = ?', [newpath, user.idUser]);
-            conn.end();
+            await conn.query('UPDATE `utilisateur` SET `photoProfil` = ? WHERE `utilisateur`.`idUser` = ?;', [newName, user.idUser]);
+            await conn.end();
 
             res.status(200).json({
                 status: 'success',
@@ -88,5 +119,7 @@ async function upload(req, res, next) {
 
 
 module.exports = {
-    upload
+    upload,
+    getPicture,
+    getProfile
 }
