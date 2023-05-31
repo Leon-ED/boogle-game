@@ -21,9 +21,9 @@ services:
       context: ./server
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "4000:4000"
     expose:
-      - "3000"
+      - "4000"
     volumes:
       - /app/node_modules
       - ./server:/app

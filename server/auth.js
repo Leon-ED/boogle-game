@@ -151,9 +151,19 @@ login = async function (req, res, next) {
     const token = generateToken(user);
     insertToken(token, user.idUser);
     res.status(200).json({
+      token,
       status: 'success',
       message: 'Authentification réussie.',
-      token: token
+      user: {
+        idUser: user.idUser,
+        login: user.login,
+        email: user.email,
+        pseudoUser: user.pseudoUser,
+        photo: user.photoProfil,
+        hash: "74635e7z4ez5e41z75ez4e5e",
+        
+      }
+      
     });
   } catch (err) {
     console.log(err);

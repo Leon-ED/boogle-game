@@ -30,5 +30,5 @@ server.on('upgrade', function upgrade(request, socket, head) {
       socket.destroy();
     }
   });
-app.set('port', process.env.PORT || 3000);
-server.listen(process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);
+server.listen(process.env.PORT || 4000);

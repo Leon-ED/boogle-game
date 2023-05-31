@@ -95,6 +95,7 @@ async function submitForm(e: any, history: any) {
     const data = await reponse.json();
     if (data.status === "success") {
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       history("/");
       window.location.href = "/";
     } else {

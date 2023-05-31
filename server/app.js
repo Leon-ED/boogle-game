@@ -8,6 +8,7 @@ require('dotenv').config();
 require('./auth');
 require('./base');
 require('./jeu');
+const compte = require('./account');
 const CWD = process.env.CWD;
 
 
@@ -35,7 +36,7 @@ app.post("/api/auth/check", check);
 app.post("/api/auth/register", register);
 app.post("/api/jeu/create", createGame);
 app.post("/api/jeu/verifID", apiGetGameFromUUID);
-
+app.post("/api/account/upload", compte.upload);
 
 
 

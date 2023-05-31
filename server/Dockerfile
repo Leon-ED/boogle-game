@@ -31,5 +31,5 @@ RUN apk add --no-cache make
 COPY . .
 RUN make all -C dictionnary
 ENV PATH="/app/dictionnary/bin:${PATH}"
-EXPOSE 3000
+EXPOSE 4000
 CMD [ "npx", "nodemon", "server.js", "-L"]
