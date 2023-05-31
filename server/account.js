@@ -5,13 +5,24 @@ const base = require('./base');
 
 
 
-function getPicture(req, res, next) {
+async function getPicture(req, res, next) {
     const idUser = req.params.idUser;
-    const path = process.env.UPLOAD_DIR + idUser + '_picture.png';
-    if (!require('fs').existsSync(path)) {
+    const conn = await base.getBase();
+    const [rows] = await conn.query('SELECT `photoProfil` FROM `utilisateur` WHERE `idUser` = ?;', [idUser]);
+    await conn.end();
+    if (!rows || rows.length === 0) {
         return res.sendFile(process.env.UPLOAD_DIR + 'default.png');
     }
-    return res.sendFile(path);
+   // create img from base64 and return it
+   console.log(rows);
+    const base64Data = rows.photoProfil.replace(/^data:image\/png;base64,/, "");
+    const img = Buffer.from(base64Data, 'base64');
+    res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-Length': img.length
+    });
+    res.end(img);
+
 }
 
 async function getProfile(req, res, next) {
@@ -53,24 +64,31 @@ async function upload(req, res, next) {
         const fs = require('fs');
         const newName = user.idUser + '_picture.png';
         const newpath = process.env.UPLOAD_DIR + newName;
-        fs.copyFile(files.file.filepath, newpath, async function (err) {
-            if (err) {
-                console.log(err);
-                res.status(400).json({
-                    status: 'error',
-                    message: 'Une erreur est survenue lors de l\'upload du fichier.'
-                });
-                return;
-            }
-            await conn.query('UPDATE `utilisateur` SET `photoProfil` = ? WHERE `utilisateur`.`idUser` = ?;', [newName, user.idUser]);
-            await conn.end();
-
-            res.status(200).json({
-                status: 'success',
-                message: 'Upload réussi.'
+        // max size 5MB
+        if (files.file.size > 5 * 1024 * 1024) {
+            res.status(400).json({
+                status: 'error',
+                message: 'Le fichier est trop volumineux.Max 5MB.'
             });
+            return;
         }
-        );
+        // encode file to base64
+        const base64 = fs.readFileSync(files.file.filepath, { encoding: 'base64' });
+        // delete file from disk
+        fs.unlinkSync(files.file.filepath);
+        // format base64 to data url
+        const dataUrl = 'data:image/png;base64,' + base64;
+        await conn.query('UPDATE `utilisateur` SET `photoProfil` = ? WHERE `utilisateur`.`idUser` = ?;', [dataUrl, user.idUser]);
+        await conn.end();
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Upload réussi.'
+        });
+
+
+
+
     });
 
 
