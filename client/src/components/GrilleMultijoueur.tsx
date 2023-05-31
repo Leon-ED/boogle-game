@@ -117,7 +117,7 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
                     />
 
                 </div>
-                <div id="listeMots">
+                {/* <div id="listeMots">
                     <h2>Mots trouvés</h2>
                     <div id="listeMots-container">
                         {
@@ -129,7 +129,7 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
                         }
 
                     </div>
-                </div>
+                </div> */}
             </div>
         </section>
     )

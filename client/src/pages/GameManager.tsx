@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { createContext, useEffect, useState } from "react"
 import { auth, getGameUUID, verifGameID } from "../functions"
 import { useNavigate, useParams } from "react-router-dom"
 import { GrilleSettings } from "../components/GrilleSettings"
@@ -6,8 +6,9 @@ import Chat from "../components/Chat"
 import useWebSocket from 'react-use-websocket';
 import { BACKEND_URL, MP_WS_URL } from '../env';
 import { Partie } from "../components/Partie"
+import { Player } from "../components/Player"
 
-
+export const PlayersContext = createContext<User[]>([]); 
 interface Settings {
     lignes: number,
     colonnes: number,
@@ -29,13 +30,20 @@ interface GameDB {
 
 }
 
+interface User{
+    idUser: string,
+    login: string,
+}
+
 export const GameManager = () => {
     const navigate = useNavigate()
     const [settings, setSettings] = useState<Settings>({ lignes: 4, colonnes: 4, temps: 3, gameID: "", bloquerMots: false, politiqueScore: 1 });
     const [gameID, setGameID] = useState<string>("");
     const { lastMessage, sendJsonMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [users, setUsers] = useState<User[]>([]);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+
 
 
     const { id } = useParams();
@@ -117,6 +125,8 @@ export const GameManager = () => {
             setIsGameStarted(true);
             navigate("/game/" + gameID);
 
+        }if (data.type === "players_update") {
+            setUsers(data.players);
         }
 
 
@@ -125,17 +135,31 @@ export const GameManager = () => {
     const lobby: JSX.Element = (
         <section>
             <h1>Lobby</h1>
-            <h1>{isGameStarted ? "true" : "false"}</h1>
             <p>Créez votre partie et jouez contre vos amis</p>
             <hr />
             <GrilleSettings onSettingsChange={handleChange} settings={settings} gameID={gameID} isAdmin={isAdmin} isStarted={handleGameStart} />
+            <hr />
+            <div className="lobby-player-list">
+            {users.map((user) => {
+                return (
+                    <Player idUser={user.idUser} name={user.login} />
+                )
+            })}
+            </div>
+            <hr />
         </section>
     )
 
 
     return (
         <>
-            {!isGameStarted ? lobby : <Partie gameID={gameID} />}
+            {!isGameStarted && lobby }
+            {isGameStarted &&
+            
+            <PlayersContext.Provider value={users}>
+            <Partie gameID={gameID} />
+            </PlayersContext.Provider>
+            }
             <Chat gameID={gameID} />
 
         </>

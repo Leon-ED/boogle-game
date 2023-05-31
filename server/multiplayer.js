@@ -165,7 +165,8 @@ async function handleJoin(ws, message) {
 
 
     // Si l'utilisateur est déjà dans la partie, on ne fait rien
-    if (game.players.includes(ws.user)){
+    if (isPlayerAlreadyInGame(game, ws.user)){
+        sendNewPlayerUpdate(game)
         console.log("L'utilisateur est déjà dans la partie");
         return;
     }
@@ -178,7 +179,45 @@ async function handleJoin(ws, message) {
 
     // On envoie un update à tous les joueurs
     sendGameUpdate(ws,game);
+
+    sendNewPlayerUpdate(game);
 }
+
+function isPlayerAlreadyInGame(game, user) {
+    for (const player of game.players) {
+        if (player.user.idUser === user.idUser) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+
+function sendNewPlayerUpdate(game){
+    const players = [];
+    game.players.forEach((player) => {
+        console.log("On envoie la liste des joueurs à : " + player.user.idUser);
+        const playerObj = {
+            idUser: player.user.idUser,
+            login: player.user.login,
+        }
+        players.push(playerObj);
+    });
+    for (const player of game.players) {
+
+        if (player.readyState !== WebSocket.OPEN) {
+            continue;
+        }
+        player.send(JSON.stringify({
+            type: 'players_update',
+            players
+        }));
+
+    }
+}
+
+
 
 function sendGameStart(client,game){
     client.send(JSON.stringify({
@@ -295,6 +334,7 @@ function handleRejoin(ws, message) {
     if(!game)
         return
     
+    sendNewPlayerUpdate(game);
     ws.send(JSON.stringify({
         type: 'rejoin',
         game: game,

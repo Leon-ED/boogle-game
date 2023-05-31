@@ -2,9 +2,19 @@ import { useParams } from "react-router-dom"
 import Chat from "./Chat"
 
 import { GrilleMultijoueur } from "./GrilleMultijoueur"
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useWebSocket from "react-use-websocket";
 import { MP_WS_URL } from "../env";
+import { TableauScores } from "./TableauScores";
+import { PlayersContext } from "../pages/GameManager";
+interface Player{
+    idUser: string;
+    login: string;
+    score: number;
+    mots: string[];
+    
+}
+
 interface GrilleProps {
     lignes: number,
     colonnes: number,
@@ -15,6 +25,8 @@ export const Partie = (props: any) => {
     const [gameID, setGameID] = useState<string>("");
     const { lastMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const { id } = useParams();
+    const users = useContext(PlayersContext);
+    const [players, setPlayers] = useState<Player[]>([]);
 
 
     const [grilleProps, setGrilleProps] = useState<GrilleProps>({ lignes: 4, colonnes: 4, grilleProps: [] });
@@ -24,8 +36,24 @@ export const Partie = (props: any) => {
             return
         setGameID(id);
         connectToGame(id);
+        setPlayers(initPlayers());
+        
+        
+
     }, []);
 
+    const initPlayers = () => {
+        const players: Player[] = [];
+        users.forEach((user) => {
+            players.push({
+                idUser: user.idUser,
+                login: user.login,
+                score: 0,
+                mots: [],
+            })
+        })
+        return players;
+    }
 
 
     useEffect(() => {
@@ -57,8 +85,12 @@ export const Partie = (props: any) => {
 
 
     return (
+        <div className="multiplayer-line">
         <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} />
+        <TableauScores players={players} />
+ 
 
+        </div>
     )
 
 
