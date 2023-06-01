@@ -42,6 +42,7 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent}: Gri
 
     function verifierMot() {
         onWordSent(inputWord);
+        setInputWord("");
         return;
         console.log(grille1D);
         console.log(lignes);
