@@ -6,9 +6,10 @@ interface GrilleProps {
     lignes: number,
     colonnes: number,
     grilleProps: Array<string>,
+    onWordSent: (word: string) => void,
 }
 
-export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) => {
+export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent}: GrilleProps) => {
     const [inputWord, setInputWord] = useState<string>("");
     const [grille1D, setGrille1D] = useState<Array<string>>([]);
     const [grille2D, setGrille2D] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
@@ -16,6 +17,7 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
 
         
     useEffect(displayGrid, [grilleProps]);
+
 
     function displayGrid() {
         if(grilleProps[grilleProps.length - 1] === "\n")
@@ -39,6 +41,8 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps}: GrilleProps) =
 
 
     function verifierMot() {
+        onWordSent(inputWord);
+        return;
         console.log(grille1D);
         console.log(lignes);
         console.log(colonnes);

@@ -123,8 +123,7 @@ getGrille =  function (lignes,colonnes) {
     
 }
 
-
-function preVerifMot(mot,lignes,colonnes){
+preVerifMot = function(mot,lignes,colonnes){
 
     if (mot.length > lignes * colonnes)
         return false;
@@ -133,6 +132,19 @@ function preVerifMot(mot,lignes,colonnes){
     if (!/^[a-zA-Z]+$/.test(mot))
         return false;
     return true;
+}
+
+
+
+
+solveGrille = async function(grille,lignes,colonnes){
+    const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex 2 ' + lignes + ' ' + colonnes + ' ' + grille;
+    const exec = require("child_process").execSync;
+    const result = await exec(command).toString();
+    return result.split(' ');
+
+
+
 }
 
 
@@ -186,6 +198,8 @@ module.exports = {
     createGameAPI: createGameAPI,
     createGame: createGame,
     getGameFromUUID: getGameFromUUID,
-    apiGetGameFromUUID:apiGetGameFromUUID
+    apiGetGameFromUUID:apiGetGameFromUUID,
+    solve:solveGrille,
+    preVerifMot
 }
 

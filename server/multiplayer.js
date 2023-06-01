@@ -66,8 +66,8 @@ initMultiplayer = function (server) {
                     return handleRejoin(ws, message);
                 case 'leave':
                     return handleLeave(ws, message);
-                case 'move':
-                    return handleMove(ws, message);
+                case 'guess':
+                    return handleGuess(ws, message);
                 case 'start':
                     return handleStart(ws, message);
                 case 'end':
@@ -80,12 +80,98 @@ initMultiplayer = function (server) {
         });
 
         ws.on('close', (ws) => {
+            console.log("On ferme la connexion");
             clearInterval(interval);
         });
 
     });
     return wss;
 }
+
+function handleGuess(ws, message) {
+    const guess = message.word.toUpperCase();
+    const game = games[message.gameID];
+    if (!game) {
+        console.log("La partie n'existe pas");
+        return;
+    }
+    console.log("On vérifie le mot : " + guess + " proposé par  " + ws.user.idUser);
+    if(!jeu.preVerifMot(guess,game.settings.grille)){
+        console.log("Le mot n'est pas valide pour la recherche");
+        return ws.send(JSON.stringify({
+            type: 'guess',
+            status: 'invalid',
+            message: 'Le mot n\'est pas valide pour la recherche.'
+        }));
+
+    }
+
+    if(!game.word_list.includes(guess)){
+        console.log("Le mot n'est pas dans la liste");
+        return ws.send(JSON.stringify({
+            type: 'guess',
+            status: 'invalid',
+            message: 'Le mot n\'est pas dans la liste.'
+        }));
+    }
+
+    
+    // Si le mot de blocage des mots est activé alors on vérifie si le mot a déjà été trouvé dans par un des joueurs
+    if(game.settings.bloquer){
+        console.log("Le mode bloquer est activé");
+        for (const player_guesses of game.foundWords) {
+            if (player_guesses.includes(guess))
+                return ws.send(JSON.stringify({
+                    type: 'guess',
+                    status: 'invalid',
+                    message: 'Le mot a déjà été trouvé.'
+                }));
+        }
+        game.settings.foundWords[ws.user.idUser].push(guess);
+    
+
+    }
+    console.log(game.settings.foundWords);
+    // Sinon on regarde juste dans la propre liste du joueur
+    if (game.settings.foundWords[ws.user.idUser].includes(guess)) {
+
+        console.log("Le mot a déjà été trouvé");
+        return;
+    }
+    // On envoie que le mot a été trouvé à tous les joueurs
+    game.settings.foundWords[ws.user.idUser].push(guess);
+    sendScoreUpdate(game);
+
+
+
+
+
+}
+
+
+function sendScoreUpdate(game) {
+    const scores = [];
+    for (const player of game.players) {
+        const score = {
+            idUser: player.user.idUser,
+            login: player.user.login,
+            score: game.settings.foundWords[player.user.idUser].length,
+            words: game.settings.foundWords[player.user.idUser],
+        }
+        scores.push(score);
+    }
+    for (const player of game.players) {
+        if (player.readyState !== WebSocket.OPEN) {
+            continue;
+        }
+        player.send(JSON.stringify({
+            type: 'move_event',
+            scores
+        }));
+    }
+}
+
+
 /**
  * Renvois la liste des parties disponibles
  */
@@ -132,15 +218,15 @@ async function handleStart(ws, message) {
     game.statut = "game";
     const colonnes = game.settings.colonnes;
     const lignes = game.settings.lignes;
-    const grille = await jeu.getGrille(colonnes, lignes, game.settings.langue);
-    game.settings.grille = grille;
+    game.settings.grille = await jeu.getGrille(colonnes, lignes, game.settings.langue);
+    game.word_list = await jeu.solve(game.settings.grille, lignes, colonnes);
     //console.log("On envoie la grille à tous les joueurs");
     game.players.forEach((player) => {
         console.log("On envoie la grille à : " + player.user.login);
         player.send(JSON.stringify({
             type: 'start',
             settings: game.settings,
-            grille: grille,
+            grille: game.settings.grille,
         }));
     });
 
@@ -234,7 +320,7 @@ async function handleJoin(ws, message) {
 
     // Si l'utilisateur est déjà dans la partie, on c
     if (isPlayerAlreadyInGame(game, ws.user)){
-        replaceOldWSClient(game, ws);
+        replaceOldWSClient(ws, game);
         sendNewPlayerUpdate(game);
         console.log("L'utilisateur est déjà dans la partie");
         return;
@@ -245,6 +331,7 @@ async function handleJoin(ws, message) {
     }
     // On ajoute le joueur à la partie
     game.players.push(ws);
+    game.settings.foundWords[ws.user.idUser] = [];
 
     // On envoie un update à tous les joueurs
     sendGameUpdate(ws,game);
@@ -264,8 +351,8 @@ function replaceOldWSClient(ws,game){
    console.log("On remplace l'ancien client par le nouveau");
    if(!ws.user)
         return;
-   console.log(ws.user);
-    const index = game.players.findIndex(player => player.user.idUser === idUser);
+    const index = game.players.findIndex(player => player.user.idUser === ws.user.idUser);
+    console.log(index);
     game.players[index] = ws;
 
 
@@ -406,11 +493,10 @@ async function createGame(ws, message,status = "lobby") {
             politique: '1',
             bloquer: false,
             mode: 'normal',
-            foundWords: {
-                user1: [],
-            }
+            foundWords: []
         }
     }
+    gameObj.settings.foundWords[ws.user.idUser] = [];
 
 
 
@@ -452,11 +538,10 @@ async function  createGameInternal(ws, message) {
             politique: '1',
             bloquer: false,
             mode: 'normal',
-            foundWords: {
-                user1: [],
-            }
+            foundWords: []
         }
     }
+    gameObj.settings.foundWords[ws.user.idUser] = [];
 
 
 

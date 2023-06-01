@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react"
+import { createContext, useEffect, useRef, useState } from "react"
 import { auth, getGameUUID, verifGameID } from "../functions"
 import { useNavigate, useParams } from "react-router-dom"
 import { GrilleSettings } from "../components/GrilleSettings"
@@ -43,13 +43,17 @@ export const GameManager = () => {
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [users, setUsers] = useState<User[]>([]);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
-    const [sentNewGameRequest, setSentNewGameRequest] = useState<boolean>(false);
+    const webSocketRef = useRef<WebSocket | null>(null);
+
 
 
 
     const { id } = useParams();
 
     useEffect(() => {
+        webSocketRef.current = new WebSocket(MP_WS_URL);
+
+
         // Si l'utilisateur n'est pas connecté, on le redirige vers la page de connexion
         auth().then((data) => {
             if (!data) {
@@ -91,6 +95,13 @@ export const GameManager = () => {
             // }
             // )
 
+        }
+        return () => {
+            if (webSocketRef.current) {
+                webSocketRef.current.close();
+            }else{
+                console.log("websocket null");
+            }
         }
 
     }, [])
@@ -142,6 +153,12 @@ export const GameManager = () => {
             navigate("/lobby/" + data.gameID);
         }
         if (data.type === "start") {
+            if(webSocketRef.current){
+                webSocketRef.current.close();
+            }else{
+                console.log("websocket null");
+            }
+
             setIsGameStarted(true);
             navigate("/game/" + gameID);
 
@@ -211,6 +228,11 @@ export const GameManager = () => {
     }
 
     function handleGameStart(boolean: boolean) {
+        if(webSocketRef.current){
+            webSocketRef.current.close();
+        }else{
+            console.log("websocket null");
+        }
         if (!isAdmin || !boolean)
             return;
         console.log("start");

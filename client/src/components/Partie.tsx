@@ -21,13 +21,20 @@ interface GrilleProps {
     grilleProps: Array<string>,
 }
 
+interface PlayerStats{
+    idUser: string;
+    login: string;
+    score: number;
+    words : string[];
+}
+
 export const Partie = (props: any) => {
     const [gameID, setGameID] = useState<string>("");
     const { lastMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const { id } = useParams();
     const users = useContext(PlayersContext);
     const [players, setPlayers] = useState<Player[]>([]);
-
+    const [playersStats, setPlayersStats] = useState<PlayerStats[]>([]);
 
     const [grilleProps, setGrilleProps] = useState<GrilleProps>({ lignes: 4, colonnes: 4, grilleProps: [] });
 
@@ -60,6 +67,7 @@ export const Partie = (props: any) => {
         if (!lastMessage)
             return;
         const lastMessageData = JSON.parse(lastMessage.data);
+        console.error(lastMessageData);
         if (lastMessageData.type === "start") {
             console.log(lastMessageData);
             setGrilleProps({
@@ -68,6 +76,11 @@ export const Partie = (props: any) => {
                 grilleProps: lastMessageData.grille.split(" "),
             });
         }
+        if (lastMessageData.type === "move_event") {
+            setPlayersStats(lastMessageData.scores);
+        }
+
+
     }, [lastMessage]);
 
 
@@ -82,12 +95,23 @@ export const Partie = (props: any) => {
         sendMessage(JSON.stringify(joinRoom));
     }
 
+    function handleWordSend(word: string) {
+        const sendWord = {
+            type: "guess",
+            token: localStorage.getItem("token"),
+            gameID: gameID,
+            word: word,
+        }
+        sendMessage(JSON.stringify(sendWord));
 
+
+    }
 
     return (
         <div className="multiplayer-line">
-        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} />
-        <TableauScores players={players} />
+        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} onWordSent={handleWordSend} />
+        
+        { playersStats.length > 0 && <TableauScores stats={playersStats} />}
  
 
         </div>
