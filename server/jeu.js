@@ -2,34 +2,48 @@ require('dotenv').config();
 const CWD = process.env.CWD;
 const base = require('./base');
 
+createGame = async function (token = null, user = null) {
+    console.log('Création d\'une partie, token : ' + token);
+    if (token == null && user == null)
+        return false;
+    
+    if(user == null)
+        user = await returnUserFromToken(token);
+    if(!user)
+        return false;
 
 
-createGame = async function (req, res, next) {
     const uuid = require('uuid');
     const uuidv4 = uuid.v4();
-    const user = await returnUserFromToken(req.body.token);
-    console.log(user);
-    if (user == false)
-        return res.status(500);
+
     const idUser = user.idUser;
     const conn = await base.getBase();
     const query = 'INSERT INTO partie (idPartie,gameAdmin) VALUES (?,?)';
     const params = [uuidv4, idUser];
-    conn.query(query, params, function (err, rows) {
-        if (err) {
-            console.log(err);
-            return res.status(400).json({
-                status: 'error',
-                message: 'Une erreur est survenue lors de la création de la partie.'
-            });
-        }
-    });
-    conn.end();
+    const result = await conn.execute(query, params);
+    await conn.end();
+    if (result.length == 0)
+        return false;
+    
+    return uuidv4;
+
+}
+
+createGameAPI = async function (req, res, next) {
+    const token = req.body.token;
+    const result = await createGame(token);
+    if (result == false)
+        return res.status(400).json({
+            status: 'error',
+            message: 'Une erreur est survenue lors de la création de la partie.'
+        });
+    
     return res.status(200).json({
         status: 'success',
         message: 'Partie créée.',
-        uuid: uuidv4
+        uuid: result
     });
+    
 }
 getGameFromUUID = async function (uuid, token = undefined) {
     const conn = await base.getBase();
@@ -169,6 +183,7 @@ module.exports = {
     getGrille: getGrille,
     APIgetGrille: APIgetGrille,
     verifMot: verifMot,
+    createGameAPI: createGameAPI,
     createGame: createGame,
     getGameFromUUID: getGameFromUUID,
     apiGetGameFromUUID:apiGetGameFromUUID

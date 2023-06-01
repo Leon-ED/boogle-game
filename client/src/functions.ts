@@ -133,6 +133,8 @@ interface User {
 }
 
 
+
+
 export const getUserInfo = async (idUser:string): Promise<User> => {
     return fetch(BACKEND_URL + "/account/get/profile/"+idUser, {
         method: "GET",

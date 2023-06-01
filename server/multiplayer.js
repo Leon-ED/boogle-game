@@ -8,7 +8,7 @@ initMultiplayer = function (server) {
     const wss = new WebSocket.Server({ noServer: true });
 
 
-
+    
 
     // Attribue un id unique à un utilisateur
     wss.getUniqueID = function () {
@@ -34,7 +34,7 @@ initMultiplayer = function (server) {
         ws.isAlive = true;
         ws.on('error', console.error);
         ws.on('pong', heartbeat);
-        //console.log("Nouvelle connexion");
+        console.log("Nouvelle connexion");
         ws.id = wss.getUniqueID();
 
 
@@ -49,17 +49,17 @@ initMultiplayer = function (server) {
                     console.log("L'utilisateur n'est pas connecté");
                     return;
                 }
-                console.log("L'utilisateur est connecté");
+                // console.log("L'utilisateur est connecté");
                 ws.user = user;
             }
 
 
-
-
-
-
-
             switch (message.type) {
+                case 'seek':
+                    return handleSeek(ws, message);
+                
+                case 'new_game':
+                    return handleNewGame(ws, message);
                 case 'join':
                     return handleJoin(ws, message);
                 case 'rejoin':
@@ -85,6 +85,32 @@ initMultiplayer = function (server) {
 
     });
     return wss;
+}
+/**
+ * Renvois la liste des parties disponibles
+ */
+function handleSeek(ws,message){
+    const gamesList = [];
+    for (const gameID in games) {
+        const game = games[gameID];
+        if(game.statut == "lobby"){
+            const gameObj = {
+                id: game.id,
+                adminID: game.players.find(player => player.user.idUser === game.adminID).user.pseudoUser,
+                players: game.players.length,
+                settings: game.settings,
+            }
+            gamesList.push(gameObj);
+        }
+    }
+    ws.send(JSON.stringify({
+        type: 'seek',
+        games: gamesList,
+    }));
+
+
+
+
 }
 
 async function handleStart(ws, message) {
@@ -125,6 +151,48 @@ async function handleStart(ws, message) {
 function heartbeat() {
     this.isAlive = true;
 }
+
+async function handleNewGame(ws,message){
+    if(isPlayerAlreadyInAGame(ws.user)){
+        sendError2(ws,'new_game', "already_in_game", "Vous êtes déjà dans une partie");
+        sendRedirect(ws, "/lobby/"+ getPlayerCurrentGame(ws).id);
+        console.log("Création annulée: l'utilisateur est déjà dans une partie");
+        return;
+    }
+    console.log(ws.user.login + " veut créer une partie")
+    const game = await jeu.createGame(token = null,user = ws.user);
+    if(game == false){
+        ws.user.inCreateGame = false;
+        sendError(ws, "error", "Une erreur est survenue lors de la création de la partie");
+        console.log("Création annulée: erreur lors de la création de la partie");
+        return;
+    }
+
+    const fakeMessage = {
+        gameID: game,
+        token: null,
+    }
+
+    await createGameInternal(ws, fakeMessage);
+
+    ws.send(JSON.stringify({
+        type: 'game_created',
+        gameID: game,
+    }));
+    console.log("Création réussie");
+
+
+
+
+    // sendRedirect(ws, "/join/"+ game.idPartie);
+
+    
+
+
+
+
+}
+
 async function handleSettings(ws, message) {
     const game = games[message.gameID];
     if (!game) {
@@ -164,9 +232,10 @@ async function handleJoin(ws, message) {
     }
 
 
-    // Si l'utilisateur est déjà dans la partie, on ne fait rien
+    // Si l'utilisateur est déjà dans la partie, on c
     if (isPlayerAlreadyInGame(game, ws.user)){
-        sendNewPlayerUpdate(game)
+        replaceOldWSClient(game, ws);
+        sendNewPlayerUpdate(game);
         console.log("L'utilisateur est déjà dans la partie");
         return;
     }
@@ -190,6 +259,16 @@ function isPlayerAlreadyInGame(game, user) {
         }
     }
     return false;
+}
+function replaceOldWSClient(ws,game){
+   console.log("On remplace l'ancien client par le nouveau");
+   if(!ws.user)
+        return;
+   console.log(ws.user);
+    const index = game.players.findIndex(player => player.user.idUser === idUser);
+    game.players[index] = ws;
+
+
 }
 
 
@@ -279,8 +358,25 @@ function sendGameUpdate(ws, gameToUpdate) {
     return clone(obj);
   }
   
+function isPlayerAlreadyInAGame(user) {
+    for (const gameID in games) {
+        const game = games[gameID];
+        if (isPlayerAlreadyInGame(game, user)) {
+            return true;
+        }
+    }
+    return false;
+}
 
 async function createGame(ws, message,status = "lobby") {
+    if(isPlayerAlreadyInAGame(ws.user)){
+        sendError2(ws,'new_game', "already_in_game", "Vous êtes déjà dans une partie");
+        sendRedirect(ws, "/lobby/"+ getPlayerCurrentGame(ws).id);
+        console.log("Création annulée: l'utilisateur est déjà dans une partie");
+        return;
+    }
+
+
     if (!message.token || !message.gameID){
         console.log("Création annulée: token ou gameID non fourni");
         return;
@@ -316,10 +412,13 @@ async function createGame(ws, message,status = "lobby") {
         }
     }
 
+
+
     ws.send(JSON.stringify({
         type: 'update',
         game: gameObj,
     }));
+    sendNewPlayerUpdate(gameObj);
     games[message.gameID] = gameObj;
     console.log("Partie crée");
     if(status == "game"){
@@ -327,6 +426,53 @@ async function createGame(ws, message,status = "lobby") {
     }
 
 }
+async function  createGameInternal(ws, message) {
+    const game = await jeu.getGameFromUUID(message.gameID);
+    if (!game){
+        console.log("Création annulée: partie non trouvée en BDD");
+        return;
+    }
+
+    if (ws.user.idUser != game.gameAdmin){
+        console.log("Création annulée: pas admin");
+        return;
+    }
+
+
+    const gameObj = {
+        id: message.gameID,
+        adminID: ws.user.idUser,
+        players: [ws],
+        statut: "lobby",
+        settings: {
+            colonnes: 4,
+            lignes: 4,
+            langue: 'fr',
+            temps: 60,
+            politique: '1',
+            bloquer: false,
+            mode: 'normal',
+            foundWords: {
+                user1: [],
+            }
+        }
+    }
+
+
+
+    ws.send(JSON.stringify({
+        type: 'update',
+        game: gameObj,
+    }));
+    sendNewPlayerUpdate(gameObj);
+    games[message.gameID] = gameObj;
+    console.log("Partie crée");
+
+
+}
+
+
+
 function handleRejoin(ws, message) {
     if(!message.gameID)
         return;
@@ -343,6 +489,40 @@ function handleRejoin(ws, message) {
 
 }
 
+function getPlayerCurrentGame(ws) {
+    for (const gameID in games) {
+        const game = games[gameID];
+        if (isPlayerAlreadyInGame(game, ws.user)) {
+            return game;
+        }
+    }
+    return null;
+}
+
+function sendError2(ws,type, error_type, message) {
+    ws.send(JSON.stringify({
+        type,
+        status: 'error',
+        error_type,
+        message,
+    }));
+}
+
+
+function sendError(ws, error_type, message) {
+    ws.send(JSON.stringify({
+        type: 'error',
+        error_type,
+        message,
+    }));
+}
+
+function sendRedirect(ws, url) {
+    ws.send(JSON.stringify({
+        type: 'redirect',
+        url,
+    }));
+}
 
 
 const gameExemple = {
@@ -359,6 +539,7 @@ const gameExemple = {
         mode: 'normal',
     }
 }
+
 
 
 

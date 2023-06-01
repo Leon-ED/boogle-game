@@ -43,6 +43,7 @@ export const GameManager = () => {
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [users, setUsers] = useState<User[]>([]);
     const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+    const [sentNewGameRequest, setSentNewGameRequest] = useState<boolean>(false);
 
 
 
@@ -70,19 +71,25 @@ export const GameManager = () => {
                     gameID: gameID,
                 }
                 sendJsonMessage(joinRoom);
+                navigate("/lobby/" + id);
             })
 
 
         } else {
-            // On crée une partie et on redirige vers la page de la partie
-            setIsAdmin(true);
-            getGameUUID().then((data) => {
-                setGameID(data);
-                if (data) {
-                    navigate("/lobby/" + data);
-                }
-            }
-            )
+            sendJsonMessage({
+                type: "new_game",
+                token: localStorage.getItem("token"),
+            });
+
+            
+            // setIsAdmin(true);
+            // getGameUUID().then((data) => {
+            //     setGameID(data);
+            //     if (data) {
+            //         navigate("/lobby/" + data);
+            //     }
+            // }
+            // )
 
         }
 
@@ -90,12 +97,10 @@ export const GameManager = () => {
 
     useEffect(() => {
         const path = window.location.pathname.split("/")[1];
-        console.log(path);
         switch (path) {
             case "game": setIsGameStarted(true); console.log("handleGameURL"); break;
+            case "create": if(gameID){ navigate("/lobby/" + gameID); } else { } break;
         }
-
-
     }, [window.location.pathname]);
 
 
@@ -118,8 +123,23 @@ export const GameManager = () => {
             return;
         const data = JSON.parse(lastMessage.data);
         console.log(data);
+        if(data.type === "redirect"){
+            console.log("redirect");
+            console.log(data.url);
+            navigate(data.url);
+        }
         if (data.type === "update") {
             setSettings(data.game.settings);
+        }
+        if(data.type === "game_created"){
+            if(data?.status === "error"){
+                console.error("Une erreur est survenue : " + data.message);
+                return;
+            }
+
+            setIsAdmin(true);
+            setGameID(data.gameID);
+            navigate("/lobby/" + data.gameID);
         }
         if (data.type === "start") {
             setIsGameStarted(true);

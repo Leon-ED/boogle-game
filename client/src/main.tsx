@@ -14,6 +14,7 @@ import { BACKEND_URL } from './env';
 import { GameManager } from './pages/GameManager';
 import { Partie } from './components/Partie';
 import { Account } from './pages/Account';
+import { GamesList } from './pages/GamesList';
 
 
 function Main() {
@@ -57,7 +58,7 @@ function Main() {
         <Route path="/game/:id" element={<GameManager />} />
         <Route path="/account" element={<Account />} />
         <Route path="/account/:id" element={<Account />} />
-  
+        <Route path="/seek" element={<GamesList />} />
         <Route path="/join/:id" element={<GameManager />} />
         <Route path="/lobby/:id" element={<GameManager />} />
         <Route path="*" element={<Error404 />} />

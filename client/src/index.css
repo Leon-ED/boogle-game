@@ -345,9 +345,19 @@ button:disabled{
   text-decoration: underline;
 
 }
+.waiting-game-infos{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
 .multiplayer-line{
   display: flex;
   flex-direction: column;
+}
+.me{
+  border-bottom: 2px solid var(--green);
 }
 
 @media screen and (max-width: 800px) {
