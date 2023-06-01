@@ -7,9 +7,10 @@ interface GrilleProps {
     colonnes: number,
     grilleProps: Array<string>,
     onWordSent: (word: string) => void,
+    children?: React.ReactNode,
 }
 
-export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent}: GrilleProps) => {
+export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent,children}: GrilleProps) => {
     const [inputWord, setInputWord] = useState<string>("");
     const [grille1D, setGrille1D] = useState<Array<string>>([]);
     const [grille2D, setGrille2D] = useState<Array<Array<string>>>(Array(lignes).fill(Array(colonnes).fill("X")));
@@ -44,39 +45,6 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent}: Gri
         onWordSent(inputWord);
         setInputWord("");
         return;
-        console.log(grille1D);
-        console.log(lignes);
-        console.log(colonnes);
-        fetch(BACKEND_URL + '/jeu/verify/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept-Charset': 'utf-8',
-                'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-                mot: inputWord,
-                grille: grille1D.join(" "),
-                lignes,
-                colonnes,
-                langue: "fr"
-            })
-
-
-
-        }).then((response) => {
-            return response.json();
-        }
-        ).then((data) => {
-            if (data.status === "success") {
-
-                alert("Mot trouvé");
-                setWordsList([...wordsList, inputWord]);
-            } else {
-                alert(data.message);
-            }
-
-        })
     }
 
 
@@ -122,19 +90,7 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent}: Gri
                     />
 
                 </div>
-                {/* <div id="listeMots">
-                    <h2>Mots trouvés</h2>
-                    <div id="listeMots-container">
-                        {
-                            wordsList.map((mot, index) => {
-                                return (
-                                    <Mot mot={mot} index={index} />
-                                )
-                            })
-                        }
-
-                    </div>
-                </div> */}
+               {children}
             </div>
         </section>
     )

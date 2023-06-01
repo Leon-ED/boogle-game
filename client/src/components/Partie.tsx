@@ -109,9 +109,11 @@ export const Partie = (props: any) => {
 
     return (
         <div className="multiplayer-line">
-        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} onWordSent={handleWordSend} />
-        
+        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} onWordSent={handleWordSend} >
         { playersStats.length > 0 && <TableauScores stats={playersStats} />}
+
+        </GrilleMultijoueur>
+        
  
 
         </div>
