@@ -25,7 +25,7 @@ Par défaut le frontend est sur le port `8080` et le backend sur le port `3000`
 
 Ne pas oublier de se connecter sur le PHPMyAdmin afin d'installer la base de données qui se trouve dans le dossier `bdd`
 
-# Téléchargement de certains fichiers, trop volumineux pour Github, nécessaires au fonctionnement : 
+# Téléchargement de certains fichiers, trop volumineux pour Github, nécessaires au fonctionnement (à déplacer dans /server/utils) : 
 https://drive.google.com/drive/folders/1ArZ0M6xaVCLskLNfYJuhI1l5fXF9bkfa?usp=sharing
 # Information
 Le server est fait pour fonctionner dans un environnement UNIX (Linux, MacOS), il faudra donc le lancer sur un système compatible ou via docker
