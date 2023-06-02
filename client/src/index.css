@@ -45,10 +45,6 @@ a {
   align-items: flex-start;
 }
 
-main {
-  margin-left: 5px;
-  margin-right: 5px;
-}
 
 .hidden {
   display: none;
@@ -368,7 +364,9 @@ button:disabled{
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      width: 100%;
   }
+
   .grille-header{
     flex-direction: column;
   }
@@ -382,7 +380,6 @@ button:disabled{
   .main-home{
       flex-direction: column;
       align-items: center;
-      width: 100%;
 
   }
   section {
@@ -415,6 +412,10 @@ button:disabled{
 
   .chat-rooms{
     max-height: 150px;
+  }
+
+  .flex-row{
+    flex-direction: column !important;
   }
 
   

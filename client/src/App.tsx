@@ -12,7 +12,7 @@ function App() {
 
   return (
     <>
-      <Grille largeur={4} hauteur={4} />
+      <Grille largeur={4} hauteur={4} /> 
       <Chat />
     </>
   )
