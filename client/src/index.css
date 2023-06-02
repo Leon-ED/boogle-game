@@ -352,6 +352,9 @@ button:disabled{
   justify-content: flex-start;
   gap: 10px;
 }
+.center{
+  text-align: center;
+}
 .multiplayer-line{
   display: flex;
   flex-direction: column;

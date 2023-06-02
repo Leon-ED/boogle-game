@@ -7,7 +7,7 @@ import { MP_WS_URL } from "../env";
 interface Games {
     id: string,
     adminID: string,
-    players:number,
+    players: number,
     settings: GameSettings,
 }
 
@@ -25,6 +25,7 @@ export const GamesList = () => {
 
     const [games, setGames] = useState<Games[]>([]);
     const { lastMessage, sendJsonMessage, sendMessage } = useWebSocket(MP_WS_URL);
+    const [title, setTitle] = useState<string>("Aucune partie n'est disponible :/");
 
     useEffect(() => {
         sendJsonMessage({
@@ -38,6 +39,9 @@ export const GamesList = () => {
         const data = JSON.parse(lastMessage.data);
         if (data.type === "seek") {
             console.log(data.games);
+            const numberOfGames: number = data.games.length;
+            if (numberOfGames != 0)
+                setTitle(data.games.length + " parties disponibles");
             setGames(data.games);
         }
     }, [lastMessage]);
@@ -48,12 +52,12 @@ export const GamesList = () => {
         )
     })
 
-        
+
 
     return (
         <main>
             <section>
-                <h1>Parties disponibles</h1>
+                <h1>{title}</h1>
             </section>
             <div className="games">
                 {gamesList}
