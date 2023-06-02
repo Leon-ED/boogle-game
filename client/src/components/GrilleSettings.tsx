@@ -81,8 +81,7 @@ export const GrilleSettings = ({ settings, onSettingsChange, gameID, isAdmin, is
                             setPolitiqueScore(parseInt(e.target.value));
                         }
                     } {...(isAdmin ? {} : { disabled: true })} >
-
-                        <option id="politique_1" value="1" selected>1 point par mot</option>
+                        <option id="politique_1" value="1" >1 point par mot</option>
                         <option id="politique_2" value="2">1 point par lettre</option>
                         <option id="politique_3" value="3">Par fréquence des mots</option>
                     </select>

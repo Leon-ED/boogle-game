@@ -173,7 +173,7 @@ export const GameManager = () => {
             <div className="lobby-player-list">
             {users.map((user) => {
                 return (
-                    <Player idUser={user.idUser} name={user.login} />
+                    <Player key={user.idUser} idUser={user.idUser} name={user.login} />
                 )
             })}
             </div>
