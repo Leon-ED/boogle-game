@@ -156,7 +156,7 @@ function Message(message: any) {
     <div className={className}>
       <div className='message-header'>
         <span className='message-author'>{message.author}</span>
-        <span className='message-date'>{message.date}</span>
+        <span className='message-date'>{new Date(message.date).toLocaleTimeString()}</span>
       </div>
       <div className='message-content'>{message.content}</div>
     </div>
