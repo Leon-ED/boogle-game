@@ -38,7 +38,6 @@ export const GamesList = () => {
         if (!lastMessage) return;
         const data = JSON.parse(lastMessage.data);
         if (data.type === "seek") {
-            console.log(data.games);
             const numberOfGames: number = data.games.length;
             if (numberOfGames != 0)
                 setTitle(data.games.length + " parties disponibles");

@@ -60,7 +60,6 @@ export const GameManager = () => {
                 navigate("/login")
             }
         })
-        console.log(id);
         // S'il y a un id alors on vérifie que la partie existe, sinon on redirige vers la page d'accueil
         if (id) {
             verifGameID(id).then((data) => {
@@ -100,7 +99,6 @@ export const GameManager = () => {
             if (webSocketRef.current) {
                 webSocketRef.current.close();
             }else{
-                console.log("websocket null");
             }
         }
 
@@ -109,7 +107,7 @@ export const GameManager = () => {
     useEffect(() => {
         const path = window.location.pathname.split("/")[1];
         switch (path) {
-            case "game": setIsGameStarted(true); console.log("handleGameURL"); break;
+            case "game": setIsGameStarted(true); break;
             case "create": if(gameID){ navigate("/lobby/" + gameID); } else { } break;
         }
     }, [window.location.pathname]);
@@ -133,10 +131,7 @@ export const GameManager = () => {
         if (lastMessage === null)
             return;
         const data = JSON.parse(lastMessage.data);
-        console.log(data);
         if(data.type === "redirect"){
-            console.log("redirect");
-            console.log(data.url);
             navigate(data.url);
         }
         if (data.type === "update") {
@@ -156,7 +151,6 @@ export const GameManager = () => {
             if(webSocketRef.current){
                 webSocketRef.current.close();
             }else{
-                console.log("websocket null");
             }
 
             setIsGameStarted(true);
@@ -216,7 +210,6 @@ export const GameManager = () => {
 
 
     function handleGameURL() {
-        console.log("game: " + id);
         if (!id)
             return;
         const JSON = {
@@ -231,11 +224,9 @@ export const GameManager = () => {
         if(webSocketRef.current){
             webSocketRef.current.close();
         }else{
-            console.log("websocket null");
         }
         if (!isAdmin || !boolean)
             return;
-        console.log("start");
         setIsGameStarted(true);
         sendMessage(JSON.stringify({
             type: "start",

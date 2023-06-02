@@ -129,7 +129,6 @@ export default Chat;
 
 function Message(message: any) {
   const system = message.system;
-  console.log(message);
   if (system == true) {
     return (
 

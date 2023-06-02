@@ -19,7 +19,6 @@ export const MyAccount = () => {
 
     useEffect(() => {
         const user = localStorage.getItem("user");
-        console.log(user);
         if (user) {
             const userOBj: User = JSON.parse(user);
             setImage(BACKEND_URL + "/account/get/image/" + userOBj.idUser);
@@ -74,7 +73,6 @@ export const MyAccount = () => {
                 })
                     .then((res) => res.json())
                     .then((res) => {
-                        console.log(res);
                         setImage(BACKEND_URL + "/account/get/image/" + user?.idUser+"?"+Date.now());
                     
                     });

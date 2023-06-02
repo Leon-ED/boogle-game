@@ -46,8 +46,6 @@ export const GrilleMultijoueur = ({lignes, colonnes,grilleProps,onWordSent,child
 
         setGrille2D(newGrille2D);
         setGrille1D(grilleProps);
-        console.log(grilleProps);
-        console.log(grille1D);
     }
 
 

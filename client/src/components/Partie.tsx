@@ -69,7 +69,6 @@ export const Partie = (props: any) => {
         const lastMessageData = JSON.parse(lastMessage.data);
         console.error(lastMessageData);
         if (lastMessageData.type === "start") {
-            console.log(lastMessageData);
             setGrilleProps({
                 lignes: lastMessageData.settings.lignes,
                 colonnes: lastMessageData.settings.colonnes,

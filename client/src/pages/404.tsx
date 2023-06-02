@@ -38,7 +38,6 @@ function Error404() {
 const getRandomDefinition = async () => {
     const response = await fetch(BACKEND_URL + "/api/definitions/random");
     const data = await response.json();
-    console.log(data);
     return data;
 }
 

@@ -129,7 +129,6 @@ export const GrilleSettings = ({ settings, onSettingsChange, gameID, isAdmin, is
     }
 
     function handleStart() {
-        console.log("start");
         isStarted(true);
     }
 }

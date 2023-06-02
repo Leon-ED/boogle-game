@@ -21,7 +21,6 @@ export const ViewAccount = () => {
         getUserInfo(idUser).then((user) => {
             if (user) {
                 setImage(BACKEND_URL + "/account/get/image/" + user.idUser);
-                console.log(user);
                 setUser(user);
             } else {
                 setUser(null);

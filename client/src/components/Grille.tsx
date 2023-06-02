@@ -133,7 +133,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
                         } />
                     </div>
                     <div className="grille-header-container">
-                        <label htmlFor="temps">Temps : Indisponible</label>
+                        <label htmlFor="temps">Temps</label>
                         <input type="range" name="temps" defaultValue="4" min="1" max="10" />
                     </div>
 
@@ -141,7 +141,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
                 </div>
             </section>
             <section id="grille-sec">
-                <h1>Temps: Indisponible</h1>
+                <h1>Temps</h1>
                 <div id="grille-sec-container">
                     <div id="grille" className="grille" >
 

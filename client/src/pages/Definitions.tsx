@@ -34,11 +34,9 @@ function Definitions() {
                 return response.json();
             })
             .then(data => {
-                console.log(data);
                 if (data.status === "error") {
                     setDefinitions([]);
                     setError(true);
-                    console.log(error);
                     return;
                 }
                 setError(false);
