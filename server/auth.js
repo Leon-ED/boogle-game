@@ -107,15 +107,6 @@ register = async function (req, res, next) {
   await conn.execute(query, params);
   await conn.end();
   return sendRes(res, 'success', 200, 'Inscription réussie');
-
-
-
-
-
-
-
-
-
 }
 
 

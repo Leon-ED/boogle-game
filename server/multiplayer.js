@@ -8,7 +8,7 @@ initMultiplayer = function (server) {
     const wss = new WebSocket.Server({ noServer: true });
 
 
-    
+
 
     // Attribue un id unique à un utilisateur
     wss.getUniqueID = function () {
@@ -21,7 +21,7 @@ initMultiplayer = function (server) {
     const interval = setInterval(function ping() {
         wss.clients.forEach(function each(ws) {
             //console.log("On teste si le client est alive");
-            if (ws.isAlive === false) {  return ws.terminate(); }
+            if (ws.isAlive === false) { return ws.terminate(); }
             ws.isAlive = false;
             ws.ping();
         });
@@ -57,7 +57,7 @@ initMultiplayer = function (server) {
             switch (message.type) {
                 case 'seek':
                     return handleSeek(ws, message);
-                
+
                 case 'new_game':
                     return handleNewGame(ws, message);
                 case 'join':
@@ -85,7 +85,7 @@ initMultiplayer = function (server) {
     });
     return wss;
 }
-function handleEnd(game){
+function handleEnd(game) {
     game.statut = "ended";
     game.players.forEach((player) => {
         player.send(JSON.stringify({
@@ -94,10 +94,10 @@ function handleEnd(game){
         }));
     }
     );
-    sendRedirect(game.players[0], "/recap/"+ game.id);
+    sendRedirect(game.players[0], "/recap/" + game.id);
     delete games[game.id];
     // TODO : enregistrer la partie en BDD
-    
+
 
 
 
@@ -113,7 +113,7 @@ function handleGuess(ws, message) {
     }
     console.log("On vérifie le mot : " + guess + " proposé par  " + ws.user.idUser);
     // On vérifie premièrement si le mot est valide pour la recherche
-    if(!jeu.preVerifMot(guess,game.settings.grille)){
+    if (!jeu.preVerifMot(guess, game.settings.grille)) {
         console.log("Le mot n'est pas valide pour la recherche");
         return ws.send(JSON.stringify({
             type: 'guess',
@@ -123,7 +123,7 @@ function handleGuess(ws, message) {
 
     }
     // Ensuite, si le mot est dans la grille
-    if(!game.word_list.includes(guess)){
+    if (!game.word_list.includes(guess)) {
         console.log("Le mot n'est pas dans la liste");
         return ws.send(JSON.stringify({
             type: 'guess',
@@ -132,12 +132,12 @@ function handleGuess(ws, message) {
         }));
     }
 
-    
+
     // Si le mot de blocage des mots est activé alors on vérifie si le mot a déjà été trouvé dans par un des joueurs
-    if(game.settings.bloquerMots){
+    if (game.settings.bloquerMots) {
         console.log("Le mode bloquer est activé");
         game.players.forEach((player) => {
-            if(game.settings.foundWords[player.user.idUser].includes(guess)){
+            if (game.settings.foundWords[player.user.idUser].includes(guess)) {
                 console.log("Le mot a déjà été trouvé par un joueur");
                 return ws.send(JSON.stringify({
                     type: 'guess',
@@ -153,7 +153,7 @@ function handleGuess(ws, message) {
     // Si le mode bloquer n'est pas activé, on regarde juste dans la liste
     // du joueur qui a envoyé le mot
 
-    if(!game.settings.foundWords)
+    if (!game.settings.foundWords)
         throw new Error("foundWords is undefined");
     if (game.settings.foundWords[ws.user.idUser].includes(guess)) {
         return;
@@ -169,7 +169,7 @@ function handleGuess(ws, message) {
 }
 
 
-function sendScoreUpdate(game,bloquer) {
+function sendScoreUpdate(game, bloquer) {
 
     const scores = [];
     for (const player of game.players) {
@@ -196,11 +196,11 @@ function sendScoreUpdate(game,bloquer) {
 /**
  * Renvois la liste des parties disponibles
  */
-function handleSeek(ws,message){
+function handleSeek(ws, message) {
     const gamesList = [];
     for (const gameID in games) {
         const game = games[gameID];
-        if(game.statut == "lobby"){
+        if (game.statut == "lobby") {
             const gameObj = {
                 id: game.id,
                 adminID: game.players.find(player => player.user.idUser === game.adminID).user.pseudoUser,
@@ -237,15 +237,17 @@ async function handleStart(ws, message) {
         return;
     }
     game.statut = "game";
-    setTimeout(() => {
-        handleEnd(game);
-        console.log("Fin de la partie");
-    }, game.settings.temps * 1000);
+
+
+    // setTimeout(() => {
+    //     handleEnd(game);
+    //     console.log("Fin de la partie");
+    // }, game.settings.temps * 1000);
     const colonnes = game.settings.colonnes;
     const lignes = game.settings.lignes;
     game.settings.grille = await jeu.getGrille(colonnes, lignes, game.settings.langue);
     game.word_list = await jeu.solve(game.settings.grille, lignes, colonnes);
-    if(!game.settings.foundWords)
+    if (!game.settings.foundWords)
         game.settings.foundWords = [];
     //console.log("On envoie la grille à tous les joueurs");
     game.players.forEach((player) => {
@@ -258,7 +260,7 @@ async function handleStart(ws, message) {
         }));
     });
 
-    }
+}
 
 
 
@@ -266,16 +268,16 @@ function heartbeat() {
     this.isAlive = true;
 }
 
-async function handleNewGame(ws,message){
-    if(isPlayerAlreadyInAGame(ws.user)){
-        sendError2(ws,'new_game', "already_in_game", "Vous êtes déjà dans une partie");
-        sendRedirect(ws, "/lobby/"+ getPlayerCurrentGame(ws).id);
+async function handleNewGame(ws, message) {
+    if (isPlayerAlreadyInAGame(ws.user)) {
+        sendError2(ws, 'new_game', "already_in_game", "Vous êtes déjà dans une partie");
+        sendRedirect(ws, "/lobby/" + getPlayerCurrentGame(ws).id);
         console.log("Création annulée: l'utilisateur est déjà dans une partie");
         return;
     }
     console.log(ws.user.login + " veut créer une partie")
-    const game = await jeu.createGame(token = null,user = ws.user);
-    if(game == false){
+    const game = await jeu.createGame(token = null, user = ws.user);
+    if (game == false) {
         ws.user.inCreateGame = false;
         sendError(ws, "error", "Une erreur est survenue lors de la création de la partie");
         console.log("Création annulée: erreur lors de la création de la partie");
@@ -300,7 +302,7 @@ async function handleNewGame(ws,message){
 
     // sendRedirect(ws, "/join/"+ game.idPartie);
 
-    
+
 
 
 
@@ -319,20 +321,20 @@ async function handleSettings(ws, message) {
     }
     game.settings = message.settings;
     //console.log("On envoie l'update");
-    sendGameUpdate(ws,game);
+    sendGameUpdate(ws, game);
 
 
 
 }
 async function handleJoin(ws, message) {
-    if(!message.gameID)
+    if (!message.gameID)
         return;
 
     // Si la partie n'existe pas, on la crée
     if (!games[message.gameID]) {
         console.log("La partie n'existe pas, on la crée");
-        if(message.status == "game")
-            await createGame(ws, message,"game");
+        if (message.status == "game")
+            await createGame(ws, message, "game");
         else
             await createGame(ws, message);
         return;
@@ -340,22 +342,22 @@ async function handleJoin(ws, message) {
     const game = games[message.gameID];
 
     // Si un joueur s'est déconnecté et qu'il revient, on le remet dans la partie
-    if(message.status == "game" && game.statut == "game" && !game.players.includes(ws.user)){
+    if (message.status == "game" && game.statut == "game" && !game.players.includes(ws.user)) {
         console.log("Un joueur s'est déconnecté et revient, on le remet dans la partie");
-        sendGameStart(ws,game);
+        sendGameStart(ws, game);
     }
 
 
     // Si l'utilisateur est déjà dans la partie, on c
-    if (isPlayerAlreadyInGame(game, ws.user)){
+    if (isPlayerAlreadyInGame(game, ws.user)) {
         replaceOldWSClient(ws, game);
-        sendGameUpdate(ws,game);
+        sendGameUpdate(ws, game);
         sendNewPlayerUpdate(game);
         console.log("L'utilisateur est déjà dans la partie");
         return;
     }
     // Max 4 joueurs
-    if (game.players.length >= 4){
+    if (game.players.length >= 4) {
         // TODO: Rajouter un return quand on aura fix le problème des clients inactifs
     }
     // On ajoute le joueur à la partie
@@ -363,8 +365,8 @@ async function handleJoin(ws, message) {
 
 
     // On envoie un update à tous les joueurs
-    sendGameUpdate(ws,game);
-    if(message.status == "game")
+    sendGameUpdate(ws, game);
+    if (message.status == "game")
         sendScoreUpdate(game, game.settings.bloquerMots);
     sendNewPlayerUpdate(game);
 }
@@ -377,9 +379,9 @@ function isPlayerAlreadyInGame(game, user) {
     }
     return false;
 }
-function replaceOldWSClient(ws,game){
-   console.log("On remplace l'ancien client par le nouveau");
-   if(!ws.user)
+function replaceOldWSClient(ws, game) {
+    console.log("On remplace l'ancien client par le nouveau");
+    if (!ws.user)
         return;
     const index = game.players.findIndex(player => player.user.idUser === ws.user.idUser);
     console.log(index);
@@ -390,7 +392,7 @@ function replaceOldWSClient(ws,game){
 
 
 
-function sendNewPlayerUpdate(game){
+function sendNewPlayerUpdate(game) {
     const players = [];
     game.players.forEach((player) => {
         console.log("On envoie la liste des joueurs à : " + player.user.idUser);
@@ -415,7 +417,7 @@ function sendNewPlayerUpdate(game){
 
 
 
-function sendGameStart(client,game){
+function sendGameStart(client, game) {
     console.log("Game start ordonné  pour : " + client.user.idUser);
     client.send(JSON.stringify({
         type: 'start',
@@ -427,55 +429,55 @@ function sendGameStart(client,game){
 
 function sendGameUpdate(ws, gameToUpdate) {
     console.log("On envoie l'update à tous les joueurs, gameToUpdate : " + gameToUpdate.players.length);
-    
+
     // Create a deep copy of the gameToUpdate object without circular references
     const game = deepCopyWithoutCircular(gameToUpdate);
-    
+
     for (const player of gameToUpdate.players) {
-      if (player.readyState !== WebSocket.OPEN) {
-        continue;
-      }
-      
-      if (player.user.idUser === gameToUpdate.adminID) {
-        continue;
-      }
-      
-      player.send(JSON.stringify({
-        type: 'update',
-        game: game,
-      }));
+        if (player.readyState !== WebSocket.OPEN) {
+            continue;
+        }
+
+        if (player.user.idUser === gameToUpdate.adminID) {
+            continue;
+        }
+
+        player.send(JSON.stringify({
+            type: 'update',
+            game: game,
+        }));
     }
-  }
-  
-  // Function to create a deep copy of an object without circular references
-  function deepCopyWithoutCircular(obj) {
+}
+
+// Function to create a deep copy of an object without circular references
+function deepCopyWithoutCircular(obj) {
     const cache = new WeakMap();
-  
+
     function clone(value) {
-      if (typeof value === 'object' && value !== null) {
-        if (cache.has(value)) {
-          return cache.get(value);
+        if (typeof value === 'object' && value !== null) {
+            if (cache.has(value)) {
+                return cache.get(value);
+            }
+
+            const isArray = Array.isArray(value);
+            const cloneObj = isArray ? [] : {};
+
+            cache.set(value, cloneObj);
+
+            const keys = isArray ? value : Object.keys(value);
+            for (const key of keys) {
+                cloneObj[key] = clone(value[key]);
+            }
+
+            return cloneObj;
         }
-  
-        const isArray = Array.isArray(value);
-        const cloneObj = isArray ? [] : {};
-  
-        cache.set(value, cloneObj);
-  
-        const keys = isArray ? value : Object.keys(value);
-        for (const key of keys) {
-          cloneObj[key] = clone(value[key]);
-        }
-  
-        return cloneObj;
-      }
-  
-      return value;
+
+        return value;
     }
-  
+
     return clone(obj);
-  }
-  
+}
+
 function isPlayerAlreadyInAGame(user) {
     for (const gameID in games) {
         const game = games[gameID];
@@ -486,26 +488,26 @@ function isPlayerAlreadyInAGame(user) {
     return false;
 }
 
-async function createGame(ws, message,status = "lobby") {
-    if(isPlayerAlreadyInAGame(ws.user)){
-        sendError2(ws,'new_game', "already_in_game", "Vous êtes déjà dans une partie");
-        sendRedirect(ws, "/lobby/"+ getPlayerCurrentGame(ws).id);
+async function createGame(ws, message, status = "lobby") {
+    if (isPlayerAlreadyInAGame(ws.user)) {
+        sendError2(ws, 'new_game', "already_in_game", "Vous êtes déjà dans une partie");
+        sendRedirect(ws, "/lobby/" + getPlayerCurrentGame(ws).id);
         console.log("Création annulée: l'utilisateur est déjà dans une partie");
         return;
     }
 
 
-    if (!message.token || !message.gameID){
+    if (!message.token || !message.gameID) {
         console.log("Création annulée: token ou gameID non fourni");
         return;
     }
     const game = await jeu.getGameFromUUID(message.gameID);
-    if (!game){
+    if (!game) {
         console.log("Création annulée: partie non trouvée en BDD");
         return;
     }
 
-    if (ws.user.idUser != game.gameAdmin){
+    if (ws.user.idUser != game.gameAdmin) {
         console.log("Création annulée: pas admin");
         return;
     }
@@ -533,24 +535,24 @@ async function createGame(ws, message,status = "lobby") {
 
     ws.send(JSON.stringify({
         type: 'update',
-        game: gameObj,
+        game: deepCopyWithoutCircular(gameObj)
     }));
     sendNewPlayerUpdate(gameObj);
     games[message.gameID] = gameObj;
     console.log("Partie crée");
-    if(status == "game"){
-        handleStart(ws,message);
+    if (status == "game") {
+        handleStart(ws, message);
     }
 
 }
-async function  createGameInternal(ws, message) {
+async function createGameInternal(ws, message) {
     const game = await jeu.getGameFromUUID(message.gameID);
-    if (!game){
+    if (!game) {
         console.log("Création annulée: partie non trouvée en BDD");
         return;
     }
 
-    if (ws.user.idUser != game.gameAdmin){
+    if (ws.user.idUser != game.gameAdmin) {
         console.log("Création annulée: pas admin");
         return;
     }
@@ -588,12 +590,12 @@ async function  createGameInternal(ws, message) {
 
 
 function handleRejoin(ws, message) {
-    if(!message.gameID)
+    if (!message.gameID)
         return;
     const game = games[message.gameID];
-    if(!game)
+    if (!game)
         return
-    
+
     sendNewPlayerUpdate(game);
 
     ws.send(JSON.stringify({
@@ -614,7 +616,7 @@ function getPlayerCurrentGame(ws) {
     return null;
 }
 
-function sendError2(ws,type, error_type, message) {
+function sendError2(ws, type, error_type, message) {
     ws.send(JSON.stringify({
         type,
         status: 'error',

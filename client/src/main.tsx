@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import  createRoot  from 'react-dom';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
 import {ConnectedNavBar,NavBar} from './components/NavBar'
@@ -68,4 +68,5 @@ function Main() {
   );
 }
 
-ReactDOM.render(<Main />, document.getElementById('root'));
+createRoot.render(<Main />, document.getElementById('root'));
+
