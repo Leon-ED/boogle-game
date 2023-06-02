@@ -66,10 +66,10 @@ export const GrilleSettings = ({ settings, onSettingsChange, gameID, isAdmin, is
                     } {...(isAdmin ? {} : { disabled: true })} />
                 </div>
                 <div className="grille-header-container">
-                    <label htmlFor="temps">Temps : Indisponible</label>
-                    <input type="range" name="temps" value={time} min="1" max="10" onChange={
-                        () => {
-                            setTime(parseInt(time.toString()));
+                    <label htmlFor="temps">Temps</label>
+                    <input type="number" name="temps" value={time} min="1" max="10" onChange={
+                        (e) => {
+                            setTime(parseInt(e.target.value));
                         }
 
                     }{...(isAdmin ? {} : { disabled: true })} />
