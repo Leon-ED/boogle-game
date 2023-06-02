@@ -17,6 +17,10 @@ dump.sql
 bin/
 mysql
 definitions_*.json
+frwiktionary-latest-pages-articles.xml.bz2
+dico_fr.lex
+frequences.txt
+words_list_fr.txt
 /docs/.vitepress/cache
 /packages/vite/LICENSE
 dist
