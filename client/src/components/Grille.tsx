@@ -134,7 +134,7 @@ function Grille(props: { largeur: number, hauteur: number }) {
                     </div>
                     <div className="grille-header-container">
                         <label htmlFor="temps">Temps : Indisponible</label>
-                        <input type="range" name="temps" value="4" min="1" max="10" />
+                        <input type="range" name="temps" defaultValue="4" min="1" max="10" />
                     </div>
 
                     <button value="Générer" onClick={generateGrille} >Générer</button>
