@@ -91,16 +91,10 @@ initMultiplayer = function (server) {
  * @param {*} game  - Partie en cours
  */
 function handleEnd(game) {
-
+    console.log("handleEnd : Fin de la partie");
     // On met le statut à jour et on notifie tous les joueurs
     game.statut = "ended";
-    game.players.forEach((player) => {
-        player.send(JSON.stringify({
-            type: 'end',
-            scores: game.settings.foundWords,
-        }));
-    }
-    );
+    sendToAllPlayers(game.players, { type: 'end', scores: game.settings.foundWords });
     // On redirige tous les joueurs vers la page de récapitulatif de la partie
     sendRedirect(game.players[0], "/recap/" + game.id);
 
@@ -266,10 +260,11 @@ async function handleStart(ws, message) {
 
 
     // Programmation de la fin de la partie
+    console.log("On programme la fin de la partie qui finira dans : " + game.settings.temps/1_000 + " secondes");
     game.timeout = setTimeout(() => {
         handleEnd(game);
-        console.log("Fin de la partie");
-    }, game.settings.temps); // Le temps est déja en ms
+        console.log("Fin de la partie, timeout terminé");
+    }, game.settings.temps * 1_0000 * 60);
 
     // On récupère la grille et la liste des mots à trouver
     const colonnes = game.settings.colonnes;
@@ -383,6 +378,8 @@ async function handleSettings(ws, message) {
     if (game.adminID != ws.user.idUser) {
         return;
     }
+    console.log("handleSettings: Mise à jour des paramètres de la partie par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
+    console.log(message.settings);
     game.settings = message.settings;
     sendGameUpdate(ws, game);
 }
@@ -501,7 +498,7 @@ function sendGameUpdate(ws, gameToUpdate) {
     // Create a deep copy of the gameToUpdate object without circular references
     const game = deepCopyWithoutCircular(gameToUpdate);
     delete game.players; // La liste contient des informations sensibles (token, etc), on ne l'envoie pas aux clients
-    sendToAllPlayers(gameToUpdate.players, { type: 'update', game });
+    sendToAllPlayers(deepCopyWithoutCircular(gameToUpdate.players), { type: 'update', game });
 }
 
 /**

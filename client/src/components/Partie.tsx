@@ -14,7 +14,14 @@ interface Player{
     mots: string[];
     
 }
-
+interface Settings {
+    lignes: number,
+    colonnes: number,
+    temps: number,
+    gameID: string,
+    bloquerMots: boolean,
+    politiqueScore: number,
+}
 interface GrilleProps {
     lignes: number,
     colonnes: number,
@@ -33,6 +40,7 @@ export const Partie = (props: any) => {
     const { lastMessage, sendMessage } = useWebSocket(MP_WS_URL);
     const { id } = useParams();
     const users = useContext(PlayersContext);
+    const [settings, setSettings] = useState<Settings>({ lignes: 4, colonnes: 4, temps: 3, gameID: "", bloquerMots: false, politiqueScore: 1 });
     const [players, setPlayers] = useState<Player[]>([]);
     const [playersStats, setPlayersStats] = useState<PlayerStats[]>([]);
 
@@ -74,6 +82,7 @@ export const Partie = (props: any) => {
                 colonnes: lastMessageData.settings.colonnes,
                 grilleProps: lastMessageData.grille.split(" "),
             });
+            setSettings(lastMessageData.settings);
         }
         if (lastMessageData.type === "move_event") {
             setPlayersStats(lastMessageData.scores);
@@ -108,7 +117,7 @@ export const Partie = (props: any) => {
 
     return (
         <div className="multiplayer-line">
-        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} onWordSent={handleWordSend} temps={3 * 60 * 1_000} >
+        <GrilleMultijoueur lignes={grilleProps.lignes} colonnes={grilleProps.colonnes} grilleProps={grilleProps.grilleProps} onWordSent={handleWordSend} temps={settings.temps*60_000}>
         { playersStats.length > 0 && <TableauScores stats={playersStats} />}
 
         </GrilleMultijoueur>

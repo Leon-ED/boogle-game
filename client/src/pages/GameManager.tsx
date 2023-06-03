@@ -130,6 +130,7 @@ export const GameManager = () => {
     useEffect(() => {
         if (lastMessage === null)
             return;
+            console.log(lastMessage);
         const data = JSON.parse(lastMessage.data);
         if(data.type === "redirect"){
             navigate(data.url);
