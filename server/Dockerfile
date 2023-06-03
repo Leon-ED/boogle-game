@@ -2,34 +2,31 @@ FROM node:18-alpine
 
 # Create app directory
 WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package*.json /app/
+
 # Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json /app
 RUN npm install
 
-
+# Install express module
 RUN npm i express --save
-# If you are building your code for production
-# RUN npm ci --only=production
-# Bundle app source
-# RUN npm i nodemon --save
-RUN apk update && apk add nano
-# install java version 17
-RUN apk add --no-cache openjdk17-jre
 
-#add bin/jdict.jar to the path
-#install GCC
-RUN apk add --no-cache build-base
-#install make
-RUN apk add --no-cache make
-#run the makefile in dictionnary
+# Update packages and install nano, java, build-base, and make
+RUN apk update && \
+    apk add --no-cache nano openjdk17-jre build-base make
 
-
-
-
+# Copy the entire project to the app directory
 COPY . .
+
+# Build the makefile in the dictionnary directory
 RUN make all -C dictionnary
+
+# Add bin/jdict.jar to the path
 ENV PATH="/app/dictionnary/bin:${PATH}"
+
+# Expose port 4000
 EXPOSE 4000
-CMD [ "npx", "nodemon", "server.js", "-L"]
+
+# Start the server using nodemon
+CMD [ "npx", "nodemon", "server.js", "-L" ]
