@@ -38,7 +38,15 @@ deleteUserToken = async function (idUser) {
 
 check = async function (req, res, next) {
   const user = await returnUserFromToken(req.body.token);
-  return (user == false ? res.status(401).json({ status: 'error', message: 'Token invalide' }) : res.status(200).json({ status: 'success', message: 'Token valide' }));
+  const userWithoutPassword = {
+    idUser: user.idUser,
+    login: user.login,
+    email: user.email,
+    pseudoUser: user.pseudoUser,
+    photo: user.photoProfil,
+    hash: "74635e7z4ez5e41z75ez4e5e",
+  }
+  return (user == false ? res.status(401).json({ status: 'error', message: 'Token invalide' }) : res.status(200).json({ status: 'success', message: 'Token valide', user: userWithoutPassword }));
 }
 
 

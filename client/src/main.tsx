@@ -35,6 +35,7 @@ function Main() {
     }
     ).then((data) => {
       if (data.status === "success") {
+        localStorage.setItem("user", JSON.stringify(data.user));
         setLoggedIn(true);
       } else {
         setLoggedIn(false);
