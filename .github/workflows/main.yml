@@ -1,4 +1,7 @@
-on: push
+on:
+    push:
+      branches:
+        - production
 name: Publish Website
 jobs:
   web-deploy:
