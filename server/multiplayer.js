@@ -3,6 +3,7 @@ const auth = require('./auth');
 const jeu = require('./jeu');
 
 const games = {};
+const seekers = {};
 
 initMultiplayer = function (server) {
     const wss = new WebSocket.Server({ noServer: true });
@@ -49,28 +50,27 @@ initMultiplayer = function (server) {
                     console.log("L'utilisateur n'est pas connecté");
                     return;
                 }
-                // console.log("L'utilisateur est connecté");
                 ws.user = user;
             }
 
 
             switch (message.type) {
-                case 'seek':
+                case 'seek': // Gère les joueurs en recherche de parties 
                     return handleSeek(ws, message);
 
-                case 'new_game':
+                case 'new_game': // Gère la création d'une partie
                     return handleNewGame(ws, message);
-                case 'join':
+                case 'join': // Gère la connexion à une partie
                     return handleJoin(ws, message);
-                case 'rejoin':
+                case 'rejoin': // Gère la reconnexion à une partie
                     return handleRejoin(ws, message);
-                case 'leave':
+                case 'leave': // Gère la déconnexion d'une partie (non implémenté)
                     return handleLeave(ws, message);
-                case 'guess':
+                case 'guess': // Gère la proposition d'un mot
                     return handleGuess(ws, message);
-                case 'start':
+                case 'start': // Gère le démarrage d'une partie
                     return handleStart(ws, message);
-                case 'settings':
+                case 'settings': // Gère les le changeement des paramètres d'une partie
                     return handleSettings(ws, message);
             }
 
@@ -85,7 +85,14 @@ initMultiplayer = function (server) {
     });
     return wss;
 }
+
+/**
+ *  Gère la fin d'une partie (déconnexion d'un joueur, fin du temps, ...)
+ * @param {*} game  - Partie en cours
+ */
 function handleEnd(game) {
+
+    // On met le statut à jour et on notifie tous les joueurs
     game.statut = "ended";
     game.players.forEach((player) => {
         player.send(JSON.stringify({
@@ -94,27 +101,36 @@ function handleEnd(game) {
         }));
     }
     );
+    // On redirige tous les joueurs vers la page de récapitulatif de la partie
     sendRedirect(game.players[0], "/recap/" + game.id);
+
+    // On supprime la partie de la liste des parties du WS
     delete games[game.id];
-    // TODO : enregistrer la partie en BDD
-
-
-
+    // TODO : enregistrer la partie en BDD et toutes les données assoociées
 
 }
 
+/**
+ * Gère la proposition d'un mot par un joueur
+ * @param {*} ws - Client qui a envoyé la proposition
+ * @param {*} message - Message contenant le mot proposé
+ */
 
 function handleGuess(ws, message) {
+    // On récupère la partie et le mot 
     const guess = message.word.toUpperCase();
     const game = games[message.gameID];
+    // Impossible de faire une proposition si la partie n'existe pas
     if (!game) {
-        console.log("La partie n'existe pas");
+        console.log("handleGuess : La partie n'existe pas");
         return;
     }
-    console.log("On vérifie le mot : " + guess + " proposé par  " + ws.user.idUser);
+    console.log("handleGuess : Le mot proposé est : " + guess + " par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
+
+
     // On vérifie premièrement si le mot est valide pour la recherche
     if (!jeu.preVerifMot(guess, game.settings.grille)) {
-        console.log("Le mot n'est pas valide pour la recherche");
+        console.log("handleGuess : Le mot n'est pas valide pour la recherche");
         return ws.send(JSON.stringify({
             type: 'guess',
             status: 'invalid',
@@ -124,7 +140,7 @@ function handleGuess(ws, message) {
     }
     // Ensuite, si le mot est dans la grille
     if (!game.word_list.includes(guess)) {
-        console.log("Le mot n'est pas dans la liste");
+        console.log("handleGuess : Le mot n'est pas dans la liste du solveur");
         return ws.send(JSON.stringify({
             type: 'guess',
             status: 'invalid',
@@ -135,10 +151,10 @@ function handleGuess(ws, message) {
 
     // Si le mot de blocage des mots est activé alors on vérifie si le mot a déjà été trouvé dans par un des joueurs
     if (game.settings.bloquerMots) {
-        console.log("Le mode bloquer est activé");
+        console.log("handleGuess : Le mode bloquer (mots uniques) est activé");
         game.players.forEach((player) => {
             if (game.settings.foundWords[player.user.idUser].includes(guess)) {
-                console.log("Le mot a déjà été trouvé par un joueur");
+                console.log("handleGuess : Le mot a déjà été trouvé par un joueur");
                 return ws.send(JSON.stringify({
                     type: 'guess',
                     status: 'invalid',
@@ -147,40 +163,46 @@ function handleGuess(ws, message) {
             }
         });
         // Si le mot n'a pas été trouvé, on l'ajoute à la liste des mots trouvés du joueur
-        console.log("Le mot n'a pas été trouvé, on l'ajoute à la liste des mots trouvés du joueur");
+        console.log("handleGuess : Le joueur a bien trouvé un mot");
 
     }
-    // Si le mode bloquer n'est pas activé, on regarde juste dans la liste
-    // du joueur qui a envoyé le mot
 
+
+    // Ne devrait jamais arriver
     if (!game.settings.foundWords)
-        throw new Error("foundWords is undefined");
+        throw new RuntimeException("handleGuess : La liste des mots trouvés n'existe pas");
     if (game.settings.foundWords[ws.user.idUser].includes(guess)) {
         return;
     }
+
+
     // On envoie que le mot a été trouvé à tous les joueurs
     game.settings.foundWords[ws.user.idUser].push(guess);
     sendScoreUpdate(game, game.settings.bloquerMots);
 
-
-
-
-
 }
 
-
+/**
+ * Gère l'envoie en direct des informations de score à tous les joueurs
+ * @param {*} game  - Partie en cours 
+ * @param {*} bloquer  - Mode bloquer activé ou non
+ */
 function sendScoreUpdate(game, bloquer) {
 
     const scores = [];
+    // Pour chaque joueur on récupère son score et on l'ajoute à la liste des scores
     for (const player of game.players) {
         const score = {
             idUser: player.user.idUser,
             login: player.user.login,
             score: game.settings.foundWords[player.user.idUser].length,
+            // Particularité du mode non bloqué, on envoie pas les mots trouvés
+            // Car on ne veut pas que les joueurs puissent tricher
             words: bloquer ? game.settings.foundWords[player.user.idUser] : "Dans ce mode, les mots ne sont pas affichés",
         }
         scores.push(score);
     }
+    // On envoie les scores à tous les joueurs
     for (const player of game.players) {
         if (player.readyState !== WebSocket.OPEN) {
             continue;
@@ -198,6 +220,8 @@ function sendScoreUpdate(game, bloquer) {
  */
 function handleSeek(ws, message) {
     const gamesList = [];
+    if (!seekers[ws.id])
+        seekers[ws.id] = ws;
     for (const gameID in games) {
         const game = games[gameID];
         if (game.statut == "lobby") {
@@ -219,7 +243,9 @@ function handleSeek(ws, message) {
 
 
 }
-
+/**
+ *  Gère le démarage d'une partie
+ */
 async function handleStart(ws, message) {
     console.log("On démarre la partie");
     const game = games[message.gameID];
@@ -239,17 +265,33 @@ async function handleStart(ws, message) {
     game.statut = "game";
 
 
-    // setTimeout(() => {
-    //     handleEnd(game);
-    //     console.log("Fin de la partie");
-    // }, game.settings.temps * 1000);
+    // Programmation de la fin de la partie
+    game.timeout = setTimeout(() => {
+        handleEnd(game);
+        console.log("Fin de la partie");
+    }, game.settings.temps); // Le temps est déja en ms
+
+    // On récupère la grille et la liste des mots à trouver
     const colonnes = game.settings.colonnes;
     const lignes = game.settings.lignes;
-    game.settings.grille = await jeu.getGrille(colonnes, lignes, game.settings.langue);
-    game.word_list = await jeu.solve(game.settings.grille, lignes, colonnes);
+
+
+    // Si une erreur a eu lieu lors de ce processus, on annule la partie
+    try {
+        game.settings.grille = await jeu.getGrille(colonnes, lignes, game.settings.langue); // On récupère la grille
+        game.word_list = await jeu.solve(game.settings.grille, lignes, colonnes); // On récupère la liste des mots à trouver
+    }catch(err){
+        sendToAllPlayers(game.players, { type: 'error', error_type: 'error', message: 'Une erreur est survenue lors de la création de la partie' });
+        saveGameToDB(game,statut = "cancelled");
+        delete games[game.id];
+        return;
+    }
+
+
     if (!game.settings.foundWords)
         game.settings.foundWords = [];
-    //console.log("On envoie la grille à tous les joueurs");
+
+    // On créee la liste des mots trouvés pour chaque joueur et on leur envoie par la même occasion la grille et l'ordre de début de partie
     game.players.forEach((player) => {
         game.settings.foundWords[player.user.idUser] = [];
         console.log("On envoie la grille à : " + player.user.login);
@@ -260,19 +302,47 @@ async function handleStart(ws, message) {
         }));
     });
 
-}
+    // Mise à jour des parties disponibles (donc celle-ci n'est plus disponible)
+    updateAllSeekers();
 
+}
+/**
+ *  Envois un message à tous les client d'une liste
+ * @param {*} users_list - Liste des clients
+ * @param {*} message  - Message à envoyer
+ */
+function sendToAllPlayers(users_list, message) {
+    for (const user of users_list) {
+        user.send(JSON.stringify(message));
+    }
+
+}
+/**
+ *  Sauvegarde une partie en BDD
+ * @param {*} game  - Partie à sauvegarder
+ * @param {*} statut - Statut de la partie (ended, cancelled, ...)
+ */
+function saveGameToDB(game,statut = "ended") {
+
+}
 
 
 function heartbeat() {
     this.isAlive = true;
 }
 
+/**
+ * Gère les demandes de création de partie
+ * @param {*} ws - Client qui a envoyé la demande de nouvelle partie
+ * @param {*} message  - Message contenant le token de l'utilisateur
+ * @returns 
+ */
 async function handleNewGame(ws, message) {
+    console.log("handleNewGame: Tentative de création de partie par ->  " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
     if (isPlayerAlreadyInAGame(ws.user)) {
         sendError2(ws, 'new_game', "already_in_game", "Vous êtes déjà dans une partie");
         sendRedirect(ws, "/lobby/" + getPlayerCurrentGame(ws).id);
-        console.log("Création annulée: l'utilisateur est déjà dans une partie");
+        console.log("handleNewGame: Création annulée -> l'utilisateur est déjà dans une partie");
         return;
     }
     console.log(ws.user.login + " veut créer une partie")
@@ -280,7 +350,7 @@ async function handleNewGame(ws, message) {
     if (game == false) {
         ws.user.inCreateGame = false;
         sendError(ws, "error", "Une erreur est survenue lors de la création de la partie");
-        console.log("Création annulée: erreur lors de la création de la partie");
+        console.log("handleNewGame: Création annulée -> erreur lors de la création de la partie");
         return;
     }
 
@@ -295,44 +365,42 @@ async function handleNewGame(ws, message) {
         type: 'game_created',
         gameID: game,
     }));
-    console.log("Création réussie");
-
-
-
+    console.log("handleNewGame: Création réussie");
 
     // sendRedirect(ws, "/join/"+ game.idPartie);
-
-
-
-
-
-
 }
 
+/**
+ * Gère la mise à jour des paramètres de la partie par l'administateur
+ * @param {*} ws - Client qui a envoyé la mise à jour
+ * @param {*} message - Message contenant les paramètres de la partie
+ * @returns 
+ */
 async function handleSettings(ws, message) {
     const game = games[message.gameID];
     if (!game) {
-        //console.log("La partie n'existe pas");
         return;
     }
     if (game.adminID != ws.user.idUser) {
-        //console.log("L'utilisateur n'est pas admin");
         return;
     }
     game.settings = message.settings;
-    //console.log("On envoie l'update");
     sendGameUpdate(ws, game);
-
-
-
 }
+/**
+ *  Fait rejoindre une partie à un client
+ * @param {*} ws - Client qui veut rejoindre la partie
+ * @param {*} message  - Message contenant l'id de la partie
+ * @returns 
+ */
 async function handleJoin(ws, message) {
+    console.log("handleJoin: Tentative de connexion à une partie par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
     if (!message.gameID)
         return;
 
     // Si la partie n'existe pas, on la crée
     if (!games[message.gameID]) {
-        console.log("La partie n'existe pas, on la crée");
+        console.log("handleJoin: La partie n'existe pas, on la crée");
         if (message.status == "game")
             await createGame(ws, message, "game");
         else
@@ -343,7 +411,7 @@ async function handleJoin(ws, message) {
 
     // Si un joueur s'est déconnecté et qu'il revient, on le remet dans la partie
     if (message.status == "game" && game.statut == "game" && !game.players.includes(ws.user)) {
-        console.log("Un joueur s'est déconnecté et revient, on le remet dans la partie");
+        console.log("handleJoin: Un joueur s'est déconnecté et revient, on le remet dans la partie");
         sendGameStart(ws, game);
     }
 
@@ -353,7 +421,7 @@ async function handleJoin(ws, message) {
         replaceOldWSClient(ws, game);
         sendGameUpdate(ws, game);
         sendNewPlayerUpdate(game);
-        console.log("L'utilisateur est déjà dans la partie");
+        console.log("handleJoin: L'utilisateur est déjà dans la partie");
         return;
     }
     // Max 4 joueurs
@@ -371,16 +439,16 @@ async function handleJoin(ws, message) {
     sendNewPlayerUpdate(game);
 }
 
-function isPlayerAlreadyInGame(game, user) {
-    for (const player of game.players) {
-        if (player.user.idUser === user.idUser) {
-            return true;
-        }
-    }
-    return false;
-}
+
+/**
+ *  Remplace un ancien client WebSocket par un nouveau
+ * @description Il arrive de perdre la connexion avec l'ancien client, (F5, problème de connexion), il faut alors identifier et remplacer l'autre client par le nouveau
+ * @param {*} ws - Nouveau client
+ * @param {*} game - Partie à mettre à jour
+ * @returns 
+ */
 function replaceOldWSClient(ws, game) {
-    console.log("On remplace l'ancien client par le nouveau");
+    console.log("replaceOldWSClient: On remplace l'ancien client par le nouveau (id : " + ws.user.idUser + " pseudo: " + ws.user.pseudoUser + ")");
     if (!ws.user)
         return;
     const index = game.players.findIndex(player => player.user.idUser === ws.user.idUser);
@@ -391,32 +459,31 @@ function replaceOldWSClient(ws, game) {
 }
 
 
-
+/**
+ * Envois à tous les joueurs de la partie la liste des joueurs
+ * @param {*} game - Partie dont on souhaite envoyer la liste des joueurs
+ */
 function sendNewPlayerUpdate(game) {
     const players = [];
+
     game.players.forEach((player) => {
-        console.log("On envoie la liste des joueurs à : " + player.user.idUser);
+        console.log("sendNewPlayerUpdate: On envoie la liste des joueurs à : " + player.user.pseudoUser + "(" + player.user.idUser + ")");
         const playerObj = {
             idUser: player.user.idUser,
-            login: player.user.login,
+            login: player.user.pseudoUser,
         }
         players.push(playerObj);
     });
-    for (const player of game.players) {
 
-        if (player.readyState !== WebSocket.OPEN) {
-            continue;
-        }
-        player.send(JSON.stringify({
-            type: 'players_update',
-            players
-        }));
-
-    }
+    sendToAllPlayers(game.players, { type: 'players_update', players });
 }
 
 
-
+/**
+ * Envois à une client que la partie à débuté
+ * @param {*} client - Client à qui envoyer la redirection
+ * @param {*} game - Partie à rejoindre
+ */
 function sendGameStart(client, game) {
     console.log("Game start ordonné  pour : " + client.user.idUser);
     client.send(JSON.stringify({
@@ -426,30 +493,25 @@ function sendGameStart(client, game) {
     }));
 }
 
-
+/**
+ * Envois à tous les joueurs de la partie les infos de la partie
+ * @param {*} ws - Client (non utilisé, y passer null)
+ * @param {*} gameToUpdate 
+ */
 function sendGameUpdate(ws, gameToUpdate) {
     console.log("On envoie l'update à tous les joueurs, gameToUpdate : " + gameToUpdate.players.length);
 
     // Create a deep copy of the gameToUpdate object without circular references
     const game = deepCopyWithoutCircular(gameToUpdate);
-
-    for (const player of gameToUpdate.players) {
-        if (player.readyState !== WebSocket.OPEN) {
-            continue;
-        }
-
-        if (player.user.idUser === gameToUpdate.adminID) {
-            continue;
-        }
-
-        player.send(JSON.stringify({
-            type: 'update',
-            game: game,
-        }));
-    }
+    delete game.players; // La liste contient des informations sensibles (token, etc), on ne l'envoie pas aux clients
+    sendToAllPlayers(gameToUpdate.players, { type: 'update', game });
 }
 
-// Function to create a deep copy of an object without circular references
+/**
+ * Créé un objet sans références circulaires
+ * @param {*} obj - Objet à copier
+ * @returns  - Copie de l'objet sans références circulaires
+ */
 function deepCopyWithoutCircular(obj) {
     const cache = new WeakMap();
 
@@ -478,6 +540,11 @@ function deepCopyWithoutCircular(obj) {
     return clone(obj);
 }
 
+/**
+ * Vérifie toutes les parties à la recherche du joueur spécifié
+ * @param {*} user - Utilisateur à vérifier
+ * @returns - true si l'utilisateur est déjà dans une partie, false sinon
+ */
 function isPlayerAlreadyInAGame(user) {
     for (const gameID in games) {
         const game = games[gameID];
@@ -487,28 +554,58 @@ function isPlayerAlreadyInAGame(user) {
     }
     return false;
 }
+/**
+ * - Check si un joueur est dans la partie spécifiée
+ * @param {*} game - Partie à vérifier
+ * @param {*} user  - Utilisateur à vérifier
+ * @returns true si l'utilisateur est dans la partie, false sinon
+ */
+function isPlayerAlreadyInGame(game, user) {
+    for (const player of game.players) {
+        if (player.user.idUser === user.idUser) {
+            return true;
+        }
+    }
+    return false;
+}
 
+/**
+ * Fonction créant une partie
+ * Remplacée par createGameInternal
+ * Utilisée à des fins de rétrocompatibilité
+ * @deprecated
+ * @see createGameInternal  
+ * @param {*} ws 
+ * @param {*} message 
+ * @param {*} status 
+ * @returns 
+ */
 async function createGame(ws, message, status = "lobby") {
+    console.log("createGame: Tentative de création de partie par -> " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
+
+
     if (isPlayerAlreadyInAGame(ws.user)) {
         sendError2(ws, 'new_game', "already_in_game", "Vous êtes déjà dans une partie");
         sendRedirect(ws, "/lobby/" + getPlayerCurrentGame(ws).id);
-        console.log("Création annulée: l'utilisateur est déjà dans une partie");
+        console.log("createGame: Création annulée -> l'utilisateur est déjà dans une partie");
         return;
     }
+
 
 
     if (!message.token || !message.gameID) {
-        console.log("Création annulée: token ou gameID non fourni");
+        console.log("createGame: Création annulée -> token ou gameID non fourni");
         return;
     }
+
     const game = await jeu.getGameFromUUID(message.gameID);
     if (!game) {
-        console.log("Création annulée: partie non trouvée en BDD");
+        console.log("createGame: Création annulée -> partie non trouvée en BDD");
         return;
     }
 
     if (ws.user.idUser != game.gameAdmin) {
-        console.log("Création annulée: pas admin");
+        console.log("createGame: Création annulée -> pas admin de la game visée");
         return;
     }
 
@@ -539,21 +636,31 @@ async function createGame(ws, message, status = "lobby") {
     }));
     sendNewPlayerUpdate(gameObj);
     games[message.gameID] = gameObj;
-    console.log("Partie crée");
+    console.log("createGame: Partie créée");
     if (status == "game") {
         handleStart(ws, message);
     }
 
 }
+
+/**
+ * Crée une partie, en appelant directement la fonction de création de partie du module jeu.js
+ * Utilisée depuis que les parties sont créées via le websocket
+ * 
+ * @param {*} ws  - Client qui veut créer la partie
+ * @param {*} message - Message contenant l'id de la partie
+ * @returns 
+ */
 async function createGameInternal(ws, message) {
+    console.log("createGameInternal: Tentative de création de partie par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
     const game = await jeu.getGameFromUUID(message.gameID);
     if (!game) {
-        console.log("Création annulée: partie non trouvée en BDD");
+        console.log("createGameInternal: Création annulée -> partie non trouvée en BDD");
         return;
     }
 
     if (ws.user.idUser != game.gameAdmin) {
-        console.log("Création annulée: pas admin");
+        console.log("createGameInternal: Création annulée -> pas admin");
         return;
     }
     const gameObj = {
@@ -582,13 +689,28 @@ async function createGameInternal(ws, message) {
     }));
     sendNewPlayerUpdate(gameObj);
     games[message.gameID] = gameObj;
-    console.log("Partie crée");
+    updateAllSeekers();
+    console.log("createGameInternal: Partie créée");
 
 
 }
+/**
+ * Envois un la liste des parties disponibles à tous les joueurs en recherche de parties
+ */
+updateAllSeekers = function () {
+    for (const seekerID in seekers) {
+        const seeker = seekers[seekerID];
+        handleSeek(seeker, null);
+    }
+}
 
 
-
+/**
+ * Gère la reconnexion d'un joueur à une partie
+ * @param {*} ws  - Client qui veut se reconnecter
+ * @param {*} message  - Message contenant l'id de la partie
+ * @returns 
+ */
 function handleRejoin(ws, message) {
     if (!message.gameID)
         return;
@@ -596,7 +718,7 @@ function handleRejoin(ws, message) {
     if (!game)
         return
 
-    sendNewPlayerUpdate(game);
+    sendNewPlayerUpdate(game); 
 
     ws.send(JSON.stringify({
         type: 'rejoin',
@@ -606,6 +728,11 @@ function handleRejoin(ws, message) {
 
 }
 
+/**
+ * Permet de récupérer la partie en cours d'un client
+ * @param {*} ws  - Client dont on veut récupérer la partie en cours
+ * @returns  - La partie en cours du client sinon null
+ */
 function getPlayerCurrentGame(ws) {
     for (const gameID in games) {
         const game = games[gameID];
@@ -616,6 +743,13 @@ function getPlayerCurrentGame(ws) {
     return null;
 }
 
+/**
+ * Wrapper pour envoyer une erreur à un client avec un type de message
+ * @param {*} ws  - Client à qui envoyer l'erreur
+ * @param {*} type  - Type de message
+ * @param {*} error_type  - Type d'erreur
+ * @param {*} message  - Message d'erreur
+ */
 function sendError2(ws, type, error_type, message) {
     ws.send(JSON.stringify({
         type,
@@ -625,7 +759,12 @@ function sendError2(ws, type, error_type, message) {
     }));
 }
 
-
+/**
+ * Wrapper pour envoyer une erreur à un client
+ * @param {*} ws  - Client à qui envoyer l'erreur
+ * @param {*} error_type  - Type d'erreur
+ * @param {*} message  - Message d'erreur
+ */
 function sendError(ws, error_type, message) {
     ws.send(JSON.stringify({
         type: 'error',
@@ -634,6 +773,11 @@ function sendError(ws, error_type, message) {
     }));
 }
 
+/**
+ * Envoyer un client vers une autre page
+ * @param {*} ws  - Client à rediriger
+ * @param {*} url  - URL de redirection
+ */
 function sendRedirect(ws, url) {
     ws.send(JSON.stringify({
         type: 'redirect',
