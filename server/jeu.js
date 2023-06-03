@@ -6,10 +6,10 @@ createGame = async function (token = null, user = null) {
     console.log('createGame: création d\'une partie en BDD (params: token=' + token + ', user=' + user + ')');
     if (token == null && user == null)
         return false;
-    
-    if(user == null)
+
+    if (user == null)
         user = await returnUserFromToken(token);
-    if(!user)
+    if (!user)
         return false;
 
 
@@ -24,7 +24,7 @@ createGame = async function (token = null, user = null) {
     await conn.end();
     if (result.length == 0)
         return false;
-    
+
     return uuidv4;
 
 }
@@ -37,13 +37,13 @@ createGameAPI = async function (req, res, next) {
             status: 'error',
             message: 'Une erreur est survenue lors de la création de la partie.'
         });
-    
+
     return res.status(200).json({
         status: 'success',
         message: 'Partie créée.',
         uuid: result
     });
-    
+
 }
 getGameFromUUID = async function (uuid, token = undefined) {
     const conn = await base.getBase();
@@ -59,7 +59,7 @@ getGameFromUUID = async function (uuid, token = undefined) {
         return false;
     }
     const game = result[0];
-    if(user != false && user.idUser == game.gameAdmin)
+    if (user != false && user.idUser == game.gameAdmin)
         game.admin = true;
     else
         game.admin = false;
@@ -98,21 +98,21 @@ APIgetGrille = async function (req, res, next) {
         });
 
     return res.status(200).json({
-            status: 'success',
-            message: 'Recherche réussie.',
-            grille: grille.replace(/\n/g, ''),
-            lignes: lignes,
-            colonnes: colonnes
+        status: 'success',
+        message: 'Recherche réussie.',
+        grille: grille.replace(/\n/g, ''),
+        lignes: lignes,
+        colonnes: colonnes
     });
 
 
-   
+
 
 
 
 }
 
-getGrille =  function (lignes,colonnes) {
+getGrille = function (lignes, colonnes) {
     const exec = require("child_process").execSync;
     lignes = Math.max(2, lignes);
     colonnes = Math.max(2, colonnes);
@@ -120,10 +120,10 @@ getGrille =  function (lignes,colonnes) {
     const result = exec('cd ' + CWD + '/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes).toString();
     const grille = result
     return grille;
-    
+
 }
 
-preVerifMot = function(mot,lignes,colonnes){
+preVerifMot = function (mot, lignes, colonnes) {
 
     if (mot.length > lignes * colonnes)
         return false;
@@ -137,8 +137,9 @@ preVerifMot = function(mot,lignes,colonnes){
 
 
 
-solveGrille = async function(grille,lignes,colonnes){
-    const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex 2 ' + lignes + ' ' + colonnes + ' ' + grille;
+solveGrille = async function (grille, lignes, colonnes) {
+    const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex ' + lignes + ' ' + colonnes + ' ' + grille;
+    console.log(command);
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
     return result.split(' ');
@@ -152,15 +153,15 @@ verifMot = async function (req, res, next) {
 
     const exec = require("child_process").execSync;
     const { mot, grille, lignes, colonnes, langue } = req.body;
-    if(!preVerifMot(mot,lignes,colonnes))
+    if (!preVerifMot(mot, lignes, colonnes))
         return res.status(400).json({ status: 'error', message: 'Le mot ne peut pas être recherché' });
-    if(!grille || !lignes || !colonnes || !langue)
+    if (!grille || !lignes || !colonnes || !langue)
         return res.status(400).json({ status: 'error', message: 'Erreur dans les paramètres fournis' });
 
 
     const cmd = 'cd ' + CWD + '/bin && ./grid_path ' + mot.toUpperCase() + ' ' + lignes + ' ' + colonnes + ' ' + grille;
     const result = await exec(cmd).toString();
-    if(result == 1){
+    if (result == 1) {
         return res.status(200).json({ status: 'error', message: 'Le mot n\'est pas dans la grille' });
 
     }
@@ -186,7 +187,67 @@ verifMot = async function (req, res, next) {
 }
 
 
+getAllGamesFromUser = async function (req, res) {
+    const token = req.params.uuid;
+    const sql = "SELECT idPartie FROM jouer WHERE idUser = ?";
+    const conn = await base.getBase();
+    const result = await conn.execute(sql, [token]);
+    if (result.length == 0)
+        return res.status(400).json({ status: 'error', message: 'Aucune partie trouvée.' });
+    const games = result;
+    const fullGames = [];
 
+    const sql2 = `
+    SELECT P.*, 
+    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
+     FROM jouer U
+     WHERE P.idPartie = ?) AS users
+    FROM partie P
+    WHERE P.idPartie = ?;`;
+
+    for (let i = 0; i < games.length; i++) {
+        const game = games[i];
+        const result2 = await conn.execute(sql2, [game.idPartie, game.idPartie]);
+        if (result2.length == 0)
+            continue;
+        const fullGame = result2[0];
+        fullGames.push(fullGame);
+    }
+    await conn.end();
+    return res.status(200).json({ status: 'success', message: 'Parties trouvées.', games: fullGames });
+
+}
+        
+
+
+ getFullGame = async function (req, res) {
+    const uuid = req.params.uuid;
+
+    const sql = `
+    SELECT P.*, 
+    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
+     FROM jouer U
+     WHERE P.idPartie = ?) AS users
+    FROM partie P
+    WHERE P.idPartie = ?;`;
+    const conn = await base.getBase();
+    const result = await conn.execute(sql, [uuid, uuid]);
+    const jsonGrille = JSON.parse(result[0].Grille);
+    const stringGrille = jsonGrille.join(' ').replaceAll(',', ' ');
+
+
+    const solveur = await solveGrille(stringGrille, result[0].lignes, result[0].colonnes);
+    console.log(solveur);
+    result[0].solveur = solveur;
+    if (result.length == 0)
+        return res.status(400).json({ status: 'error', message: 'La partie n\'existe pas.' });
+    const game = result[0];
+    return res.status(200).json({ status: 'success', message: 'Partie trouvée.', game: game });        
+
+
+
+
+}
 
 
 
@@ -198,8 +259,10 @@ module.exports = {
     createGameAPI: createGameAPI,
     createGame: createGame,
     getGameFromUUID: getGameFromUUID,
-    apiGetGameFromUUID:apiGetGameFromUUID,
-    solve:solveGrille,
-    preVerifMot
+    apiGetGameFromUUID: apiGetGameFromUUID,
+    solve: solveGrille,
+    preVerifMot,
+    getFullGame,
+    getAllGamesFromUser
 }
 

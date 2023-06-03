@@ -1,6 +1,7 @@
 import React from 'react';
 
 function Definition(props: { nom: string, liste: string }) {
+    console.log(props);
     const sousDefinitions = Object.keys(props.liste).map((key:any, index) => (
         <SousDefinition key={index} type={key} definition={props.liste[key]} />
     ));

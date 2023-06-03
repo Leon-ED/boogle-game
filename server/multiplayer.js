@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 const auth = require('./auth');
 const jeu = require('./jeu');
+const base = require('./base');
 
 const games = {};
 const seekers = {};
@@ -97,11 +98,11 @@ function handleEnd(game) {
     sendToAllPlayers(game.players, { type: 'end', scores: game.settings.foundWords });
     // On redirige tous les joueurs vers la page de récapitulatif de la partie
     sendRedirect(game.players[0], "/recap/" + game.id);
-
+    game.winnerID = game.adminID;
+    game.startTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // On supprime la partie de la liste des parties du WS
     delete games[game.id];
-    // TODO : enregistrer la partie en BDD et toutes les données assoociées
-
+    saveGameToDB(game);
 }
 
 /**
@@ -144,7 +145,7 @@ function handleGuess(ws, message) {
 
 
     // Si le mot de blocage des mots est activé alors on vérifie si le mot a déjà été trouvé dans par un des joueurs
-    if (game.settings.bloquerMots) {
+    if (game.settings.bloquer) {
         console.log("handleGuess : Le mode bloquer (mots uniques) est activé");
         game.players.forEach((player) => {
             if (game.settings.foundWords[player.user.idUser].includes(guess)) {
@@ -172,7 +173,7 @@ function handleGuess(ws, message) {
 
     // On envoie que le mot a été trouvé à tous les joueurs
     game.settings.foundWords[ws.user.idUser].push(guess);
-    sendScoreUpdate(game, game.settings.bloquerMots);
+    sendScoreUpdate(game, game.settings.bloquer);
 
 }
 
@@ -260,11 +261,11 @@ async function handleStart(ws, message) {
 
 
     // Programmation de la fin de la partie
-    console.log("On programme la fin de la partie qui finira dans : " + game.settings.temps/1_000 + " secondes");
+    console.log("On programme la fin de la partie qui finira dans : " + game.settings.temps / 1_000 + " secondes");
     game.timeout = setTimeout(() => {
         handleEnd(game);
         console.log("Fin de la partie, timeout terminé");
-    }, game.settings.temps * 1_0000 * 60);
+    }, game.settings.temps);
 
     // On récupère la grille et la liste des mots à trouver
     const colonnes = game.settings.colonnes;
@@ -275,9 +276,9 @@ async function handleStart(ws, message) {
     try {
         game.settings.grille = await jeu.getGrille(colonnes, lignes, game.settings.langue); // On récupère la grille
         game.word_list = await jeu.solve(game.settings.grille, lignes, colonnes); // On récupère la liste des mots à trouver
-    }catch(err){
+    } catch (err) {
         sendToAllPlayers(game.players, { type: 'error', error_type: 'error', message: 'Une erreur est survenue lors de la création de la partie' });
-        saveGameToDB(game,statut = "cancelled");
+        saveGameToDB(game, statut = "CANCELLED");
         delete games[game.id];
         return;
     }
@@ -318,9 +319,61 @@ function sendToAllPlayers(users_list, message) {
  * @param {*} game  - Partie à sauvegarder
  * @param {*} statut - Statut de la partie (ended, cancelled, ...)
  */
-function saveGameToDB(game,statut = "ended") {
+async function saveGameToDB(game, statut = "FINISHED") {
+    const sql = `
+    UPDATE partie SET idVainqueur = ?, dimensionsGrille = ?, DateDebutPartie = ?,DateFinPartie = ?, temps = ?, politiqueScore = ?, bloquerMots = ?, statut = ?, motsTrouves = ?, Grille = ? WHERE partie.idPartie = ?;
+    `  
+
+    const arrayGrille = game.settings.grille.split(" ");
+    const grille2D = [];
+    for (let i = 0; i < game.settings.lignes; i++) {
+        grille2D[i] = [];
+        for (let j = 0; j < game.settings.colonnes; j++) {
+            grille2D[i][j] = arrayGrille[i * game.settings.colonnes + j];
+        }
+    }
+    game.settings.grille = grille2D;
+
+
+    const params = [
+        game.winnerID,
+        game.settings.colonnes + "x" + game.settings.lignes,
+        game.startTime,
+        new Date().toISOString().slice(0, 19).replace('T', ' '),
+        game.settings.temps,
+        game.settings.politique,
+        game.settings.bloquer,
+        statut,
+        JSON.stringify(game.settings.foundWords),
+        game.settings.grille,
+        game.id,
+    ]
+    const conn = await base.getBase();
+    await conn.execute(sql, params);
+    await conn.end();
+
+    game.players.forEach((player) => {
+        linkGameToUser(game, player.user);
+    }
+    );
+
 
 }
+
+async function linkGameToUser(game, user) {
+    const sql = `INSERT INTO jouer (idPartie, idUser) VALUES (?, ?);`;
+    const conn = await base.getBase();
+    console.log("On lie la partie " + game.id + " à l'utilisateur " + user.idUser);
+    try{
+    await conn.execute(sql, [game.id, user.idUser]);
+    console.log("Lien créé");
+    }catch(e){
+    }
+
+    await conn.end();
+}
+
+
 
 
 function heartbeat() {
@@ -427,10 +480,10 @@ async function handleJoin(ws, message) {
     }
     // On ajoute le joueur à la partie
     game.players.push(ws);
-        // On envoie un update à tous les joueurs
+    // On envoie un update à tous les joueurs
     sendGameUpdate(ws, game);
     if (message.status == "game")
-        sendScoreUpdate(game, game.settings.bloquerMots);
+        sendScoreUpdate(game, game.settings.bloquer);
     sendNewPlayerUpdate(game);
 }
 
@@ -713,7 +766,7 @@ function handleRejoin(ws, message) {
     if (!game)
         return
 
-    sendNewPlayerUpdate(game); 
+    sendNewPlayerUpdate(game);
     ws.send(JSON.stringify({
         type: 'rejoin',
         game: game,

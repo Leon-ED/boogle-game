@@ -42,6 +42,9 @@ app.use(
   });
   // Apply rate limiter to all requests
 app.use(limiter);
+
+app.get("/api/jeu/fetchAll/:uuid", getAllGamesFromUser);
+app.get("/api/jeu/fetch/:uuid", getFullGame);
 app.post('/api/auth/login', login);
 app.post("/api/auth/logout", disconnect);
 app.get("/api/jeu/grille/:lignes/:colonnes", APIgetGrille);

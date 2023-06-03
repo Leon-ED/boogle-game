@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../env";
+import { GameOverview } from "./GameOverview";
 
 interface User {
     idUser: string;
@@ -9,28 +10,56 @@ interface User {
     photoProfil: string;
     hash: string;
 }
-
+interface FullGame {
+    idPartie: string;
+    idVainqueur: string;
+    dimensionsGrille: string;
+    motsTrouves: string;
+    Grille: Array<Array<string>>
+    politiqueScore: string;
+    DateDebutPartie: string;
+    temps: number;
+    DateFinPartie: string;
+    gameAdmin: string;
+    users: Array<string>;
+    bloquerMots: boolean;
+    statut: string;
+}
 
 
 export const MyAccount = () => {
     const [user, setUser] = useState<User | null>(null);
     const [image, setImage] = useState<string>();
+    const [playedGames, setPlayedGames] = useState<Array<FullGame>>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         const user = localStorage.getItem("user");
         if (user) {
             const userOBj: User = JSON.parse(user);
+            fetch(BACKEND_URL + "/jeu/fetchAll/" + userOBj.idUser)
+            .then((res) => res.json())
+            .then((res) => {
+                setPlayedGames(res.games);
+            })
             setImage(BACKEND_URL + "/account/get/image/" + userOBj.idUser);
             setUser(userOBj);
         } else {
             setUser(null);
         }
     }, []);
+
+
+
+
+
     if (!user) {
         navigate("/login");
         return null;
     }
+
+
+
 
     return (
         <>
@@ -47,13 +76,19 @@ export const MyAccount = () => {
                             <h4>Email: <span className="profile-info-item-value">{user.email}</span></h4>
                         </div>
                         <div className="profile-info-item">
-                            <h4>Parties jouées : <span className="profile-info-item-value">Pas d'informations</span></h4>
+                            <h4>Parties jouées : <span className="profile-info-item-value">{playedGames.length}</span></h4>
                         </div>
                     </div>
-
-
                 </div>
             </section>
+            <section>
+                <h2>Mes parties</h2>
+            </section>
+            {playedGames.map((game) => {
+                return(<GameOverview key={game.idPartie} {...game} />)
+            })
+            
+            }
         </>
     );
 
@@ -73,8 +108,8 @@ export const MyAccount = () => {
                 })
                     .then((res) => res.json())
                     .then((res) => {
-                        setImage(BACKEND_URL + "/account/get/image/" + user?.idUser+"?"+Date.now());
-                    
+                        setImage(BACKEND_URL + "/account/get/image/" + user?.idUser + "?" + Date.now());
+
                     });
             }
         });
