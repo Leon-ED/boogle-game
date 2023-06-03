@@ -1,19 +1,17 @@
 on: push
-name: 🚀 Deploy website on push
+name: Publish Website
 jobs:
   web-deploy:
-    name: 🎉 Deploy
+    name: 🚀 Deploy Website Every Commit
     runs-on: ubuntu-latest
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v2
+    - name: 🚚 Get Latest Code
+      uses: actions/checkout@v3
     
-    - name: 📂 Sync files
-      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+    - name: 📂 Sync Files
+      uses: SamKirkland/web-deploy@v1
       with:
-        port: 22
-        protocol: ftps
-        server: 90.46.59.96
-        username: ${{ secrets.ftp_username }}
-        password: ${{ secrets.ftp_password }}
-        server-dir: boogle/
+        target-server: 90.46.59.96:21
+        remote-user: ${{ secrets.ftp_username }}
+        private-ssh-key: ${{ secrets.SSH_KEY }}
+        destination-path: ~/boogle/
