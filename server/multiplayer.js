@@ -308,6 +308,7 @@ async function handleStart(ws, message) {
  */
 function sendToAllPlayers(users_list, message) {
     for (const user of users_list) {
+        console.log(JSON.stringify(message));
         user.send(JSON.stringify(message));
     }
 
@@ -498,6 +499,7 @@ function sendGameUpdate(ws, gameToUpdate) {
     // Create a deep copy of the gameToUpdate object without circular references
     const game = deepCopyWithoutCircular(gameToUpdate);
     delete game.players; // La liste contient des informations sensibles (token, etc), on ne l'envoie pas aux clients
+    delete game.timeout; // On ne veut pas envoyer le timeout aux clients
     sendToAllPlayers(gameToUpdate.players, { type: 'update', game });
 }
 
