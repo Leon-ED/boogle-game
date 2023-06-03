@@ -10,11 +10,11 @@ require('./base');
 require('./jeu');
 const compte = require('./account');
 const CWD = process.env.CWD;
-
+const compression = require("compression");
 
 app.use(cors());
 
-
+const helmet = require("helmet");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,7 +27,21 @@ app.get("/", (req, res, next) => {
 
 
 
-
+app.use(compression());
+app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        "script-src": ["'self'", "code.jquery.com", "cdn.jsdelivr.net"],
+      },
+    })
+  );
+  const RateLimit = require("express-rate-limit");
+  const limiter = RateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 20,
+  });
+  // Apply rate limiter to all requests
+app.use(limiter);
 app.post('/api/auth/login', login);
 app.post("/api/auth/logout", disconnect);
 app.get("/api/jeu/grille/:lignes/:colonnes", APIgetGrille);
