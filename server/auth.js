@@ -120,6 +120,12 @@ register = async function (req, res, next) {
 
 
 login = async function (req, res, next) {
+  if (req.body.login == undefined || req.body.password == undefined) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Veuillez renseigner tous les champs.'
+    });
+  }
   let conn;
   try {
     conn = await base.getBase();
@@ -149,7 +155,7 @@ login = async function (req, res, next) {
     const user = result[0];
     const token = generateToken(user);
     insertToken(token, user.idUser);
-    res.status(200).json({
+    return res.status(200).json({
       token,
       status: 'success',
       message: 'Authentification réussie.',
