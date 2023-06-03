@@ -11,7 +11,8 @@ jobs:
     - name: 📂 Sync Files
       uses: SamKirkland/web-deploy@v1
       with:
-        target-server: 90.46.59.96:21
+        target-server: 90.46.59.96
         remote-user: ${{ secrets.ftp_username }}
         private-ssh-key: ${{ secrets.SSH_KEY }}
         destination-path: ~/boogle/
+        port: 22
