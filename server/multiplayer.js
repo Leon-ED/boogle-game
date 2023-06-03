@@ -498,7 +498,7 @@ function sendGameUpdate(ws, gameToUpdate) {
     // Create a deep copy of the gameToUpdate object without circular references
     const game = deepCopyWithoutCircular(gameToUpdate);
     delete game.players; // La liste contient des informations sensibles (token, etc), on ne l'envoie pas aux clients
-    sendToAllPlayers(deepCopyWithoutCircular(gameToUpdate.players), { type: 'update', game });
+    sendToAllPlayers(gameToUpdate.players, { type: 'update', game });
 }
 
 /**
