@@ -3,7 +3,7 @@ const CWD = process.env.CWD;
 const base = require('./base');
 
 createGame = async function (token = null, user = null) {
-    console.log('Création d\'une partie, token : ' + token);
+    console.log('createGame: création d\'une partie en BDD (params: token=' + token + ', user=' + user + ')');
     if (token == null && user == null)
         return false;
     

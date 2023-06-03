@@ -345,7 +345,6 @@ async function handleNewGame(ws, message) {
         console.log("handleNewGame: Création annulée -> l'utilisateur est déjà dans une partie");
         return;
     }
-    console.log(ws.user.login + " veut créer une partie")
     const game = await jeu.createGame(token = null, user = ws.user);
     if (game == false) {
         ws.user.inCreateGame = false;
@@ -430,9 +429,7 @@ async function handleJoin(ws, message) {
     }
     // On ajoute le joueur à la partie
     game.players.push(ws);
-
-
-    // On envoie un update à tous les joueurs
+        // On envoie un update à tous les joueurs
     sendGameUpdate(ws, game);
     if (message.status == "game")
         sendScoreUpdate(game, game.settings.bloquerMots);
@@ -652,7 +649,6 @@ async function createGame(ws, message, status = "lobby") {
  * @returns 
  */
 async function createGameInternal(ws, message) {
-    console.log("createGameInternal: Tentative de création de partie par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
     const game = await jeu.getGameFromUUID(message.gameID);
     if (!game) {
         console.log("createGameInternal: Création annulée -> partie non trouvée en BDD");
@@ -719,7 +715,6 @@ function handleRejoin(ws, message) {
         return
 
     sendNewPlayerUpdate(game); 
-
     ws.send(JSON.stringify({
         type: 'rejoin',
         game: game,

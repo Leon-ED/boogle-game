@@ -44,7 +44,7 @@ app.get("/api/account/get/profile/:idUser", compte.getProfile);
 
 
 
-app.get("/api/definitions/:mot", async (req, res, next) => {
+app.get("/api/definitions/:mot", async (req, res) => {
     console.log('Recherche de définitions pour le mot ' + req.params.mot);
     const exec = require('child_process').execSync;
     const mot = req.params.mot.toUpperCase();
@@ -52,12 +52,7 @@ app.get("/api/definitions/:mot", async (req, res, next) => {
     try {
         stdout = await exec('cd ' + CWD + '/bin && java -cp jdict.jar fr.uge.jdict.DictionarySearcher definitions ' + mot + ' ../utils/dictionary.index ../utils/definitions_fr.json').toString();
     } catch (err) {
-        console.log(err);
-        res.status(404).json({
-            status: 'error',
-            message: 'Erreur lors de la recherche de définitions.'
-        });
-        next();
+        return res.status(400).json({ status: 'error', message: 'Mot introuvable.' });
     }
 
     res.status(200).json({
