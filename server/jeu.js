@@ -116,6 +116,8 @@ getGrille = function (lignes, colonnes) {
     const exec = require("child_process").execSync;
     lignes = Math.max(2, lignes);
     colonnes = Math.max(2, colonnes);
+    lignes = Math.min(10, lignes);
+    colonnes = Math.min(10, colonnes);
 
     const result = exec('cd ' + CWD + '/bin && ./grid_build ../utils/frequences.txt ' + lignes + ' ' + colonnes).toString();
     const grille = result
@@ -139,6 +141,13 @@ preVerifMot = function (mot, lignes, colonnes) {
 
 solveGrille = async function (grille, lignes, colonnes) {
     const MIN_WORD_LENGTH = 2;
+    if(lignes > 10 || colonnes > 10)
+        return false;
+    if(lignes*colonnes != grille.length)
+        return false;
+        
+
+
     const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
