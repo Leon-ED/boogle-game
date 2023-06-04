@@ -39,6 +39,11 @@ Voici ce qui est implémenté actuellement :
 - Lobby, tant que le créateur de la partie multijoueurs, ne l'a pas décidé, tous les joueurs sont en attente dans le lobby avec un chat de lobby et visualisation en direct des paramètres.
 - Partie multijoueur, une fois la partie multijoueurs lancée, les joueurs se voient afficher la grille
 
+
+## Application Android
+Le dossier /android contient toutes les sources de l'application Android
+
+
 ## Reste à faire
 - gestion de compte : (public,privé)
 
