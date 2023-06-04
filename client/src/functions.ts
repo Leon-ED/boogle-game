@@ -128,7 +128,8 @@ export const getProfilePicture = async (): Promise<File> => {
 
 interface User {
     idUser: string;
-    login: string;
+    pseudoUser: string;
+    email: string;
     photoProfil: string;
 }
 
