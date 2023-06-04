@@ -30,7 +30,7 @@ interface FullGame {
 export const MyAccount = () => {
     const [user, setUser] = useState<User | null>(null);
     const [image, setImage] = useState<string>();
-    const [playedGames, setPlayedGames] = useState<Array<FullGame>>([]);
+    const [playedGames, setPlayedGames] = useState<Array<FullGame> | null>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -76,7 +76,7 @@ export const MyAccount = () => {
                             <h4>Email: <span className="profile-info-item-value">{user.email}</span></h4>
                         </div>
                         <div className="profile-info-item">
-                            <h4>Parties jouées : <span className="profile-info-item-value">{playedGames.length}</span></h4>
+                            <h4>Parties jouées : <span className="profile-info-item-value">{playedGames == null ? 0 : playedGames.length}</span></h4>
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,8 @@ export const MyAccount = () => {
             <section>
                 <h2>Mes parties</h2>
             </section>
-            {playedGames.map((game) => {
+            {playedGames == null ? <section><h2>Vous n'avez pas encore joué de parties</h2></section> :
+            playedGames.map((game) => {
                 return(<GameOverview key={game.idPartie} {...game} />)
             })
             
