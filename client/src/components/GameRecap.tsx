@@ -84,6 +84,7 @@ export const GameRecap = () => {
                 </div>
             </section>
             {
+                //@ts-expect-error
                 game.Grille && <Grid lignes={4} colonnes={2} grille={JSON.parse(game.Grille)} />
                  
             }
