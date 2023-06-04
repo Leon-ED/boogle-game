@@ -40,9 +40,7 @@ Voici ce qui est implémenté actuellement :
 - Partie multijoueur, une fois la partie multijoueurs lancée, les joueurs se voient afficher la grille
 
 ## Reste à faire
-- Enregistrment des parties dans le compte des joueurs respectifs
-- Création d'un page de gestion de compte : (public,privé, changement de photo de profil, pseudos), affichage des parties jouées et de tous leurs paramètres
-- Afficher les joueurs dans la partie en cours (photo de profil, pseudos), afficher leurs propositions et leur score
+- gestion de compte : (public,privé)
 
 
 
