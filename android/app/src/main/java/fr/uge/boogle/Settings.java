@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 public class Settings extends Fragment {
 
     private String webViewUrl;
+    private String BACK_END_URL;
 
     public static Settings newInstance() {
         return new Settings();
@@ -23,6 +24,7 @@ public class Settings extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         webViewUrl = Constants_values.getWebViewUrl();
+        BACK_END_URL = Constants_values.getBackendUrl();
     }
 
     @Override
@@ -32,17 +34,24 @@ public class Settings extends Fragment {
         EditText urlEditText = view.findViewById(R.id.urlEditText);
         urlEditText.setText(webViewUrl);
 
+        EditText urlEditTextBack = view.findViewById(R.id.urlEditTextBack);
+        urlEditTextBack.setText(BACK_END_URL);
+
         Button saveButton = view.findViewById(R.id.saveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Boolean changed = false;
-                if (!webViewUrl.equals(urlEditText.getText().toString())) {
+                if (!webViewUrl.equals(urlEditText.getText().toString()) || !BACK_END_URL.equals(urlEditTextBack.getText().toString())) {
                     changed = true;
                 }
                 String newUrl = urlEditText.getText().toString();
                 webViewUrl = newUrl;
                 Constants_values.setWebViewUrl(newUrl);
+
+                String newUrlBack = urlEditTextBack.getText().toString();
+                BACK_END_URL = newUrlBack;
+                Constants_values.setBackendUrl(newUrlBack);
 
                 if (changed) {
                     // Return to the connection page
