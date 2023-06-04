@@ -1,8 +1,7 @@
-export const FRONT_HOST="http://boogle.edmeeleon.fr/";
-const BACK_END="boogle.edmeeleon.fr";
-const BACK_END_PORT="4000";
+export const FRONT_HOST="https://boogle.s01.edmeeleon.fr/";
+const BACK_END="boogle.s01.edmeeleon.fr/back";
 const BACK_END_PATH="/api"
-export const BACKEND_URL="http://"+BACK_END+":"+BACK_END_PORT+BACK_END_PATH;
-export const WS_URL="ws://"+BACK_END+":"+BACK_END_PORT+"/chat";
-export const MP_WS_URL="ws://"+BACK_END+":"+BACK_END_PORT+"/mp";
+export const BACKEND_URL="https://"+BACK_END+BACK_END_PATH;
+export const WS_URL="wss://"+BACK_END+"/ws/chat";
+export const MP_WS_URL="wss://"+BACK_END+"/ws/mp";
 
