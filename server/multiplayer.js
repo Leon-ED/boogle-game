@@ -97,7 +97,7 @@ function handleEnd(game) {
     game.statut = "ended";
     sendToAllPlayers(game.players, { type: 'end', scores: game.settings.foundWords });
     // On redirige tous les joueurs vers la page de récapitulatif de la partie
-    sendRedirect(game.players[0], "/recap/" + game.id);
+    sendRedirectList(game.players, "/recap/" + game.id);
     game.winnerID = game.adminID;
     game.startTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
     // On supprime la partie de la liste des parties du WS
@@ -835,7 +835,11 @@ function sendRedirect(ws, url) {
         url,
     }));
 }
-
+function sendRedirectList(users_list, url) {
+    for (const user of users_list) {
+        sendRedirect(user, url);
+        }
+}
 
 const gameExemple = {
     id: 1,
