@@ -140,7 +140,6 @@ preVerifMot = function (mot, lignes, colonnes) {
 solveGrille = async function (grille, lignes, colonnes) {
     const MIN_WORD_LENGTH = 2;
     const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
-    console.log(command);
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
     return result.split(' ');
@@ -238,7 +237,6 @@ getAllGamesFromUser = async function (req, res) {
 
     const [lignes, colonnes] = result[0].dimensionsGrille.split('x');
     const solveur = await solveGrille(stringGrille, lignes,colonnes);
-    console.log(solveur);
     result[0].solveur = solveur;
     if (result.length == 0)
         return res.status(400).json({ status: 'error', message: 'La partie n\'existe pas.' });

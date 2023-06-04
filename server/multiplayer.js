@@ -322,7 +322,7 @@ function sendToAllPlayers(users_list, message) {
 async function saveGameToDB(game, statut = "FINISHED") {
     const sql = `
     UPDATE partie SET idVainqueur = ?, dimensionsGrille = ?, DateDebutPartie = ?,DateFinPartie = ?, temps = ?, politiqueScore = ?, bloquerMots = ?, statut = ?, motsTrouves = ?, Grille = ? WHERE partie.idPartie = ?;
-    `  
+    `
 
     const arrayGrille = game.settings.grille.split(" ");
     const grille2D = [];
@@ -364,10 +364,10 @@ async function linkGameToUser(game, user) {
     const sql = `INSERT INTO jouer (idPartie, idUser) VALUES (?, ?);`;
     const conn = await base.getBase();
     console.log("On lie la partie " + game.id + " à l'utilisateur " + user.idUser);
-    try{
-    await conn.execute(sql, [game.id, user.idUser]);
-    console.log("Lien créé");
-    }catch(e){
+    try {
+        await conn.execute(sql, [game.id, user.idUser]);
+        console.log("Lien créé");
+    } catch (e) {
     }
 
     await conn.end();
