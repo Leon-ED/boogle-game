@@ -138,7 +138,8 @@ preVerifMot = function (mot, lignes, colonnes) {
 
 
 solveGrille = async function (grille, lignes, colonnes) {
-    const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex ' + lignes + ' ' + colonnes + ' ' + grille;
+    const MIN_WORD_LENGTH = 2;
+    const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
     console.log(command);
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
@@ -235,8 +236,8 @@ getAllGamesFromUser = async function (req, res) {
     const jsonGrille = JSON.parse(result[0].Grille);
     const stringGrille = jsonGrille.join(' ').replaceAll(',', ' ');
 
-
-    const solveur = await solveGrille(stringGrille, result[0].lignes, result[0].colonnes);
+    const [lignes, colonnes] = result[0].dimensionsGrille.split('x');
+    const solveur = await solveGrille(stringGrille, lignes,colonnes);
     console.log(solveur);
     result[0].solveur = solveur;
     if (result.length == 0)
