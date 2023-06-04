@@ -146,13 +146,10 @@ preVerifMot = function (mot, lignes, colonnes) {
 solveGrille = async function (grille, lignes, colonnes) {
     const MIN_WORD_LENGTH = 2;
     if(lignes > 10 || colonnes > 10)
-        return false;
-    if(lignes*colonnes != grille.length)
-        return false;
-
-
+        return []
 
     const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
+    console.warn(command);
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
     return result.split(' ');

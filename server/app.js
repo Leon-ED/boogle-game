@@ -28,6 +28,22 @@ app.get('/', (req, res, next) => {
   next();
 });
 
+// dump request data
+app.use((req, res, next) => {
+  // console log IP
+  console.log('========DEBUT REQ============');
+  console.log('IP: ' + req.ip);
+  console.log("Method: " + req.method);
+  console.log("URL: " + req.url);
+  console.log("Body: "+ JSON.stringify(req.body));
+  // UA
+  console.log("UA: " + req.headers['user-agent']);
+  console.log('========FIN REQ============');
+  next();
+});
+
+
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -36,8 +52,8 @@ app.use(
   })
 );
 const limiter = RateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20,
+  windowMs: 1 * 60 * 1000, // 15 minutes
+  max: 120,
 });
 // Apply rate limiter to all requests
 app.use(limiter);
