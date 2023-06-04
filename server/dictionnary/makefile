@@ -1,5 +1,6 @@
 PROJDIR := $(realpath $(CURDIR)/..)
 SOURCEDIR := $(PROJDIR)/dictionnary/src
+SOLVE_DIR := $(SOURCEDIR)/solve
 BUILDDIR := ../bin/
 CC = gcc
 FLAGS = -g
@@ -25,11 +26,14 @@ score_len: $(SOURCEDIR)/score_len.c
 	$(CC) -o $(BUILDDIR)/score_len $(SOURCEDIR)/score_len.c $(FLAGS)
 
 
-solve : $(SOURCEDIR)/solve.c $(SOURCEDIR)/libs.c $(SOURCEDIR)/trees.c $(SOURCEDIR)/grid_path.c
-	$(CC) -o $(BUILDDIR)/solve $(SOURCEDIR)/solve.c $(SOURCEDIR)/libs.c $(SOURCEDIR)/trees.c $(SOURCEDIR)/grid_path.c -DEXTERNAL_DRIVER $(FLAGS)
+solve : $(SOLVE_DIR)/solve/*.c $(SOLVE_DIR)/dictionnary_lookup/lookup/*.c 
+	$(CC)  $(SOLVE_DIR)/solve/*.c $(SOLVE_DIR)/dictionnary_lookup/lookup/*.c -o $(BUILDDIR)/solve
+
+
+
 
 clean:
 	rm -f $(SOURCEDIR)/*.o
 
 
-all: dictionnary_build dictionnary_lookup grid_build grid_path score_basic score_len clean
+all: dictionnary_build dictionnary_lookup grid_build grid_path score_basic score_len clean solve
