@@ -3,6 +3,7 @@ package fr.uge.boogle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,10 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 public class Connexion extends AppCompatActivity {
@@ -37,9 +35,10 @@ public class Connexion extends AppCompatActivity {
         TextView password_edittext = findViewById(R.id.password_edittext);
         Button button = findViewById(R.id.login_button);
 
-        // if the user is already logged in, redirect him to the webview
+        // if the user is already logged in, redirect him to the home page
         if (sharedPref.contains("token")) {
-            //sendLoginRequest();
+            // check if the token is still valid
+            checkIfTokenIsValid(sharedPref.getString("token", ""));
         }
 
         button.setOnClickListener(v -> {
@@ -49,9 +48,8 @@ public class Connexion extends AppCompatActivity {
                 username_edittext.setError("Please fill the username");
                 password_edittext.setError("Please fill the password");
             } else {
-                // send a request to the server
-
-                sendLoginRequest(username, password, Constants_values.BACKEND_URL+"api/auth/login");
+                // send a request to the serve
+                sendLoginRequest(username, password, Constants_values.getBackendUrl()+"api/auth/login");
 
 
 
@@ -62,7 +60,45 @@ public class Connexion extends AppCompatActivity {
 
     }
 
-    private void sendLoginRequest(String username, String password, String url) {
+    private void checkIfTokenIsValid(String token) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        JSONObject requestData = new JSONObject();
+        try {
+            requestData.put("token", sharedPref.getString("token", ""));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(Connexion.this, "Login failed 1", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Constants_values.getBackendUrl()+"api/auth/check", requestData,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (response.getString("status").equals("success")) {
+                                loginSuccess(response, token);
+                            } else {
+                                // login failed
+                                Toast.makeText(Connexion.this, "Login failed 2", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(Connexion.this, "Login failed 3", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(Connexion.this, "Login failed 4", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        queue.add(request);
+    }
+
+    private boolean sendLoginRequest(String username, String password, String url) {
         RequestQueue queue = Volley.newRequestQueue(this);
 
         JSONObject requestData = new JSONObject();
@@ -71,8 +107,8 @@ public class Connexion extends AppCompatActivity {
             requestData.put("password", password);
         } catch (JSONException e) {
             e.printStackTrace();
-            Toast.makeText(Connexion.this, "Login failed", Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(Connexion.this, "Login failed 1", Toast.LENGTH_SHORT).show();
+            return false;
         }
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, requestData,
@@ -80,24 +116,15 @@ public class Connexion extends AppCompatActivity {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Log.e("response", response.toString());
                             if (response.getString("status").equals("success")) {
-                                // login success
-                                Toast.makeText(Connexion.this, "Login success", Toast.LENGTH_SHORT).show();
-                                // save the token
-                                String token = response.getString("token");
-                                //save the token in shared preferences
-                                sharedPref.edit().putString("token", token).apply();
-                                //go to the webview activity
-                                //startActivity(WebViewApp.newIntent(Connexion.this));
-                                finish();
+                                loginSuccess(response,"");
                             } else {
                                 // login failed
-                                Toast.makeText(Connexion.this, "Login failed", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(Connexion.this, "Your token has expired", Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Toast.makeText(Connexion.this, "Login failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Connexion.this, "Login failed 3", Toast.LENGTH_SHORT).show();
                         }
                     }
                 },
@@ -105,11 +132,31 @@ public class Connexion extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.getCause();
-                        Toast.makeText(Connexion.this, "Login failed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Connexion.this, "Login failed 4", Toast.LENGTH_SHORT).show();
                     }
                 });
 
         queue.add(request);
+        return false;
+    }
+
+    private void loginSuccess(JSONObject response, String token) throws JSONException {
+        Toast.makeText(Connexion.this, "Login success", Toast.LENGTH_SHORT).show();
+
+        if (token == "") {
+            sharedPref.edit().putString("token", response.getString("token")).apply();
+        }
+        else {
+            sharedPref.edit().putString("token", token).apply();
+        }
+        // save the token
+        String user = response.getString("user");
+        sharedPref.edit().putString("user", user).apply();
+        //go to the main activity
+        Intent intent = new Intent(Connexion.this, Home_Menu.class);
+        intent.putExtra("token", sharedPref.getString("token", ""));
+        startActivity(intent);
+        //startActivity(WebViewApp.newIntent(Connexion.this));
     }
 
 }
