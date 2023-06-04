@@ -87,8 +87,12 @@ apiGetGameFromUUID = async function (req, res, next) {
 
 
 APIgetGrille = async function (req, res, next) {
-    const lignes = Math.max(2, req.params.lignes);
-    const colonnes = Math.max(2, req.params.colonnes);
+    let lignes = Math.max(2, req.params.lignes);
+    let colonnes = Math.max(2, req.params.colonnes);
+    lignes = Math.min(10, lignes);
+    colonnes = Math.min(10, colonnes);
+    
+
     const grille = await getGrille(lignes, colonnes);
 
     if (!grille)
@@ -145,7 +149,7 @@ solveGrille = async function (grille, lignes, colonnes) {
         return false;
     if(lignes*colonnes != grille.length)
         return false;
-        
+
 
 
     const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
