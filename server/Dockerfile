@@ -8,7 +8,7 @@ COPY package*.json /app/
 
 # Install app dependencies
 RUN npm install
-
+ENV NODE_ENV production
 # Install express module
 RUN npm i express --save
 
@@ -18,6 +18,7 @@ RUN apk update && \
 
 # Copy the entire project to the app directory
 COPY . .
+RUN npm ci --only=production
 
 # Build the makefile in the dictionnary directory
 RUN make all -C dictionnary
@@ -28,5 +29,4 @@ ENV PATH="/app/dictionnary/bin:${PATH}"
 # Expose port 4000
 EXPOSE 4000
 
-# Start the server using nodemon
-CMD [ "npx", "nodemon", "server.js", "-L" ]
+CMD ["node", "server.js"]

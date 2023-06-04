@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import Chat from "./Chat"
 
 import { GrilleMultijoueur } from "./GrilleMultijoueur"
@@ -43,6 +43,7 @@ export const Partie = (props: any) => {
     const [settings, setSettings] = useState<Settings>({ lignes: 4, colonnes: 4, temps: 3, gameID: "", bloquerMots: false, politiqueScore: 1 });
     const [players, setPlayers] = useState<Player[]>([]);
     const [playersStats, setPlayersStats] = useState<PlayerStats[]>([]);
+    const navigate = useNavigate();
 
     const [grilleProps, setGrilleProps] = useState<GrilleProps>({ lignes: 4, colonnes: 4, grilleProps: [] });
 
@@ -76,6 +77,9 @@ export const Partie = (props: any) => {
             return;
         const lastMessageData = JSON.parse(lastMessage.data);
         console.error(lastMessageData);
+        if(lastMessageData.type === "redirect"){
+            navigate(lastMessageData.url);
+        }
         if (lastMessageData.type === "start") {
             setGrilleProps({
                 lignes: lastMessageData.settings.lignes,

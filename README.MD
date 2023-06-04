@@ -21,7 +21,7 @@ Et pour le `server` dans :
 Se placer ensuite dans le dossier global et exécuter la commande :
 
     docker-compose up
-Par défaut le frontend est sur le port `8080` et le backend sur le port `3000`
+Par défaut le frontend est sur le port `8080` et le backend sur le port `4000`
 
 Ne pas oublier de se connecter sur le PHPMyAdmin afin d'installer la base de données qui se trouve dans le dossier `bdd`
 
@@ -40,9 +40,7 @@ Voici ce qui est implémenté actuellement :
 - Partie multijoueur, une fois la partie multijoueurs lancée, les joueurs se voient afficher la grille
 
 ## Reste à faire
-- Enregistrment des parties dans le compte des joueurs respectifs
-- Création d'un page de gestion de compte : (public,privé, changement de photo de profil, pseudos), affichage des parties jouées et de tous leurs paramètres
-- Afficher les joueurs dans la partie en cours (photo de profil, pseudos), afficher leurs propositions et leur score
+- gestion de compte : (public,privé)
 
 
 

@@ -15,7 +15,7 @@ export const Player = ({idUser, name}: {idUser: string, name: string}) => {
     return(
         <div className="lobby-player">
             <img  src={BACKEND_URL+"/account/get/image/"+idUser} alt="profile" />
-            <p className={imgClasse} data-fullname={name}>{shortName}</p>
+            <p style={{margin:"0"}} className={imgClasse} data-fullname={name}>{shortName}</p>
         </div>
 
 

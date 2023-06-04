@@ -24,7 +24,6 @@ export const GrilleMultijoueur = ({
   const [grille2D, setGrille2D] = useState<Array<Array<string>>>(
     Array(lignes).fill(Array(colonnes).fill("X"))
   );
-  const [wordsList, setWordsList] = useState<Array<string>>([]);
   const [tempsRestant_str, setTempsRestant_str] = useState<string>("00:00");
   const [tempsRestant, setTempsRestant] = useState<number>(3);
 

@@ -17,7 +17,6 @@ const chat_WS = initChat(server);
 
 server.on('upgrade', function upgrade(request, socket, head) {
     const { pathname } = parse(request.url);
-  
     if (pathname === '/chat') {
       chat_WS.handleUpgrade(request, socket, head, function done(ws) {
         chat_WS.emit('connection', ws, request);

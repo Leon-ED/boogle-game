@@ -45,6 +45,34 @@ a {
   align-items: flex-start;
 }
 
+.game-recap-settings{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.game-recap-solve{
+  text-align: center;
+}
+.game-recap-solve-words{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.game-recap-players{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
 .hidden {
   display: none;

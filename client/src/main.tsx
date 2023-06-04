@@ -15,6 +15,7 @@ import { GameManager } from './pages/GameManager';
 import { Partie } from './components/Partie';
 import { Account } from './pages/Account';
 import { GamesList } from './pages/GamesList';
+import { GameRecap } from './components/GameRecap';
 
 
 function Main() {
@@ -62,6 +63,7 @@ function Main() {
         <Route path="/seek" element={<GamesList />} />
         <Route path="/join/:id" element={<GameManager />} />
         <Route path="/lobby/:id" element={<GameManager />} />
+        <Route path="/recap/:id" element={<GameRecap />} />
         <Route path="*" element={<Error404 />} />
         <Route path="/logout" element={<Logout />} />
       </Routes>
