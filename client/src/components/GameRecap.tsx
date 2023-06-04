@@ -5,7 +5,7 @@ import Grille from "./Grille"
 import { GrilleMultijoueur } from "./GrilleMultijoueur"
 import { Player } from "./Player"
 import { BACKEND_URL } from "../env"
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 
 interface FullGame {
     idPartie: string;
@@ -63,7 +63,7 @@ export const GameRecap = () => {
                     <div className="game-recap-solve-words">
                         {game.solveur?.map((mot, index) => {
                             return (
-                                <p key={index}>{mot}</p>
+                               <Link to={"/definitions/" + mot} key={index}>{mot}</Link>
                             )
 
                         })}

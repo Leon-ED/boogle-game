@@ -261,11 +261,11 @@ async function handleStart(ws, message) {
 
 
     // Programmation de la fin de la partie
-    console.log("On programme la fin de la partie qui finira dans : " + game.settings.temps / 1_000 + " secondes");
+    console.log("On programme la fin de la partie qui finira dans : " + game.settings.temps  + " min");
     game.timeout = setTimeout(() => {
         handleEnd(game);
         console.log("Fin de la partie, timeout terminé");
-    }, game.settings.temps * 1_0000 * 60);
+    }, game.settings.temps * 1_000 * 60);
 
     // On récupère la grille et la liste des mots à trouver
     const colonnes = game.settings.colonnes;
@@ -323,7 +323,7 @@ async function saveGameToDB(game, statut = "FINISHED") {
     const sql = `
     UPDATE partie SET idVainqueur = ?, dimensionsGrille = ?, DateDebutPartie = ?,DateFinPartie = ?, temps = ?, politiqueScore = ?, bloquerMots = ?, statut = ?, motsTrouves = ?, Grille = ? WHERE partie.idPartie = ?;
     `
-
+    console.log(game);
     const arrayGrille = game.settings.grille.split(" ");
     const grille2D = [];
     for (let i = 0; i < game.settings.lignes; i++) {
@@ -333,7 +333,6 @@ async function saveGameToDB(game, statut = "FINISHED") {
         }
     }
     game.settings.grille = grille2D;
-
 
     const params = [
         game.winnerID,
@@ -434,7 +433,12 @@ async function handleSettings(ws, message) {
     }
     console.log("handleSettings: Mise à jour des paramètres de la partie par : " + ws.user.pseudoUser + "(" + ws.user.idUser + ")");
     console.log(message.settings);
-    game.settings = message.settings;
+    // pour chaque attribue de settingso n le met à jour dans la partie
+    for (const key in message.settings) {
+        game.settings[key] = message.settings[key];
+    }
+
+
     sendGameUpdate(ws, game);
 }
 /**

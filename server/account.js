@@ -36,7 +36,7 @@ async function getPicture(req, res) {
 async function getProfile(req, res) {
   const { idUser } = req.params;
   const conn = await base.getBase();
-  const [rows] = await conn.query('SELECT `idUser`, `login`, `photoProfil` FROM `utilisateur` WHERE `idUser` = ?;', [idUser]);
+  const [rows] = await conn.query('SELECT `idUser`, `pseudoUser`, `photoProfil` FROM `utilisateur` WHERE `idUser` = ?;', [idUser]);
 
   await conn.end();
   if (!rows || rows.length === 0) {
