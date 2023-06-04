@@ -45,7 +45,7 @@ public class Home_Menu extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Toast.makeText(Home_Menu.this, "Activité 1", Toast.LENGTH_SHORT).show();
-                launchFragment(new WebViewApp());
+                launchFragment(new Messenger());
             }
         });
 
