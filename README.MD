@@ -21,7 +21,7 @@ Et pour le `server` dans :
 Se placer ensuite dans le dossier global et exécuter la commande :
 
     docker-compose up
-Par défaut le frontend est sur le port `8080` et le backend sur le port `3000`
+Par défaut le frontend est sur le port `8080` et le backend sur le port `4000`
 
 Ne pas oublier de se connecter sur le PHPMyAdmin afin d'installer la base de données qui se trouve dans le dossier `bdd`
 
