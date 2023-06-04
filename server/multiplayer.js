@@ -265,7 +265,7 @@ async function handleStart(ws, message) {
     game.timeout = setTimeout(() => {
         handleEnd(game);
         console.log("Fin de la partie, timeout terminé");
-    }, game.settings.temps);
+    }, game.settings.temps * 1_0000 * 60);
 
     // On récupère la grille et la liste des mots à trouver
     const colonnes = game.settings.colonnes;
