@@ -199,7 +199,7 @@ verifMot = async function (req, res, next) {
 
 getAllGamesFromUser = async function (req, res) {
     const token = req.params.uuid;
-    const sql = "SELECT idPartie FROM jouer WHERE idUser = ?";
+    const sql = "SELECT DISTINCT idPartie FROM jouer WHERE idUser = ?";
     const conn = await base.getBase();
     const result = await conn.execute(sql, [token]);
     if (result.length == 0)
