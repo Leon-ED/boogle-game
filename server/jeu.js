@@ -207,19 +207,21 @@ getAllGamesFromUser = async function (req, res) {
     const games = result;
     const fullGames = [];
 
-    const sql2 = `
-    SELECT P.*, 
-    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
-     FROM jouer U
-     WHERE P.idPartie = ?) AS users
-    FROM partie P
-    WHERE P.idPartie = ?;`;
-
+    const sql2 = `SELECT P.* FROM partie P WHERE P.idPartie = ?;`;
     for (let i = 0; i < games.length; i++) {
         const game = games[i];
-        const result2 = await conn.execute(sql2, [game.idPartie, game.idPartie]);
+        const result2 = await conn.execute(sql2, [game.idPartie]);
         if (result2.length == 0)
             continue;
+        let users = await conn.execute('SELECT idUser FROM jouer WHERE idPartie = ?', [game.idPartie]);
+        let user_strr = ""
+        for(let i = 0; i < users.length; i++){
+            user_strr += users[i].idUser + (i == users.length - 1 ? "" : ",")
+        }
+        result2[0].users = user_strr;
+            
+
+
         const fullGame = result2[0];
         fullGames.push(fullGame);
     }
@@ -233,18 +235,18 @@ getAllGamesFromUser = async function (req, res) {
  getFullGame = async function (req, res) {
     const uuid = req.params.uuid;
 
-    const sql = `
-    SELECT P.*, 
-    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
-     FROM jouer U
-     WHERE P.idPartie = ?) AS users
-    FROM partie P
-    WHERE P.idPartie = ?;`;
+    const sql = `SELECT P.* FROM partie P WHERE P.idPartie = ?;`;
     const conn = await base.getBase();
-    const result = await conn.execute(sql, [uuid, uuid]);
+    const result = await conn.execute(sql, [uuid]);
+    const users  = await conn.execute('SELECT idUser FROM jouer WHERE idPartie = ?', [uuid]);
+    let user_strr = ""
+    for(let i = 0; i < users.length; i++){
+        user_strr += users[i].idUser + (i == users.length - 1 ? "" : ",")
+    }
+    result[0].users = user_strr;
     const jsonGrille = JSON.parse(result[0].Grille);
     const stringGrille = jsonGrille.join(' ').replaceAll(',', ' ');
-
+    console.log(result[0].users);
     const [lignes, colonnes] = result[0].dimensionsGrille.split('x');
     const solveur = await solveGrille(stringGrille, lignes,colonnes);
     result[0].solveur = solveur;

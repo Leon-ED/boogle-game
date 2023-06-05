@@ -51,12 +51,7 @@ app.use(
     },
   })
 );
-const limiter = RateLimit({
-  windowMs: 1 * 60 * 1000, // 15 minutes
-  max: 120,
-});
 // Apply rate limiter to all requests
-app.use(limiter);
 
 app.get('/api/jeu/fetchAll/:uuid', getAllGamesFromUser);
 app.get('/api/jeu/fetch/:uuid', getFullGame);
