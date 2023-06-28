@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { BACKEND_URL } from "../env"
 
 export const Player = ({idUser, name}: {idUser: string, name: string}) => {
@@ -15,7 +16,7 @@ export const Player = ({idUser, name}: {idUser: string, name: string}) => {
     return(
         <div className="lobby-player">
             <img  src={BACKEND_URL+"/account/get/image/"+idUser} alt="profile" />
-            <p style={{margin:"0"}} className={imgClasse} data-fullname={name}>{shortName}</p>
+            <Link to={"/account/"+idUser}><p style={{margin:"0"}} className={imgClasse} data-fullname={name}>{shortName}</p></Link>
         </div>
 
 

@@ -146,13 +146,10 @@ preVerifMot = function (mot, lignes, colonnes) {
 solveGrille = async function (grille, lignes, colonnes) {
     const MIN_WORD_LENGTH = 2;
     if(lignes > 10 || colonnes > 10)
-        return false;
-    if(lignes*colonnes != grille.length)
-        return false;
-
-
+        return []
 
     const command = 'cd ' + CWD + '/bin && ./solve ../utils/dico_fr.lex '+MIN_WORD_LENGTH+ " " + lignes + ' ' + colonnes + ' ' + grille;
+    console.warn(command);
     const exec = require("child_process").execSync;
     const result = await exec(command).toString();
     return result.split(' ');
@@ -202,7 +199,7 @@ verifMot = async function (req, res, next) {
 
 getAllGamesFromUser = async function (req, res) {
     const token = req.params.uuid;
-    const sql = "SELECT idPartie FROM jouer WHERE idUser = ?";
+    const sql = "SELECT DISTINCT idPartie FROM jouer WHERE idUser = ?";
     const conn = await base.getBase();
     const result = await conn.execute(sql, [token]);
     if (result.length == 0)
@@ -210,19 +207,21 @@ getAllGamesFromUser = async function (req, res) {
     const games = result;
     const fullGames = [];
 
-    const sql2 = `
-    SELECT P.*, 
-    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
-     FROM jouer U
-     WHERE P.idPartie = ?) AS users
-    FROM partie P
-    WHERE P.idPartie = ?;`;
-
+    const sql2 = `SELECT P.* FROM partie P WHERE P.idPartie = ?;`;
     for (let i = 0; i < games.length; i++) {
         const game = games[i];
-        const result2 = await conn.execute(sql2, [game.idPartie, game.idPartie]);
+        const result2 = await conn.execute(sql2, [game.idPartie]);
         if (result2.length == 0)
             continue;
+        let users = await conn.execute('SELECT idUser FROM jouer WHERE idPartie = ?', [game.idPartie]);
+        let user_strr = ""
+        for(let i = 0; i < users.length; i++){
+            user_strr += users[i].idUser + (i == users.length - 1 ? "" : ",")
+        }
+        result2[0].users = user_strr;
+            
+
+
         const fullGame = result2[0];
         fullGames.push(fullGame);
     }
@@ -236,18 +235,18 @@ getAllGamesFromUser = async function (req, res) {
  getFullGame = async function (req, res) {
     const uuid = req.params.uuid;
 
-    const sql = `
-    SELECT P.*, 
-    (SELECT GROUP_CONCAT(DISTINCT U.idUser SEPARATOR ',') 
-     FROM jouer U
-     WHERE P.idPartie = ?) AS users
-    FROM partie P
-    WHERE P.idPartie = ?;`;
+    const sql = `SELECT P.* FROM partie P WHERE P.idPartie = ?;`;
     const conn = await base.getBase();
-    const result = await conn.execute(sql, [uuid, uuid]);
+    const result = await conn.execute(sql, [uuid]);
+    const users  = await conn.execute('SELECT idUser FROM jouer WHERE idPartie = ?', [uuid]);
+    let user_strr = ""
+    for(let i = 0; i < users.length; i++){
+        user_strr += users[i].idUser + (i == users.length - 1 ? "" : ",")
+    }
+    result[0].users = user_strr;
     const jsonGrille = JSON.parse(result[0].Grille);
     const stringGrille = jsonGrille.join(' ').replaceAll(',', ' ');
-
+    console.log(result[0].users);
     const [lignes, colonnes] = result[0].dimensionsGrille.split('x');
     const solveur = await solveGrille(stringGrille, lignes,colonnes);
     result[0].solveur = solveur;

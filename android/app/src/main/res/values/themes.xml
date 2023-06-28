@@ -13,4 +13,29 @@
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <!-- Styles for dark and light themes -->
+    <style name="DarkTheme" parent="Theme.Boogle">
+        <!-- Define specific attributes for dark theme -->
+        <item name="colorPrimary">@color/dark_primary</item>
+        <item name="colorPrimaryVariant">@color/dark_primary_variant</item>
+        <item name="colorOnPrimary">@color/dark_on_primary</item>
+        <item name="colorSecondary">@color/dark_secondary</item>
+        <item name="colorSecondaryVariant">@color/dark_secondary_variant</item>
+        <item name="colorOnSecondary">@color/dark_on_secondary</item>
+        <!-- Add other attributes specific to dark theme if needed -->
+        <item name="android:windowBackground">@color/dark_grey</item>
+    </style>
+
+    <style name="LightTheme" parent="Theme.Boogle">
+        <!-- Define specific attributes for light theme -->
+        <item name="colorPrimary">@color/light_primary</item>
+        <item name="colorPrimaryVariant">@color/light_primary_variant</item>
+        <item name="colorOnPrimary">@color/light_on_primary</item>
+        <item name="colorSecondary">@color/light_secondary</item>
+        <item name="colorSecondaryVariant">@color/light_secondary_variant</item>
+        <item name="colorOnSecondary">@color/light_on_secondary</item>
+        <!-- Add other attributes specific to light theme if needed -->
+        <item name="android:windowBackground">@color/white</item>
+    </style>
 </resources>
